@@ -2,7 +2,7 @@
 
 > [!NOTE] In this file, you’ll find the structure you should follow to document your mobile app in the README.md file for LEIC-ES-2024-25. It’s a single file with guidelines. You can add more sections, but for assessment normalisation and automation, include all sections of this template. Your professors will clarify about specificities of your app.
 
-# _[your product name]_ Development Report
+# UniLink Development Report
 
 Welcome to the documentation pages of _[your product name]_!
 
@@ -67,14 +67,10 @@ To learn more about how to write a good product vision, please see:
 
 
 ### Features and Assumptions
-<!-- 
-Indicate an  initial/tentative list of high-level features - high-level capabilities or desired services of the system that are necessary to deliver benefits to the users.
- - Feature XPTO - a few words to briefly describe the feature
- - Feature ABCD - ...
-...
-
-Optionally, indicate an initial/tentative list of assumptions that you are doing about the app and dependencies of the app to other systems.
--->
+- Pedir/Dar boleia
+- Utilizador que pede boleia pode dar grojeta
+- LeaderBoard
+- Apenas universitários se podem registar
 
 ### Elevator Pitch
 <!-- 
