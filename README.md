@@ -33,11 +33,12 @@ Please contact us!
 
 Thank you!
 
-* team member name and email
-* team member name and email
-* team member name and email
-* team member name and email
-* team member name and email
+* Gonçalo Queirós up202407377@up.pt
+* Diogo Caleiro up202407548@up.pt
+* José Silva up202406359@up.pt
+* José Lopes up202406360@up.pt
+* António Machado up202404630@up.pt
+
 
 ---
 ## Business Modelling
@@ -67,10 +68,22 @@ To learn more about how to write a good product vision, please see:
 
 
 ### Features and Assumptions
-- Pedir/Dar boleia
+- Pedir/Dar boleia com identificação de carro através de matrícula e modelo do carro
 - Utilizador que pede boleia pode dar grojeta
-- LeaderBoard
-- Apenas universitários se podem registar
+- LeaderBoard 
+- Apenas universitários se podem registar, registro apenas com email associado a universidades
+- Perfil com universidade, curso e ano
+- Rating Médio and Review
+- Medalhas (conquistas ao longo do percurso, como passageiro/condutor)
+- Integração de Mapa GoogleMaps
+- Streaks semanais
+- Horários de autocarros caso não hajam boleias suficientes
+- Condutores têm o nº de boleias dadas no perfil
+- Agendar boleias
+- Reservar boleias
+- Nº de lugares livres
+- Opção "Só Mulher"
+- Mensagens entre condutor/passageiro
 
 ### Elevator Pitch
 <!-- 
