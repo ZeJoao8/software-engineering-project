@@ -48,8 +48,11 @@ Business modeling in software development involves defining the product's vision
 
 ### Product Vision
 
-**UniLink – conectando estudantes e facilitando deslocações de forma segura, rápida e acessível.**  
-UniLink promove uma comunidade ativa de estudantes, tornando a mobilidade universitária mais inteligente, econômica e sustentável.
+For university students who need flexible and reliable transportation,
+UniLink is a university-exclusive carpooling platform that enables students to share rides for free within their academic community.
+Unlike traditional ride-sharing services, UniLink focuses on trust, safety, and sustainability by restricting access to verified university users and encouraging collaborative, cost-free mobility.
+By removing transportation costs and promoting eco-friendly behavior, UniLink strengthens connections and fosters a supportive student network.
+
 
 ### Features and Assumptions
 - Pedir/Dar boleia com identificação de carro através de matrícula e modelo do carro
