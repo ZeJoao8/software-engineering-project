@@ -1,21 +1,54 @@
 import { User } from "../types/User";
 
-let currentUser: User = {
+const users: User[] = [
 
- id: "1",
+ {
+  id: "1",
+  name: "João",
+  university: "FEUP",
+  course: "LEIC",
+  gender: "male"
+ },
 
- name: "José",
+ {
+  id: "2",
+  name: "Maria",
+  university: "FEUP",
+  course: "LEIC",
+  gender: "female"
+ }
 
- university: "FEUP",
+];
 
- gender: "male"
+let currentUserId = "1";
 
-};
+export function getUsers() {
 
-export function getCurrentUser() {
- return currentUser;
+ return users;
+
 }
 
-export function updateUser(user: User) {
- currentUser = user;
+export function getCurrentUser() {
+
+ return users.find(
+  u => u.id === currentUserId
+ )!;
+
+}
+
+export function switchUser(id: string) {
+
+ currentUserId = id;
+
+}
+
+export function updateUser(updatedUser: User) {
+
+ const index =
+  users.findIndex(
+   u => u.id === updatedUser.id
+  );
+
+ users[index] = updatedUser;
+
 }

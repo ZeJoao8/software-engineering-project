@@ -6,131 +6,144 @@ import { getCurrentUser } from "../../data/user";
 
 export default function RideDetails() {
 
-  const { id } = useLocalSearchParams();
+ const { id } = useLocalSearchParams();
 
-  const router = useRouter();
+ const router = useRouter();
 
-  const ride = getRides().find(r => r.id === id);
+ const ride =
+  getRides().find(r => r.id === id);
 
-  if (!ride) {
+ if (!ride) {
 
-    return (
+  return (
 
-      <View style={styles.container}>
+   <View style={styles.container}>
 
-        <Text>
-          Ride not found
-        </Text>
+    <Text>
+     Ride not found
+    </Text>
 
-      </View>
+   </View>
 
-    );
+  );
 
-  }
+ }
 
-  const user = getCurrentUser();
-  function reserveSeat() {
-
-  if (!ride) return;
+ function reserveSeat() {
 
   const user = getCurrentUser();
 
   if (
-    ride.womenOnly &&
-    user.gender !== "female"
+
+   ride.womenOnly &&
+
+   user.gender !== "female"
+
   ) {
 
-    alert(
+   alert(
     "Only female users can join this ride"
-    );
+   );
 
-    return;
+   return;
 
   }
 
   if (ride.availableSeats > 0) {
 
-    const updatedRide = {
+   const updatedRide = {
 
     ...ride,
 
     availableSeats:
-      ride.availableSeats - 1,
+     ride.availableSeats - 1,
 
     passengers: [
 
-      ...ride.passengers,
+     ...ride.passengers,
 
-      user.id
+     user.id
 
     ]
 
-    };
+   };
 
-    updateRide(updatedRide);
+   updateRide(updatedRide);
 
-    alert("Seat reserved!");
+   alert("Seat reserved!");
 
-    router.replace("/");
+   // voltar para lista de rides
+   router.replace("/(tabs)");
 
   }
 
   else {
 
-    alert("Ride is full");
+   alert("Ride is full");
 
   }
 
-  }
+ }
 
-  return (
+ return (
 
-    <View style={styles.container}>
+  <View style={styles.container}>
 
-      <Text style={styles.title}>
+   <Text style={styles.title}>
 
-        {ride.origin} → {ride.destination}
+    {ride.origin} → {ride.destination}
 
-      </Text>
+   </Text>
 
-      <Text>
+   <Text>
+    Date: {ride.departureDateTime}
+   </Text>
 
-        Available seats: {ride.availableSeats}
+   <Text>
 
-      </Text>
+    Available seats:
+    {" "}
+    {ride.availableSeats}
 
-      <Text>
+   </Text>
 
-        Women only: {ride.womenOnly ? "Yes" : "No"}
+   <Text>
 
-      </Text>
+    Women only:
+    {" "}
+    {ride.womenOnly ? "Yes" : "No"}
 
-      <Button
-        title="Reserve seat"
-        onPress={reserveSeat}
-      />
+   </Text>
 
-    </View>
+   <Button
 
-  );
+    title="Reserve seat"
+
+    onPress={reserveSeat}
+
+   />
+
+  </View>
+
+ );
 
 }
 
 const styles = StyleSheet.create({
 
-  container: {
+ container: {
 
-    flex: 1,
-    padding: 20,
-    gap: 10
+  flex: 1,
+  padding: 20,
+  gap: 10
 
-  },
+ },
 
-  title: {
+ title: {
 
-    fontSize: 22,
-    fontWeight: "bold"
+  fontSize: 22,
+  fontWeight: "bold"
 
-  }
+ }
 
 });

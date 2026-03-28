@@ -27,16 +27,20 @@ export default function CreateRide() {
 
  const [womenOnly, setWomenOnly] = useState(false);
 
+ const [date, setDate] = useState("");
+
+ const [time, setTime] = useState(""); 
+
  const car = cars.find(c => c.id === selectedCarId);
 
 function handleCreateRide() {
 
- if (!origin || !destination || !car) {
+if (!origin || !destination || !car || !date || !time) {
 
-  alert("Fill all fields");
-  return;
+ alert("Fill all fields");
+ return;
 
- }
+}
 
  const seatsNumber = parseInt(seats);
 
@@ -77,7 +81,7 @@ function handleCreateRide() {
 
   destination,
 
-  departureDateTime: new Date().toISOString(),
+  departureDateTime: `${date} ${time}`,
 
   availableSeats: seatsNumber,
 
@@ -95,9 +99,23 @@ function handleCreateRide() {
 
 }
 
- return (
 
-  <View style={styles.container}>
+ return ( 
+
+  <View style={styles.container}> 
+  <TextInput
+    placeholder="Date (YYYY-MM-DD)"
+    value={date}
+    onChangeText={setDate}
+    style={styles.input}
+    />
+
+    <TextInput
+    placeholder="Time (HH:MM)"
+    value={time}
+    onChangeText={setTime}
+    style={styles.input}
+    />
 
    <Text style={styles.title}>
     Create Ride
