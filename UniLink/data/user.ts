@@ -1,13 +1,21 @@
 import { User } from "../types/User";
 
-export const currentUser: User = {
+let currentUser: User = {
 
-  id: "1",
+ id: "1",
 
-  name: "José",
+ name: "José",
 
-  university: "FEUP",
+ university: "FEUP",
 
-  gender: "male"
+ gender: "male"
 
 };
+
+export function getCurrentUser() {
+ return currentUser;
+}
+
+export function updateUser(user: User) {
+ currentUser = user;
+}

@@ -2,6 +2,7 @@ import { View, Text, Button, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 import { getRides, updateRide } from "../../data/rides";
+import { getCurrentUser } from "../../data/user";
 
 export default function RideDetails() {
 
@@ -27,16 +28,42 @@ export default function RideDetails() {
 
   }
 
+  const user = getCurrentUser();
   function reserveSeat() {
 
   if (!ride) return;
+
+  const user = getCurrentUser();
+
+  if (
+    ride.womenOnly &&
+    user.gender !== "female"
+  ) {
+
+    alert(
+    "Only female users can join this ride"
+    );
+
+    return;
+
+  }
 
   if (ride.availableSeats > 0) {
 
     const updatedRide = {
 
     ...ride,
-    availableSeats: ride.availableSeats - 1
+
+    availableSeats:
+      ride.availableSeats - 1,
+
+    passengers: [
+
+      ...ride.passengers,
+
+      user.id
+
+    ]
 
     };
 

@@ -13,7 +13,7 @@ import {
 
 import { addRide } from "../../data/rides";
 import { cars } from "../../data/cars";
-import { currentUser } from "../../data/user";
+import { getCurrentUser } from "../../data/user";
 
 export default function CreateRide() {
 
@@ -63,12 +63,13 @@ function handleCreateRide() {
   return;
 
  }
-
+ 
+ const user = getCurrentUser();
  addRide({
 
   id: Date.now().toString(),
 
-  driverId: currentUser.id,
+  driverId: user.id,
 
   carId: car.id,
 
