@@ -35,19 +35,20 @@ Added the test script and the `jest-expo` preset:
 
 ### 3.2 Prompts used with the GenAI Assistant
 To accelerate development, I used the following prompts with the AI assistant:
-1. *"ve se o package.json ta pronto para eu usar jest"* (To validate my environment config).
-2. *"em q pastas devo criar o ficheiro com o codigo de The student opens the application. 2. The student enters the pickup location... 7. The student receives confirmation"* (To structure the test file correctly within the Expo project).
-3. *"ja criei o ride-request.test.tsx, faz o resto"* (To auto-generate the test implementation and a dummy screen based on the previous scenario structure).
+1. *"confirma se o package.json está pronto para eu usar jest"* (To validate my environment config).
+2. *"em que pastas devo criar o ficheiro com o codigo de para os testes"* (To structure the test file correctly within the Expo project).
+3. *"cria um mockup da ride requests screen"* (To generate UI for the test).
+4. *"como resolvo este erro `ReferenceError: You are trying to import a file outside of the scope of the test code`"* (To fix the compatibility issue between Expo SDK and Jest).
 
 ### 3.3 Writing the Acceptance Test & Target Component
 Because Acceptance Tests require the UI to interact with, a representative component `RideRequestScreen.tsx` was created. It contains fields for Pickup, Destination, a Submit button, and mocked state transitions simulating the backend (searching for drivers, and accepting).
 
-The automated test was written in `testes/ride-request.test.tsx` using BDD format. It renders the screen, injects inputs using `fireEvent.changeText`, clicks the button with `fireEvent.press`, and validates async screen updates (like the "Searching..." loader and the final "Ride Confirmed!") using `waitFor()`.
+The automated test was written in `testes/ride-request.test.tsx` using Behavior-Driven Development (BDD) format. It renders the screen, injects inputs using `fireEvent.changeText`, clicks the button with `fireEvent.press`, and validates async screen updates using `waitFor()`.
 
 ### 3.4 Execution and Outputs
 **Command:**
 ```bash
-npm run test
+npm test
 ```
 **Output:**
 ```
@@ -63,12 +64,12 @@ Time:        2.35 s
 
 ### 3.5 Troubleshooting Framework Quirks
 During the configuration, we encountered a tricky compatibility issue resulting in a `ReferenceError: You are trying to import a file outside of the scope of the test code`. 
-This occurred because the newer Expo SDK (utilizing the "Winter" runtime) relies on lazy global evaluations that attempted to fetch Node modules across Jest's strictly isolated execution boundaries. We resolved this successfully by creating a custom `jest-setup.js` file to eagerly resolve these specific globals (like `__ExpoImportMetaRegistry`) prior to executing the test suite. This highlights a common challenge in automated testing: keeping abreast of framework architectural changes to maintain a stable testing environment.
+This occurred because the newer Expo SDK (utilizing the "Winter" runtime) relies on lazy global evaluations that attempted to fetch Node modules across Jest's strictly isolated execution boundaries. I fixed it by adding a custom jest-setup.js to initialize the necessary globals before running tests. This shows how framework changes can affect test stability and require careful troubleshooting.
 
 ## 4. Critical Analysis
 Developing this automated acceptance test from scratch provided significant insights into agile testing practices:
 
-1. **Shift-Left Testing**: By mocking the backend connection (`setTimeout` for driver acceptance), it was possible to validate the entire user flow functionality before the backend was even fully implemented. This prevents bottlenecks in agile teams.
+1. **Shift-Left Testing**: By mocking the backend connection (`setTimeout` for driver acceptance), it was possible to validate the entire user flow functionality before the backend was even fully implemented.
 2. **Confidence in Refactoring**: Writing tests that simulate actual user gestures (typing, clicking) rather than testing internal component state ensures that if the UI undergoes refactoring, the acceptance criteria (inputs to outputs) remain intact.
 3. **Tool Choices**: For this task, `jest` coupled with `@testing-library/react-native` proved extremely fast and reliable. However, this is essentially a "component integration test" acting as an acceptance test. If we needed to test real OS interactions (like permission modals or backgrounding the app), a true E2E framework like **Maestro** or **Detox** running on a real emulator would be more suitable, despite being much slower and harder to configure.
 4. **Conclusion**: This automation serves as a living documentation of the requirements. The time invested in setting up the Jest configuration initially pays off exponentially by completely removing the need to manually click through the app every time a new feature is merged.
