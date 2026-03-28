@@ -1,11 +1,13 @@
 export interface User {
 
-  id: string;
+ id: string;
 
-  name: string;
+ name: string;
 
-  university: string;
+ university: string;
 
-  gender: "male" | "female";
+ course: string;
+
+ gender: "male" | "female";
 
 }

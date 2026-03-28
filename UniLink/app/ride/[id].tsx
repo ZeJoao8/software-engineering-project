@@ -1,109 +1,189 @@
-import { View, Text, Button, StyleSheet } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import {
+ View,
+ Text,
+ Button,
+ StyleSheet
+} from "react-native";
 
-import { getRides, updateRide } from "../../data/rides";
+import {
+ useLocalSearchParams,
+ useRouter
+} from "expo-router";
+
+import {
+ getRides,
+ updateRide
+} from "../../data/rides";
+
+import {
+ getCurrentUser
+} from "../../data/user";
+
+import { getCars } from "../../data/cars";
 
 export default function RideDetails() {
 
-  const { id } = useLocalSearchParams();
+ const router = useRouter();
 
-  const router = useRouter();
+ const params = useLocalSearchParams();
 
-  const ride = getRides().find(r => r.id === id);
+ // id pode vir undefined quando o screen é pré-carregado
+ if (!params.id) {
 
-  if (!ride) {
+  return null;
 
-    return (
+ }
 
-      <View style={styles.container}>
+ const id = Array.isArray(params.id)
+  ? params.id[0]
+  : params.id;
 
-        <Text>
-          Ride not found
-        </Text>
+ const ride =
+  getRides().find(r => r.id === id);
 
-      </View>
+ if (!ride) {
 
-    );
+  return null;
+
+ }
+
+ const car =
+ getCars().find(
+  c => c.id === ride.carId
+ );
+ <Text>
+ Car:
+ {" "}
+ {car?.model} - {car?.color} ({car?.licensePlate})
+</Text>
+
+ function reserveSeat() {
+
+  const user = getCurrentUser();
+
+  if (
+   ride.womenOnly &&
+   user.gender !== "female"
+  ) {
+
+   alert(
+    "Only female users can join this ride"
+   );
+
+   return;
 
   }
 
-  function reserveSeat() {
+  if (ride.availableSeats <= 0) {
 
-  if (!ride) return;
+   alert("Ride is full");
 
-  if (ride.availableSeats > 0) {
-
-    const updatedRide = {
-
-    ...ride,
-    availableSeats: ride.availableSeats - 1
-
-    };
-
-    updateRide(updatedRide);
-
-    alert("Seat reserved!");
-
-    router.replace("/");
+   return;
 
   }
 
-  else {
+  updateRide({
 
-    alert("Ride is full");
+   ...ride,
 
-  }
+   availableSeats:
+    ride.availableSeats - 1,
 
-  }
+   passengers: [
+
+    ...ride.passengers,
+
+    user.id
+
+   ]
+
+  });
+
+  router.replace("/(tabs)");
+
+ }
+
+ function formatDate(iso: string) {
+
+  const d = new Date(iso);
 
   return (
-
-    <View style={styles.container}>
-
-      <Text style={styles.title}>
-
-        {ride.origin} → {ride.destination}
-
-      </Text>
-
-      <Text>
-
-        Available seats: {ride.availableSeats}
-
-      </Text>
-
-      <Text>
-
-        Women only: {ride.womenOnly ? "Yes" : "No"}
-
-      </Text>
-
-      <Button
-        title="Reserve seat"
-        onPress={reserveSeat}
-      />
-
-    </View>
-
+   d.toLocaleDateString()
+   +
+   " "
+   +
+   d.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit"
+   })
   );
+
+ }
+
+ return (
+
+  <View style={styles.container}>
+
+   <Text style={styles.title}>
+
+    {ride.origin} → {ride.destination}
+
+   </Text>
+
+   <Text>
+
+    {formatDate(
+     ride.departureDateTime
+    )}
+
+   </Text>
+
+   <Text>
+
+    Seats:
+    {" "}
+    {ride.availableSeats}
+
+   </Text>
+
+   <Text>
+
+    Women only:
+    {" "}
+    {ride.womenOnly ? "Yes" : "No"}
+
+   </Text>
+
+   <Button
+
+    title="Reserve seat"
+
+    onPress={reserveSeat}
+
+   />
+
+  </View>
+
+ );
 
 }
 
 const styles = StyleSheet.create({
 
-  container: {
+ container: {
 
-    flex: 1,
-    padding: 20,
-    gap: 10
+  flex: 1,
+  padding: 20,
+  gap: 10
 
-  },
+ },
 
-  title: {
+ title: {
 
-    fontSize: 22,
-    fontWeight: "bold"
+  fontSize: 22,
+  fontWeight: "bold"
 
-  }
+ }
+ 
 
 });

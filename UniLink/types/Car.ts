@@ -1,13 +1,15 @@
 export interface Car {
 
-  id: string;
+ id: string;
 
-  ownerId: string;
+ model: string;
 
-  model: string;
+ color: string;
 
-  licensePlate: string;
+ licensePlate: string;
 
-  seatCapacity: number;
+ seatCapacity: number;
+
+ ownerId: string;
 
 }
