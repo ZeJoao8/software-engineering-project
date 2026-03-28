@@ -1,74 +1,136 @@
 import { useState } from "react";
 
 import {
-
  View,
  Text,
  TextInput,
  Button,
  Switch,
  StyleSheet
-
 } from "react-native";
 
-import { addRide } from "../../data/rides";
-import { cars } from "../../data/cars";
-import { getCurrentUser } from "../../data/user";
+import { Picker } from "@react-native-picker/picker";
 
-export default function CreateRide() {
+import DateTimePicker
+ from "@react-native-community/datetimepicker";
 
- const [origin, setOrigin] = useState("");
+import { addRide }
+ from "../../data/rides";
 
- const [destination, setDestination] = useState("");
+import { getUserCars }
+ from "../../data/cars";
 
- const [selectedCarId, setSelectedCarId] = useState(cars[0]?.id);
+import { getCurrentUser }
+ from "../../data/user";
 
- const [seats, setSeats] = useState("1");
+export default function CreateRide(){
 
- const [womenOnly, setWomenOnly] = useState(false);
+ const user=getCurrentUser();
 
- const [date, setDate] = useState("");
+ const cars=getUserCars(user.id);
 
- const [time, setTime] = useState(""); 
+ const [origin,setOrigin]=useState("");
 
- const car = cars.find(c => c.id === selectedCarId);
+ const [destination,setDestination]=useState("");
 
-function handleCreateRide() {
+ const [selectedCar,setSelectedCar]=
+  useState(cars[0]?.id);
 
-if (!origin || !destination || !car || !date || !time) {
+ const [seats,setSeats]=useState("1");
 
- alert("Fill all fields");
- return;
+ const [womenOnly,setWomenOnly]=
+  useState(false);
 
-}
+ const [date,setDate]=useState(new Date());
 
- const seatsNumber = parseInt(seats);
+ const [time,setTime]=useState(new Date());
 
- if (isNaN(seatsNumber)) {
+ const [showDate,setShowDate]=
+  useState(false);
 
-  alert("Seats must be a number");
+ const [showTime,setShowTime]=
+  useState(false);
+
+ const car=cars.find(
+  c=>c.id===selectedCar
+ );
+
+ function createRide(){
+
+ if(
+  !origin.trim() ||
+  !destination.trim() ||
+  !car
+ ){
+
+  alert("Fill all fields");
+
   return;
 
  }
 
- if (seatsNumber <= 0) {
+ const seatsNumber =
+  Number(seats);
 
-  alert("Seats must be at least 1");
+ if(
+  !Number.isInteger(seatsNumber)
+ ){
+
+  alert("Seats must be an integer");
+
   return;
 
  }
 
- if (seatsNumber > car.seatCapacity-1) {
+ if(seatsNumber < 1){
+
+  alert("Must have at least 1 passenger seat");
+
+  return;
+
+ }
+
+ if(
+  seatsNumber >
+  car.seatCapacity - 1
+ ){
 
   alert(
-   `Max number of passengers for this car is ${car.seatCapacity-1}`
+
+   `Max passengers: ${
+    car.seatCapacity - 1
+   }`
+
   );
 
   return;
 
  }
- 
- const user = getCurrentUser();
+
+ const departure = new Date(
+
+  date.getFullYear(),
+
+  date.getMonth(),
+
+  date.getDate(),
+
+  time.getHours(),
+
+  time.getMinutes()
+
+ );
+
+ if(departure < new Date()){
+
+  alert(
+   "Cannot create ride in the past"
+  );
+
+  return;
+
+ }
+
  addRide({
 
   id: Date.now().toString(),
@@ -77,13 +139,16 @@ if (!origin || !destination || !car || !date || !time) {
 
   carId: car.id,
 
-  origin,
+  origin: origin.trim(),
 
-  destination,
+  destination:
+   destination.trim(),
 
-  departureDateTime: `${date} ${time}`,
+  departureDateTime:
+   departure.toISOString(),
 
-  availableSeats: seatsNumber,
+  availableSeats:
+   seatsNumber,
 
   womenOnly,
 
@@ -99,23 +164,9 @@ if (!origin || !destination || !car || !date || !time) {
 
 }
 
+ return(
 
- return ( 
-
-  <View style={styles.container}> 
-  <TextInput
-    placeholder="Date (YYYY-MM-DD)"
-    value={date}
-    onChangeText={setDate}
-    style={styles.input}
-    />
-
-    <TextInput
-    placeholder="Time (HH:MM)"
-    value={time}
-    onChangeText={setTime}
-    style={styles.input}
-    />
+  <View style={styles.container}>
 
    <Text style={styles.title}>
     Create Ride
@@ -135,33 +186,100 @@ if (!origin || !destination || !car || !date || !time) {
     style={styles.input}
    />
 
-   <Text>
-    Car:
-   </Text>
+   <Text>Date</Text>
 
-   {cars.map(car => (
+   <Button
+    title={date.toDateString()}
+    onPress={()=>setShowDate(true)}
+   />
 
-    <Button
-     key={car.id}
-     title={`${car.model} (${car.seatCapacity} seats)`}
-     onPress={() => setSelectedCarId(car.id)}
+   {showDate&&(
+
+    <DateTimePicker
+
+     value={date}
+
+     mode="date"
+
+     onChange={(e,d)=>{
+
+      setShowDate(false);
+
+      if(d)setDate(d);
+
+     }}
+
     />
 
-   ))}
+   )}
 
-    <TextInput
-    placeholder={`1 - ${car?.seatCapacity ? car.seatCapacity - 1 : 0} seats`}
+   <Text>Time</Text>
+
+   <Button
+    title={time.toLocaleTimeString([],{
+     hour:"2-digit",
+     minute:"2-digit"
+    })}
+    onPress={()=>setShowTime(true)}
+   />
+
+   {showTime&&(
+
+    <DateTimePicker
+
+     value={time}
+
+     mode="time"
+
+     onChange={(e,t)=>{
+
+      setShowTime(false);
+
+      if(t)setTime(t);
+
+     }}
+
+    />
+
+   )}
+
+   <Text>Car</Text>
+
+   <Picker
+
+    selectedValue={selectedCar}
+
+    onValueChange={setSelectedCar}
+
+   >
+
+    {cars.map(c=>(
+
+     <Picker.Item
+
+      key={c.id}
+
+      label={`${c.model} - ${c.color} (${c.licensePlate})`}
+
+      value={c.id}
+
+     />
+
+    ))}
+
+   </Picker>
+
+   <TextInput
+    placeholder={`1-${car?car.seatCapacity-1:0} seats`}
     value={seats}
     onChangeText={setSeats}
     keyboardType="numeric"
     style={styles.input}
-    />
+   />
 
    <View style={styles.row}>
 
-    <Text>
-     Women only
-    </Text>
+    <Text>Women only</Text>
 
     <Switch
      value={womenOnly}
@@ -172,7 +290,7 @@ if (!origin || !destination || !car || !date || !time) {
 
    <Button
     title="Create Ride"
-    onPress={handleCreateRide}
+    onPress={createRide}
    />
 
   </View>
@@ -181,37 +299,29 @@ if (!origin || !destination || !car || !date || !time) {
 
 }
 
-const styles = StyleSheet.create({
+const styles=StyleSheet.create({
 
- container: {
-
-  flex: 1,
-  padding: 20,
-  gap: 10
-
+ container:{
+  flex:1,
+  padding:20,
+  gap:10
  },
 
- title: {
-
-  fontSize: 20,
-  fontWeight: "bold"
-
+ title:{
+  fontSize:20,
+  fontWeight:"bold"
  },
 
- input: {
-
-  borderWidth: 1,
-  padding: 10,
-  borderRadius: 5
-
+ input:{
+  borderWidth:1,
+  padding:10,
+  borderRadius:5
  },
 
- row: {
-
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center"
-
+ row:{
+  flexDirection:"row",
+  justifyContent:"space-between",
+  alignItems:"center"
  }
 
 });

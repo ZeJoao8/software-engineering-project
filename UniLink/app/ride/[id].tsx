@@ -1,44 +1,69 @@
-import { View, Text, Button, StyleSheet } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import {
+ View,
+ Text,
+ Button,
+ StyleSheet
+} from "react-native";
 
-import { getRides, updateRide } from "../../data/rides";
-import { getCurrentUser } from "../../data/user";
+import {
+ useLocalSearchParams,
+ useRouter
+} from "expo-router";
+
+import {
+ getRides,
+ updateRide
+} from "../../data/rides";
+
+import {
+ getCurrentUser
+} from "../../data/user";
+
+import { getCars } from "../../data/cars";
 
 export default function RideDetails() {
 
- const { id } = useLocalSearchParams();
-
  const router = useRouter();
+
+ const params = useLocalSearchParams();
+
+ // id pode vir undefined quando o screen é pré-carregado
+ if (!params.id) {
+
+  return null;
+
+ }
+
+ const id = Array.isArray(params.id)
+  ? params.id[0]
+  : params.id;
 
  const ride =
   getRides().find(r => r.id === id);
 
  if (!ride) {
 
-  return (
-
-   <View style={styles.container}>
-
-    <Text>
-     Ride not found
-    </Text>
-
-   </View>
-
-  );
+  return null;
 
  }
+
+ const car =
+ getCars().find(
+  c => c.id === ride.carId
+ );
+ <Text>
+ Car:
+ {" "}
+ {car?.model} - {car?.color} ({car?.licensePlate})
+</Text>
 
  function reserveSeat() {
 
   const user = getCurrentUser();
 
   if (
-
    ride.womenOnly &&
-
    user.gender !== "female"
-
   ) {
 
    alert(
@@ -49,39 +74,49 @@ export default function RideDetails() {
 
   }
 
-  if (ride.availableSeats > 0) {
-
-   const updatedRide = {
-
-    ...ride,
-
-    availableSeats:
-     ride.availableSeats - 1,
-
-    passengers: [
-
-     ...ride.passengers,
-
-     user.id
-
-    ]
-
-   };
-
-   updateRide(updatedRide);
-
-   alert("Seat reserved!");
-
-   // voltar para lista de rides
-   router.replace("/(tabs)");
-
-  }
-
-  else {
+  if (ride.availableSeats <= 0) {
 
    alert("Ride is full");
 
+   return;
+
   }
+
+  updateRide({
+
+   ...ride,
+
+   availableSeats:
+    ride.availableSeats - 1,
+
+   passengers: [
+
+    ...ride.passengers,
+
+    user.id
+
+   ]
+
+  });
+
+  router.replace("/(tabs)");
+
+ }
+
+ function formatDate(iso: string) {
+
+  const d = new Date(iso);
+
+  return (
+   d.toLocaleDateString()
+   +
+   " "
+   +
+   d.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit"
+   })
+  );
 
  }
 
@@ -96,12 +131,16 @@ export default function RideDetails() {
    </Text>
 
    <Text>
-    Date: {ride.departureDateTime}
+
+    {formatDate(
+     ride.departureDateTime
+    )}
+
    </Text>
 
    <Text>
 
-    Available seats:
+    Seats:
     {" "}
     {ride.availableSeats}
 
@@ -145,5 +184,6 @@ const styles = StyleSheet.create({
   fontWeight: "bold"
 
  }
+ 
 
 });

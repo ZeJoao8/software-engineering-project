@@ -3,6 +3,7 @@ import {
  Text,
  FlatList,
  Pressable,
+ TextInput,
  StyleSheet
 } from "react-native";
 
@@ -29,21 +30,59 @@ export default function Home() {
  const [user, setUser] =
   useState(getCurrentUser());
 
+ const [originFilter, setOriginFilter] =
+  useState("");
+
+ const [destinationFilter, setDestinationFilter] =
+  useState("");
+
+ const [dateFilter, setDateFilter] =
+  useState("");
+
  useFocusEffect(
   useCallback(() => {
 
    setRides([...getRides()]);
-
    setUser(getCurrentUser());
 
   }, [])
  );
 
+ function formatDate(iso:string) {
+
+  const d = new Date(iso);
+
+  return (
+   d.toLocaleDateString()
+   + " "
+   + d.toLocaleTimeString([],{
+    hour:"2-digit",
+    minute:"2-digit"
+   })
+  );
+
+ }
+
  const availableRides =
   rides.filter(r =>
 
    r.availableSeats > 0 &&
-   r.driverId !== user.id
+
+   r.driverId !== user.id &&
+
+   !r.passengers.includes(user.id) &&
+
+   r.origin
+    .toLowerCase()
+    .includes(originFilter.toLowerCase()) &&
+
+   r.destination
+    .toLowerCase()
+    .includes(destinationFilter.toLowerCase()) &&
+
+   formatDate(r.departureDateTime)
+    .toLowerCase()
+    .includes(dateFilter.toLowerCase())
 
   );
 
@@ -52,20 +91,39 @@ export default function Home() {
   <View style={styles.container}>
 
    <Text style={styles.title}>
-    Available Rides
+    Search Rides
    </Text>
 
+   <TextInput
+    placeholder="Origin"
+    value={originFilter}
+    onChangeText={setOriginFilter}
+    style={styles.input}
+   />
+
+   <TextInput
+    placeholder="Destination"
+    value={destinationFilter}
+    onChangeText={setDestinationFilter}
+    style={styles.input}
+   />
+
+   <TextInput
+    placeholder="Date (ex: 28/03 or 28/03 14:30)"
+    value={dateFilter}
+    onChangeText={setDateFilter}
+    style={styles.input}
+   />
+
    {availableRides.length === 0 && (
-
-    <Text>
-     No rides yet.
-    </Text>
-
+    <Text>No rides found</Text>
    )}
 
    <FlatList
+
     data={availableRides}
-    keyExtractor={(item) => item.id}
+
+    keyExtractor={i => i.id}
 
     renderItem={({ item }) => (
 
@@ -84,21 +142,17 @@ export default function Home() {
       </Text>
 
       <Text>
-        {item.departureDateTime}
+       {formatDate(item.departureDateTime)}
       </Text>
 
       <Text>
-       Seats available:
-       {" "}
-       {item.availableSeats}
+       Seats: {item.availableSeats}
       </Text>
 
       {item.womenOnly && (
-
        <Text style={styles.tag}>
         Women only
        </Text>
-
       )}
 
      </Pressable>
@@ -115,32 +169,39 @@ export default function Home() {
 
 const styles = StyleSheet.create({
 
- container: {
-  flex: 1,
-  padding: 20
+ container:{
+  flex:1,
+  padding:20
  },
 
- title: {
-  fontSize: 22,
-  fontWeight: "bold",
-  marginBottom: 10
+ title:{
+  fontSize:22,
+  fontWeight:"bold",
+  marginBottom:10
  },
 
- card: {
-  borderWidth: 1,
-  padding: 15,
-  marginBottom: 10,
-  borderRadius: 8
+ input:{
+  borderWidth:1,
+  padding:8,
+  borderRadius:5,
+  marginBottom:10
  },
 
- route: {
-  fontWeight: "bold",
-  fontSize: 16
+ card:{
+  borderWidth:1,
+  padding:15,
+  marginBottom:10,
+  borderRadius:8
  },
 
- tag: {
-  marginTop: 5,
-  color: "purple"
+ route:{
+  fontWeight:"bold",
+  fontSize:16
+ },
+
+ tag:{
+  marginTop:5,
+  color:"purple"
  }
 
 });

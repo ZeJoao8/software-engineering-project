@@ -21,38 +21,24 @@ export default function RootLayout() {
  return (
 
   <ThemeProvider
-
    value={
     colorScheme === 'dark'
      ? DarkTheme
      : DefaultTheme
    }
-
   >
 
-   <Stack>
+   <Stack
+    screenOptions={{
+     headerShown: false
+    }}
+   >
 
-    {/* ecrã inicial */}
-    <Stack.Screen
+    <Stack.Screen name="index" />
 
-     name="index"
+    <Stack.Screen name="(tabs)" />
 
-     options={{
-      headerShown: false
-     }}
-
-    />
-
-    {/* tabs */}
-    <Stack.Screen
-
-     name="(tabs)"
-
-     options={{
-      headerShown: false
-     }}
-
-    />
+    <Stack.Screen name="ride/[id]" />
 
    </Stack>
 

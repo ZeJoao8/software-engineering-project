@@ -32,6 +32,22 @@ import {
 
 } from "../../data/user";
 
+ function formatDate(dateString:
+  string) {
+
+  const d =
+   new Date(dateString);
+
+  return (
+   d.toLocaleDateString()
+   +
+   " "
+   +
+   d.toLocaleTimeString()
+  );
+
+ }
+
 export default function MyRides() {
 
  const [rides, setRides] =
@@ -97,7 +113,11 @@ export default function MyRides() {
       </Text>
 
       <Text>
-       {item.departureDateTime}
+        {formatDate(
+
+        item.departureDateTime
+
+       )}
       </Text>
 
       <Text>
@@ -139,7 +159,11 @@ export default function MyRides() {
       </Text>
 
       <Text>
-       {item.departureDateTime}
+        {formatDate(
+
+        item.departureDateTime
+
+       )}
       </Text>
 
      </View>
