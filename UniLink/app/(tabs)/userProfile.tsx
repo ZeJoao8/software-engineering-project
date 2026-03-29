@@ -57,7 +57,7 @@ export default function Profile(){
 
  }
 
- function addNewCar(){
+function addNewCar(){
 
  if(
   !model.trim() ||
@@ -66,37 +66,55 @@ export default function Profile(){
   !seats.trim()
  ){
 
-  alert("Fill all car fields");
-
+  alert("Fill all fields");
   return;
 
  }
 
- const seatsNumber =
-  Number(seats);
+ if(model.length > 40){
 
- if(
-  !Number.isInteger(seatsNumber)
- ){
-
-  alert("Seats must be an integer");
-
+  alert("Model max 40 chars");
   return;
 
  }
 
- if(seatsNumber <= 0){
+ const seatsNumber = Number(seats);
 
-  alert("Seats must be greater than 0");
+ if(!Number.isInteger(seatsNumber) || seatsNumber <= 0){
 
+  alert("Seats must be integer > 0");
   return;
 
  }
 
- if(seatsNumber > 9){
+ const formattedPlate =
+  plate
+   .toUpperCase()
+   .replace(/\s/g,"");
 
-  alert("Max 9 seats allowed");
+ const plateRegex =
+ /^[A-Z0-9-]{6,8}$/;
 
+ if(!plateRegex.test(formattedPlate)){
+
+  alert("Invalid plate format");
+  return;
+
+ }
+
+ const duplicate =
+  getUserCars(user.id)
+   .some(
+
+    c =>
+     c.licensePlate ===
+     formattedPlate
+
+   );
+
+ if(duplicate){
+
+  alert("Plate already exists");
   return;
 
  }
@@ -109,8 +127,7 @@ export default function Profile(){
 
   color: color.trim(),
 
-  licensePlate:
-   plate.toUpperCase().trim(),
+  licensePlate: formattedPlate,
 
   seatCapacity: seatsNumber,
 

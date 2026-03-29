@@ -1,214 +1,129 @@
 import {
-
  View,
  Text,
  FlatList,
  StyleSheet
-
 } from "react-native";
 
 import {
-
+ useRouter,
  useFocusEffect
-
 } from "expo-router";
 
 import {
-
  useState,
  useCallback
-
 } from "react";
 
 import {
-
  getRides
-
 } from "../../data/rides";
 
 import {
-
  getCurrentUser
-
 } from "../../data/user";
 
- function formatDate(dateString:
-  string) {
+import { sortByDateDesc } from "../../utils/date";  
 
-  const d =
-   new Date(dateString);
+import RideCard from "../../components/rideCard";
 
-  return (
-   d.toLocaleDateString()
-   +
-   " "
-   +
-   d.toLocaleTimeString()
-  );
 
- }
+export default function MyRides(){
 
-export default function MyRides() {
+ const router = useRouter();
 
- const [rides, setRides] =
+ const [rides,setRides] =
   useState(getRides());
 
- const [user, setUser] =
+ const [user,setUser] =
   useState(getCurrentUser());
 
  useFocusEffect(
-
-  useCallback(() => {
-
+  useCallback(()=>{
    setRides([...getRides()]);
-
    setUser(getCurrentUser());
-
-  }, [])
+  },[])
 
  );
 
- const driverRides =
-  rides.filter(
 
+ const driverRides = sortByDateDesc(
+   rides.filter(
    r => r.driverId === user.id
+  ));
 
-  );
-
- const passengerRides =
-  rides.filter(
-
+ const passengerRides = sortByDateDesc(
+   rides.filter(
    r => r.passengers.includes(user.id)
+  ));
 
+ function renderRide(item:any){
+  return(
+   <RideCard
+    ride={item}
+    showOccupancyLabel
+    onPress={()=>
+     router.push(
+      `/ride/${item.id}`
+     )
+    }
+   />
   );
+ }
 
- return (
 
+ return(
   <View style={styles.container}>
-
    <Text style={styles.title}>
     Driver
    </Text>
-
    {driverRides.length === 0 && (
-
     <Text>
-     No rides created yet
+     No rides created
     </Text>
-
    )}
 
    <FlatList
-
     data={driverRides}
-
-    keyExtractor={(item) => item.id}
-
-    renderItem={({ item }) => (
-
-     <View style={styles.card}>
-
-      <Text style={styles.route}>
-       {item.origin} → {item.destination}
-      </Text>
-
-      <Text>
-        {formatDate(
-
-        item.departureDateTime
-
-       )}
-      </Text>
-
-      <Text>
-       Seats left:
-       {" "}
-       {item.availableSeats}
-      </Text>
-
-     </View>
-
-    )}
-
+    keyExtractor={i=>i.id}
+    renderItem={({item})=>
+     renderRide(item)
+    }
    />
 
    <Text style={styles.title}>
     Passenger
    </Text>
-
    {passengerRides.length === 0 && (
-
     <Text>
-     No reservations yet
+     No reservations
     </Text>
-
    )}
 
    <FlatList
-
     data={passengerRides}
-
-    keyExtractor={(item) => item.id}
-
-    renderItem={({ item }) => (
-
-     <View style={styles.card}>
-
-      <Text style={styles.route}>
-       {item.origin} → {item.destination}
-      </Text>
-
-      <Text>
-        {formatDate(
-
-        item.departureDateTime
-
-       )}
-      </Text>
-
-     </View>
-
-    )}
-
+    keyExtractor={i=>i.id}
+    renderItem={({item})=>
+     renderRide(item)
+    }
    />
-
   </View>
-
  );
-
 }
+
 
 const styles = StyleSheet.create({
 
- container: {
-
-  flex: 1,
-  padding: 20,
-  gap: 10
-
+ container:{
+  flex:1,
+  padding:20,
+  gap:10
  },
 
- title: {
-
-  fontSize: 20,
-  fontWeight: "bold",
-  marginTop: 15
-
- },
-
- card: {
-
-  borderWidth: 1,
-  padding: 10,
-  marginVertical: 5,
-  borderRadius: 8
-
- },
-
- route: {
-
-  fontWeight: "bold"
-
+ title:{
+  fontSize:20,
+  fontWeight:"bold",
+  marginTop:10
  }
 
 });

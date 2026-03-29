@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 import {
  View,
@@ -14,155 +14,177 @@ import { Picker } from "@react-native-picker/picker";
 import DateTimePicker
  from "@react-native-community/datetimepicker";
 
-import { addRide }
- from "../../data/rides";
+import {
+ addRide
+} from "../../data/rides";
 
-import { getUserCars }
- from "../../data/cars";
+import {
+ getUserCars
+} from "../../data/cars";
 
-import { getCurrentUser }
- from "../../data/user";
+import {
+ getCurrentUser
+} from "../../data/user";
+
+import {
+ useFocusEffect,
+ useRouter
+} from "expo-router";
 
 export default function CreateRide(){
 
- const user=getCurrentUser();
+ const router = useRouter();
 
- const cars=getUserCars(user.id);
+ const [user,setUser] =
+  useState(getCurrentUser());
 
- const [origin,setOrigin]=useState("");
+ const [cars,setCars] =
+  useState(getUserCars(user.id));
 
- const [destination,setDestination]=useState("");
+ const [origin,setOrigin] =
+  useState("");
 
- const [selectedCar,setSelectedCar]=
-  useState(cars[0]?.id);
+ const [destination,setDestination] =
+  useState("");
 
- const [seats,setSeats]=useState("1");
+ const [selectedCar,setSelectedCar] =
+  useState<string | undefined>(
+   cars[0]?.id
+  );
 
- const [womenOnly,setWomenOnly]=
+ const [seats,setSeats] =
+  useState("");
+
+ const [womenOnly,setWomenOnly] =
   useState(false);
 
- const [date,setDate]=useState(new Date());
+ const [date,setDate] =
+  useState(new Date());
 
- const [time,setTime]=useState(new Date());
+ const [time,setTime] =
+  useState(new Date());
 
- const [showDate,setShowDate]=
+ const [showDate,setShowDate] =
   useState(false);
 
- const [showTime,setShowTime]=
+ const [showTime,setShowTime] =
   useState(false);
 
- const car=cars.find(
-  c=>c.id===selectedCar
+
+ useFocusEffect(
+
+  useCallback(()=>{
+
+   const current = getCurrentUser();
+
+   const userCars =
+    getUserCars(current.id);
+    setUser(current);
+    setCars(userCars);
+   setSelectedCar(
+    userCars[0]?.id
+   );
+
+   setOrigin("");
+   setDestination("");
+   setSeats("");
+   setWomenOnly(false);
+
+  },[])
+
  );
+
+
+ const car =
+  cars.find(
+   c => c.id === selectedCar
+  );
+
 
  function createRide(){
 
- if(
-  !origin.trim() ||
-  !destination.trim() ||
-  !car
- ){
+  if(
+   !origin.trim() ||
+   !destination.trim() ||
+   !car
+  ){
+   alert("Fill all fields");
+   return;
+  }
 
-  alert("Fill all fields");
+  if(origin.trim().toLowerCase() ===
+   destination.trim().toLowerCase()
+  ){
+   alert("Origin and destination must differ");
+   return;
+  }
 
-  return;
+  const seatsNumber =Number(seats);
+
+  if(!Number.isInteger(seatsNumber)){
+   alert("Seats must be integer");
+   return;
+  }
+
+  if(seatsNumber < 1){
+    alert("Must allow at least 1 passenger");
+   return;
+  }
+
+  if(seatsNumber >car.seatCapacity - 1){
+   alert(`Max passengers ${car.seatCapacity-1}`);
+   return;
+  }
+
+  const departure =
+   new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    time.getHours(),
+    time.getMinutes()
+   );
+
+  if(departure < new Date()){
+   alert("Cannot create ride in past");
+   return;
+  }
+
+  addRide({
+
+   id: Date.now().toString(),
+   driverId: user.id,
+   carId:car.id,
+   origin:origin.trim(),
+   destination:destination.trim(),
+   departureDateTime:departure.toISOString(),
+   availableSeats:seatsNumber,
+   totalSeats:seatsNumber,
+   womenOnly,
+   passengers:[],
+   completed:false
+  });
+
+  alert("Ride created");
+
+  router.replace("/(tabs)/myRides");
 
  }
 
- const seatsNumber =
-  Number(seats);
-
- if(
-  !Number.isInteger(seatsNumber)
- ){
-
-  alert("Seats must be an integer");
-
-  return;
-
- }
-
- if(seatsNumber < 1){
-
-  alert("Must have at least 1 passenger seat");
-
-  return;
-
- }
-
- if(
-  seatsNumber >
-  car.seatCapacity - 1
- ){
-
-  alert(
-
-   `Max passengers: ${
-    car.seatCapacity - 1
-   }`
-
+ if(cars.length === 0){
+  return(
+   <View style={styles.container}>
+    <Text style={styles.title}>
+     Create Ride
+    </Text>
+    <Text>
+     Add a car first in Profile
+    </Text>
+   </View>
   );
 
-  return;
-
  }
 
- const departure = new Date(
-
-  date.getFullYear(),
-
-  date.getMonth(),
-
-  date.getDate(),
-
-  time.getHours(),
-
-  time.getMinutes()
-
- );
-
- if(departure < new Date()){
-
-  alert(
-   "Cannot create ride in the past"
-  );
-
-  return;
-
- }
-
- addRide({
-
-  id: Date.now().toString(),
-
-  driverId: user.id,
-
-  carId: car.id,
-
-  origin: origin.trim(),
-
-  destination:
-   destination.trim(),
-
-  departureDateTime:
-   departure.toISOString(),
-
-  availableSeats:
-   seatsNumber,
-
-  womenOnly,
-
-  passengers: []
-
- });
-
- alert("Ride created");
-
- setOrigin("");
- setDestination("");
- setSeats("1");
-
-}
 
  return(
 
@@ -175,6 +197,7 @@ export default function CreateRide(){
    <TextInput
     placeholder="Origin"
     value={origin}
+    maxLength={40}
     onChangeText={setOrigin}
     style={styles.input}
    />
@@ -182,95 +205,84 @@ export default function CreateRide(){
    <TextInput
     placeholder="Destination"
     value={destination}
+    maxLength={40}
     onChangeText={setDestination}
     style={styles.input}
    />
 
+
    <Text>Date</Text>
 
    <Button
-    title={date.toDateString()}
-    onPress={()=>setShowDate(true)}
+    title={
+     date.toDateString()
+    }
+    onPress={()=>
+     setShowDate(true)
+    }
+
    />
 
-   {showDate&&(
 
+   {showDate && (
     <DateTimePicker
-
      value={date}
-
      mode="date"
-
      onChange={(e,d)=>{
-
       setShowDate(false);
-
-      if(d)setDate(d);
-
+      if(d)
+       setDate(d);
      }}
-
     />
-
    )}
 
-   <Text>Time</Text>
 
+   <Text>Time</Text>
    <Button
-    title={time.toLocaleTimeString([],{
-     hour:"2-digit",
-     minute:"2-digit"
-    })}
-    onPress={()=>setShowTime(true)}
+    title={
+     time.toLocaleTimeString([],{
+      hour:"2-digit",
+      minute:"2-digit"
+     })
+    }
+    onPress={()=>
+     setShowTime(true)
+    }
    />
 
-   {showTime&&(
 
+   {showTime && (
     <DateTimePicker
-
      value={time}
-
      mode="time"
-
      onChange={(e,t)=>{
-
       setShowTime(false);
-
-      if(t)setTime(t);
-
+      if(t)
+       setTime(t);
      }}
-
     />
-
    )}
 
    <Text>Car</Text>
 
    <Picker
-
     selectedValue={selectedCar}
-
-    onValueChange={setSelectedCar}
-
+    onValueChange={
+     setSelectedCar
+    }
    >
-
     {cars.map(c=>(
-
      <Picker.Item
-
       key={c.id}
-
-      label={`${c.model} - ${c.color} (${c.licensePlate})`}
-
+      label={`${c.model} (${c.licensePlate})`}
       value={c.id}
-
      />
-
     ))}
 
    </Picker>
 
    <TextInput
-    placeholder={`1-${car?car.seatCapacity-1:0} seats`}
+    placeholder={`1-${car.seatCapacity-1} seats`}
     value={seats}
     onChangeText={setSeats}
     keyboardType="numeric"
@@ -278,28 +290,29 @@ export default function CreateRide(){
    />
 
    <View style={styles.row}>
-
-    <Text>Women only</Text>
-
+    <Text>
+     Women only
+    </Text>
     <Switch
      value={womenOnly}
-     onValueChange={setWomenOnly}
+     onValueChange={
+      setWomenOnly
+     }
     />
 
    </View>
-
    <Button
     title="Create Ride"
     onPress={createRide}
    />
-
   </View>
 
  );
 
 }
 
-const styles=StyleSheet.create({
+
+const styles = StyleSheet.create({
 
  container:{
   flex:1,

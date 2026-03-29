@@ -2,7 +2,8 @@ import {
  View,
  Text,
  Button,
- StyleSheet
+ StyleSheet,
+ Alert
 } from "react-native";
 
 import {
@@ -12,178 +13,306 @@ import {
 
 import {
  getRides,
- updateRide
+ updateRide,
+ deleteRide
 } from "../../data/rides";
 
 import {
- getCurrentUser
+ getCurrentUser,
+ getUsers
 } from "../../data/user";
 
-import { getCars } from "../../data/cars";
+import {
+ getCars
+} from "../../data/cars";
 
-export default function RideDetails() {
+import { formatDate
+} from "../../utils/date";
+
+export default function RideDetails(){
 
  const router = useRouter();
 
  const params = useLocalSearchParams();
 
- // id pode vir undefined quando o screen é pré-carregado
- if (!params.id) {
-
-  return null;
-
- }
-
- const id = Array.isArray(params.id)
-  ? params.id[0]
-  : params.id;
+ const id =
+  typeof params.id === "string"
+   ? params.id
+   : undefined;
 
  const ride =
-  getRides().find(r => r.id === id);
+  id
+   ? getRides().find(r => r.id === id)
+   : undefined;
 
- if (!ride) {
+ if(!ride) return null;
 
-  return null;
+ const user = getCurrentUser();
 
- }
+ const users = getUsers();
+
+ const cars = getCars();
+
+ const driver =
+  users.find(
+   u => u.id === ride.driverId
+  );
 
  const car =
- getCars().find(
-  c => c.id === ride.carId
- );
- <Text>
- Car:
- {" "}
- {car?.model} - {car?.color} ({car?.licensePlate})
-</Text>
+  cars.find(
+   c => c.id === ride.carId
+  );
 
- function reserveSeat() {
+ const passengers =
+  ride.passengers
+   .map(id =>
+    users.find(
+     u => u.id === id
+    )
+   )
+   .filter(Boolean);
 
-  const user = getCurrentUser();
+ const isDriver =
+  ride.driverId === user.id;
 
-  if (
-   ride.womenOnly &&
-   user.gender !== "female"
-  ) {
+ const joined =
+  ride.passengers.includes(user.id);
 
-   alert(
-    "Only female users can join this ride"
-   );
+ const rideDate =
+  new Date(ride.departureDateTime);
 
+ const now =
+  new Date();
+
+ const rideStarted =
+  rideDate < now;
+
+ const canComplete =
+  isDriver &&
+  rideStarted &&
+  !ride.completed;
+
+ function reserveSeat(){
+
+  if(ride.completed){
+   alert("Ride already completed");
    return;
-
   }
 
-  if (ride.availableSeats <= 0) {
-
-   alert("Ride is full");
-
+  if(rideStarted){
+   alert("Ride already started");
    return;
+  }
 
+  if(
+   ride.womenOnly &&
+   user.gender !== "female"
+  ){
+   alert("Only women allowed");
+   return;
+  }
+
+  if(ride.availableSeats <= 0){
+   alert("Ride full");
+   return;
   }
 
   updateRide({
-
    ...ride,
-
    availableSeats:
     ride.availableSeats - 1,
-
-   passengers: [
-
+   passengers:[
     ...ride.passengers,
-
     user.id
-
    ]
-
   });
 
-  router.replace("/(tabs)");
-
+  router.replace("/(tabs)/myRides");
  }
 
- function formatDate(iso: string) {
+ function cancelSeat(){
+  if(rideStarted || ride.completed){
+   alert("Cannot cancel now");
+   return;
+  }
 
-  const d = new Date(iso);
+  const newSeats =
+   Math.min(
+    ride.availableSeats + 1,
+    ride.totalSeats
+   );
 
-  return (
-   d.toLocaleDateString()
-   +
-   " "
-   +
-   d.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit"
-   })
+  updateRide({
+   ...ride,
+   availableSeats:newSeats,
+   passengers:
+    ride.passengers.filter(
+     p => p !== user.id
+    )
+  });
+  router.replace("/(tabs)/myRides");
+ }
+
+ function cancelRide(){
+  Alert.alert(
+   "Cancel ride",
+   "Are you sure you want to cancel this ride?",
+   [
+    {
+     text:"No"
+    },
+    {
+     text:"Yes",
+     onPress:()=>{
+      deleteRide(ride.id);
+      router.replace("/(tabs)/myRides");
+     }
+    }
+   ]
   );
-
  }
 
- return (
+ function completeRide(){
+  updateRide({
+   ...ride,
+   completed:true
+  })
+  router.replace("/(tabs)/myRides");
+ }
 
+ return(
   <View style={styles.container}>
 
    <Text style={styles.title}>
-
     {ride.origin} → {ride.destination}
-
    </Text>
 
    <Text>
-
     {formatDate(
      ride.departureDateTime
     )}
-
    </Text>
 
    <Text>
-
     Seats:
     {" "}
-    {ride.availableSeats}
+    {
+     ride.totalSeats -
+     ride.availableSeats
+    }
+    {" / "}
+    {ride.totalSeats}
+   </Text>
 
+   {ride.womenOnly && (
+    <Text style={styles.tag}>
+     Women only
+    </Text>
+   )}
+
+   <Text style={styles.section}>
+    Driver
    </Text>
 
    <Text>
-
-    Women only:
-    {" "}
-    {ride.womenOnly ? "Yes" : "No"}
-
+    {driver?.name}
    </Text>
 
-   <Button
+   <Text style={styles.section}>
+    Car
+   </Text>
 
-    title="Reserve seat"
+   <Text>
+    {car?.model}
+   </Text>
 
-    onPress={reserveSeat}
+   <Text>
+    {car?.color}
+   </Text>
 
-   />
+   <Text>
+    {car?.licensePlate}
+   </Text>
 
+   <Text style={styles.section}>
+    Passengers
+   </Text>
+
+   {passengers.length === 0 && (
+    <Text>
+     No passengers yet
+    </Text>
+   )}
+
+   {passengers.map(p => (
+    <Text key={p!.id}>
+     {p!.name}
+    </Text>
+   ))}
+
+   {ride.completed && (
+    <Text style={styles.completed}>
+     Completed
+    </Text>
+   )}
+
+   {!isDriver && !joined && !rideStarted && !ride.completed && (
+    <Button
+     title="Reserve seat"
+     onPress={reserveSeat}
+    />
+   )}
+
+   {joined && !isDriver && !rideStarted && !ride.completed && (
+    <Button
+     title="Cancel reservation"
+     onPress={cancelSeat}
+    />
+   )}
+
+   {isDriver && !rideStarted && !ride.completed && (
+    <Button
+     title="Cancel ride"
+     onPress={cancelRide}
+    />
+   )}
+
+   {canComplete && (
+    <Button
+     title="Complete ride"
+     onPress={completeRide}
+    />
+   )}
   </View>
-
  );
-
 }
 
 const styles = StyleSheet.create({
 
- container: {
-
-  flex: 1,
-  padding: 20,
-  gap: 10
-
+ container:{
+  flex:1,
+  padding:20,
+  gap:10
  },
 
- title: {
+ title:{
+  fontSize:22,
+  fontWeight:"bold"
+ },
 
-  fontSize: 22,
-  fontWeight: "bold"
+ section:{
+  marginTop:15,
+  fontWeight:"bold"
+ },
 
+ completed:{
+  color:"green",
+  fontWeight:"bold"
+ },
+
+ tag:{
+  marginTop:5,
+  color:"purple"
  }
- 
 
 });

@@ -7,7 +7,7 @@ export default function TabsLayout() {
   <Tabs>
 
    <Tabs.Screen
-    name="index"
+    name="searchRide"
     options={{ title: "Search" }}
    />
 
@@ -22,7 +22,7 @@ export default function TabsLayout() {
    />
 
    <Tabs.Screen
-    name="profile"
+    name="userProfile"
     options={{ title: "Profile" }}
    />
 

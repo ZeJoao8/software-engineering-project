@@ -11,15 +11,6 @@ let cars: Car[] = [
   ownerId: "1"
  },
 
- {
-  id: "2",
-  model: "Honda Civic",
-  color: "Black",
-  licensePlate: "BB-22-33",
-  seatCapacity: 5,
-  ownerId: "2"
- }
-
 ];
 
 export function getCars() {

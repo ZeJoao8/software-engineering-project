@@ -15,3 +15,11 @@ export function updateRide(updatedRide: Ride) {
     r.id === updatedRide.id ? updatedRide : r
   );
 }
+
+export function deleteRide(id:string){
+
+ rides = rides.filter(
+  r => r.id !== id
+ );
+
+}
