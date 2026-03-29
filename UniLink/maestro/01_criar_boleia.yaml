@@ -1,0 +1,21 @@
+appId: host.exp.Exponent
+---
+
+- tapOn: "tab-ride"
+
+- assertVisible: "Pedir uma Boleia"
+
+- tapOn:
+    id: "pickup-input"
+- inputText: "FEUP, Porto"
+
+- tapOn:
+    id: "destination-input"
+- inputText: "Trindade, Porto"
+
+- tapOn: "Confirmar Pedido de Boleia"
+
+- waitForAnimationToEnd
+- assertVisible: "Pedido de Boleia Confirmado!"
+- assertVisible: "Localização de encontro: FEUP, Porto"
+- assertVisible: "Destino: Trindade, Porto"

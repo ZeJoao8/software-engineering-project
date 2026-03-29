@@ -34,6 +34,7 @@ export default function TabLayout() {
         name="ride"
         options={{
           title: 'Boleia',
+          tabBarAccessibilityLabel: 'tab-ride',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="car.fill" color={color} />,
         }}
       />
