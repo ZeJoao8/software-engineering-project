@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Pixel_6" tests="1" failures="1" time="24.0">
+    <testcase id="publish_ride_normal" name="publish_ride_normal" classname="publish_ride_normal" time="24.0" status="ERROR">
+      <failure>Element not found: Text matching regex: JOÃO (MALE)</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

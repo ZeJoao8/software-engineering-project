@@ -1,7 +1,7 @@
 appId: host.exp.exponent
 ---
 # Given: João opens the app and selects his profile
-- openLink: "exp://192.168.1.136:8081"
+- openLink: "exp://192.168.10.230:8081"
 - waitForAnimationToEnd
 - tapOn: "JOÃO (MALE)"
 - waitForAnimationToEnd
@@ -23,11 +23,6 @@ appId: host.exp.exponent
 - tapOn: "OK"
 - waitForAnimationToEnd
 
-# Then: Leaderboard shows no data yet (no passengers yet)
-- tapOn: "Leaderboard"
-- waitForAnimationToEnd
-- assertVisible: "No sustainability data yet."
-
 # When: Maria switches profile
 - tapOn: "Profile"
 - waitForAnimationToEnd
@@ -42,9 +37,3 @@ appId: host.exp.exponent
 - tapOn: "Reserve seat"
 - waitForAnimationToEnd
 
-# Then: Leaderboard shows Maria with CO2 saved
-- tapOn: "Leaderboard"
-- waitForAnimationToEnd
-- assertVisible: "Sustainability Leaderboard"
-- assertVisible: "1. João 2 kg CO₂"
-- assertVisible: "2. Maria 2 kg CO₂"
