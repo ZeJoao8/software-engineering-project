@@ -1,0 +1,50 @@
+appId: host.exp.exponent
+---
+# Given: João opens the app and selects his profile
+- openLink: "exp://192.168.1.136:8081"
+- waitForAnimationToEnd
+- tapOn: "JOÃO (MALE)"
+- waitForAnimationToEnd
+
+# When: João creates a ride Porto -> Lisboa
+- tapOn: "Create"
+- waitForAnimationToEnd
+- tapOn: "Origin"
+- inputText: "Porto"
+- pressKey: enter
+- tapOn: "Destination"
+- inputText: "Lisboa"
+- pressKey: enter
+- waitForAnimationToEnd
+- tapOn:
+    id: "create-ride-button"
+- waitForAnimationToEnd
+- assertVisible: "Ride created"
+- tapOn: "OK"
+- waitForAnimationToEnd
+
+# Then: Leaderboard shows no data yet (no passengers yet)
+- tapOn: "Leaderboard"
+- waitForAnimationToEnd
+- assertVisible: "No sustainability data yet."
+
+# When: Maria switches profile
+- tapOn: "Profile"
+- waitForAnimationToEnd
+- tapOn: "MARIA (FEMALE)"
+- waitForAnimationToEnd
+
+# When: Maria reserves the ride
+- tapOn: "Search"
+- waitForAnimationToEnd
+- tapOn: "Porto → Lisboa"
+- waitForAnimationToEnd
+- tapOn: "Reserve seat"
+- waitForAnimationToEnd
+
+# Then: Leaderboard shows Maria with CO2 saved
+- tapOn: "Leaderboard"
+- waitForAnimationToEnd
+- assertVisible: "Sustainability Leaderboard"
+- assertVisible: "1. João 2 kg CO₂"
+- assertVisible: "2. Maria 2 kg CO₂"

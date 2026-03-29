@@ -4,21 +4,24 @@ import { getUsers } from "../../data/user";
 
 function calculateCO2Saved(rides) {
 
- // exemplo simples:
- // cada passageiro poupa 2kg CO2
  const co2PerPassenger = 2;
 
  const totals = {};
 
  rides.forEach(r => {
 
+  // passageiros poupam CO2
   r.passengers.forEach(p => {
-
    totals[p] =
-    (totals[p] || 0)
-    + co2PerPassenger;
-
+    (totals[p] || 0) + co2PerPassenger;
   });
+
+  // condutor recebe o CO2 total dos seus passageiros
+  if (r.passengers.length > 0) {
+   totals[r.driverId] =
+    (totals[r.driverId] || 0)
+    + (r.passengers.length * co2PerPassenger);
+  }
 
  });
 
