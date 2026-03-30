@@ -12,7 +12,8 @@ import {
 
 import {
  useState,
- useCallback
+ useCallback,
+ useEffect
 } from "react";
 
 import {
@@ -39,6 +40,10 @@ export default function MyRides(){
  const [user,setUser] =
   useState(getCurrentUser());
 
+  
+  const [now,setNow] =
+  useState(new Date());
+
   useFocusEffect(
   useCallback(()=>{
     removeEmptyPastRides();
@@ -46,6 +51,17 @@ export default function MyRides(){
     setUser(getCurrentUser());
   },[])
   );
+
+useEffect(()=>{
+ const interval =
+  setInterval(()=>{
+   removeEmptyPastRides();
+   setNow(new Date());
+   setRides([...getRides()]);
+  },10000);
+ return () =>
+  clearInterval(interval);
+},[]);
 
  const driverRides = sortByDateDesc(
    rides.filter(

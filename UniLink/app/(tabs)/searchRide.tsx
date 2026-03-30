@@ -64,9 +64,7 @@ const [now,setNow] =
   useCallback(()=>{
    setRides([...getRides()]);
    setUser(getCurrentUser());
-
   },[])
-
  );
 
 useEffect(()=>{

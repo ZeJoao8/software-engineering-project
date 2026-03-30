@@ -392,14 +392,20 @@ function changeCar(){
     Driver
    </Text>
 
-   <Text>
+    <Text
+    style={styles.link}
+    onPress={() =>{
+      if(driver?.id === user.id) router.push("/(tabs)/userProfile");
+      else router.push(`/user/${driver?.id}`)
+    }
+    }
+    >
     {driver?.name}
-   </Text>
+    </Text>
 
     <Text style={styles.section}>
     Car
     </Text>
-
     {car ? (
     <>
       <Text>
@@ -433,8 +439,15 @@ function changeCar(){
   key={p!.id}
   style={styles.passengerRow}
  >
-  <Text>
-   {p!.name}
+  <Text
+  style={styles.link}
+  onPress={() =>{
+    if(p!.id===user.id) router.push("/(tabs)/userProfile");
+    else router.push(`/user/${p!.id}`)
+  }
+  }
+  >
+  {p!.name}
   </Text>
   {isDriver && !rideStarted && !ride.completed && (
    <Text
@@ -563,5 +576,9 @@ passengerRow:{
 
 remove:{
  color:"red"
-}
+},
+
+link:{
+ color:"blue"
+},
 });
