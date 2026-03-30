@@ -12,9 +12,8 @@ import {
 
 import {
  getCurrentUser,
- updateUser,
  getUsers,
- switchUser
+  updateUser,
 } from "../../data/user";
 
 import {
@@ -26,6 +25,13 @@ import {
 import { getRides,
  deleteRide
 } from "../../data/rides";
+
+import { useRouter }
+ from "expo-router";
+
+import { logoutUser } from "../../data/user";
+
+const router = useRouter();
 
 export default function Profile(){
 
@@ -51,7 +57,7 @@ export default function Profile(){
   useState("");
 
  const userCars =
-  getUserCars(user.id);
+  getUserCars(user.email);
 
 
  function startEdit(){
@@ -78,14 +84,6 @@ export default function Profile(){
   setEditing(false);
   Alert.alert("Saved");
  }
-
- function changeUser(id:string){
-  switchUser(id);
-  setUser(getCurrentUser());
-  setEditing(false);
-  setShowCarForm(false);
- }
-
 
 function removeCar(carId:string){
  const ridesUsingCar =
@@ -152,7 +150,7 @@ function removeCar(carId:string){
    return;
   }
   const duplicate =
-   getUserCars(user.id)
+   getUserCars(user.email)
     .some(
      c =>
       c.licensePlate ===
@@ -168,7 +166,7 @@ function removeCar(carId:string){
    color: color.trim(),
    licensePlate: formattedPlate,
    seatCapacity: seatsNumber,
-   ownerId: user.id
+   ownerId: user.email
   });
   setModel("");
   setColor("");
@@ -348,21 +346,31 @@ function removeCar(carId:string){
     </>
    )}
 
-   <Text style={styles.section}>
-    Switch profile
-   </Text>
+<Text style={styles.section}>
+ Session
+</Text>
 
-   {getUsers().map(u => (
-    <Button
-     key={u.id}
-     title={
-      `${u.name} (${u.gender})`
-     }
-     onPress={()=>
-      changeUser(u.id)
-     }
-    />
-   ))}
+<Button
+ title="Logout"
+onPress={() =>
+ Alert.alert(
+  "Logout",
+  "Are you sure?",
+  [
+   {
+    text:"Cancel",
+    style:"cancel"
+   },
+   {
+    text:"Logout",
+    onPress:() => {
+     logoutUser();
+     router.replace("/login");
+    }
+   }
+  ]
+ )}
+/>
   </ScrollView>
  );
 }

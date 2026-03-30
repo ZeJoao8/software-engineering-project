@@ -39,7 +39,7 @@ export default function CreateRide(){
   useState(getCurrentUser());
 
  const [cars,setCars] =
-  useState(getUserCars(user.id));
+  useState(getUserCars(user.email));
 
  const [origin,setOrigin] =
   useState("");
@@ -78,7 +78,7 @@ export default function CreateRide(){
    const current = getCurrentUser();
 
    const userCars =
-    getUserCars(current.id);
+    getUserCars(current.email);
     setUser(current);
     setCars(userCars);
    setSelectedCar(
@@ -153,7 +153,7 @@ export default function CreateRide(){
   addRide({
 
    id: Date.now().toString(),
-   driverId: user.id,
+   driverId: user.email,
    carId:car.id,
    origin:origin.trim(),
    destination:destination.trim(),

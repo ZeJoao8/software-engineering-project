@@ -62,7 +62,7 @@ export default function RideDetails(){
 
  const driver =
   users.find(
-   u => u.id === r.driverId
+   u => u.email === r.driverId
   );
 
  const car =
@@ -74,16 +74,16 @@ export default function RideDetails(){
   ride.passengers
    .map(id =>
     users.find(
-     u => u.id === id
+     u => u.email === id
     )
    )
    .filter(Boolean);
 
  const isDriver =
-  r.driverId === user.id;
+  r.driverId === user.email;
 
  const joined =
-  r.passengers.includes(user.id);
+  r.passengers.includes(user.email);
 
  const rideDate =
   new Date(r.departureDateTime);
@@ -101,7 +101,7 @@ export default function RideDetails(){
 
 const driverCars =
  cars.filter(
-  c => c.ownerId === user.id
+  c => c.ownerId === user.email
  );
 
 const [editingCar,setEditingCar] =
@@ -158,7 +158,7 @@ function reserveSeat(){
        r.availableSeats - 1,
       passengers:[
        ...r.passengers,
-       user.id
+       user.email
       ]
      });
      router.replace("/(tabs)/myRides");
@@ -195,7 +195,7 @@ function cancelSeat(){
       availableSeats:newSeats,
       passengers:
        r.passengers.filter(
-        p => p !== user.id
+        p => p !== user.email
        )
      });
      router.replace("/(tabs)/myRides");
@@ -396,7 +396,7 @@ function changeCar(){
     style={styles.link}
     onPress={() =>{
       if(driver?.id === user.id) router.push("/(tabs)/userProfile");
-      else router.push(`/user/${driver?.id}`)
+      else router.push(`/user/${driver?.email}`)
     }
     }
     >
@@ -436,14 +436,14 @@ function changeCar(){
 
 {passengers.map(p => (
  <View
-  key={p!.id}
+  key={p!.email}
   style={styles.passengerRow}
  >
   <Text
   style={styles.link}
   onPress={() =>{
-    if(p!.id===user.id) router.push("/(tabs)/userProfile");
-    else router.push(`/user/${p!.id}`)
+    if(p!.email===user.email) router.push("/(tabs)/userProfile");
+    else router.push(`/user/${p!.email}`)
   }
   }
   >
@@ -453,7 +453,7 @@ function changeCar(){
    <Text
     style={styles.remove}
     onPress={() =>
-     removePassenger(p!.id)
+     removePassenger(p!.email)
     }
    >
     remove

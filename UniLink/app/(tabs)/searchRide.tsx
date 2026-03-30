@@ -81,8 +81,8 @@ useEffect(()=>{
  const availableRides = sortByDateAsc(rides.filter(r =>
    new Date(r.departureDateTime) >= now &&
    r.availableSeats > 0 &&
-   r.driverId !== user.id &&
-   !r.passengers.includes(user.id) &&
+   r.driverId !== user.email &&
+   !r.passengers.includes(user.email) &&
    r.origin.toLowerCase()
     .includes(originFilter.toLowerCase()
     ) &&

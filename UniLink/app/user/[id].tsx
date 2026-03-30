@@ -36,14 +36,14 @@ export default function PublicProfile(){
  const user =
   id
    ? getUsers().find(
-      u => u.id === id
+      u => u.email === id
      )
    : undefined;
 
  if(!user) return null;
 
  const cars =
-  getUserCars(user.id);
+  getUserCars(user.email);
 
 
  return(

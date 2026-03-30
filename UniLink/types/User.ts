@@ -1,13 +1,15 @@
 export interface User {
 
- id: string;
-
  name: string;
 
  university: string;
 
  course: string;
 
- gender: "male" | "female";
+ gender: "Male" | "Female";
+
+ email: string;
+
+ password: string;
 
 }

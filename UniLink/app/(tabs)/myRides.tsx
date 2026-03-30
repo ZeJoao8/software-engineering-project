@@ -65,12 +65,12 @@ useEffect(()=>{
 
  const driverRides = sortByDateDesc(
    rides.filter(
-   r => r.driverId === user.id
+   r => r.driverId === user.email
   ));
 
  const passengerRides = sortByDateDesc(
    rides.filter(
-   r => r.passengers.includes(user.id)
+   r => r.passengers.includes(user.email)
   ));
 
  function renderRide(item:any){
