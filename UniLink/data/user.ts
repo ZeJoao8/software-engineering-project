@@ -1,7 +1,7 @@
+import { Alert } from "react-native";
 import { User } from "../types/User";
 
 const users: User[] = [
-
  {
   name: "João",
   university: "FEUP",
@@ -19,19 +19,19 @@ const users: User[] = [
   email: "maria@feup.pt",
   password: "1234"
  }
-
 ];
 
-let currentUserId = "1";
+let currentUserId: string | null = null;
 
-export function getUsers() {
+export function getUsers(){
  return users;
 }
 
-export function getCurrentUser() {
+export function getCurrentUser(){
+ if(!currentUserId) return null;
  return users.find(
   u => u.email === currentUserId
- )!;
+ ) ?? null;
 }
 
 export function loginUser(
@@ -53,23 +53,46 @@ export function loginUser(
  return false;
 }
 
+
+
 export function registerUser(
  name:string,
  email:string,
  password:string,
  university:string,
  course:string,
- gender:"male"|"female"
+ gender:"Male"|"Female"
 ){
+
  const normalizedEmail =
   email.toLowerCase().trim();
+
+
+ const emailRegex =
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+
+ if(!emailRegex.test(normalizedEmail)){
+  Alert.alert(
+   "Error",
+   "Invalid email format"
+  );
+  return null;
+ }
+
  const exists =
   users.some(
    u => u.email === normalizedEmail
   );
+
  if(exists){
+  Alert.alert(
+   "Error",
+   "Email already exists"
+  );
   return null;
  }
+
  const newUser:User = {
   name,
   email: normalizedEmail,
@@ -84,13 +107,15 @@ export function registerUser(
 }
 
 export function logoutUser(){
- currentUserId = "";
+ currentUserId = null;
 }
 
-export function updateUser(updatedUser: User) {
+export function updateUser(updatedUser:User){
  const index =
   users.findIndex(
    u => u.email === updatedUser.email
   );
- users[index] = updatedUser;
+ if(index !== -1){
+  users[index] = updatedUser;
+ }
 }
