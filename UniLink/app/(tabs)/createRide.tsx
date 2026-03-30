@@ -289,6 +289,7 @@ export default function CreateRide(){
     style={styles.input}
    />
 
+  {user?.gender === "Female" && (
    <View style={styles.row}>
     <Text>
      Women only
@@ -299,8 +300,9 @@ export default function CreateRide(){
       setWomenOnly
      }
     />
-
    </View>
+  )}
+  
    <Button
     title="Create Ride"
     onPress={createRide}

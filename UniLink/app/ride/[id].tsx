@@ -126,7 +126,7 @@ function reserveSeat(){
   );
   return;
  }
- if(r.womenOnly && user.gender !== "female"
+ if(r.womenOnly && user.gender !== "Female"
  ){
   Alert.alert(
    "Not allowed",

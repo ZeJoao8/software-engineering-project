@@ -94,13 +94,17 @@ useEffect(()=>{
     .includes(dateFilter.toLowerCase()
    ) &&
    (
-    !womenOnlyFilter ||
-    r.womenOnly
+    user?.gender === "Female" ||
+    !r.womenOnly
    ) &&
    (
     !minSeats ||
     r.availableSeats >=
     Number(minSeats)
+   ) && 
+   (
+    !womenOnlyFilter ||
+    r.womenOnly
    )
   ));
 
@@ -151,7 +155,8 @@ useEffect(()=>{
     style={styles.input}
    />
 
-   <View style={styles.row}>
+   {user?.gender === "Female" &&(
+    <View style={styles.row}>
     <Text>
      Women only
     </Text>
@@ -162,13 +167,13 @@ useEffect(()=>{
      }
     />
    </View>
+   )}
 
    {availableRides.length === 0 && (
     <Text>
      No rides found
     </Text>
    )}
-
 
    <FlatList
     data={availableRides}
