@@ -395,7 +395,7 @@ function changeCar(){
     <Text
     style={styles.link}
     onPress={() =>{
-      if(driver?.id === user.id) router.push("/(tabs)/userProfile");
+      if(driver?.email === user?.email) router.push("/(tabs)/userProfile");
       else router.push(`/user/${driver?.email}`)
     }
     }
