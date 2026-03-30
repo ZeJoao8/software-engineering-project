@@ -31,6 +31,9 @@ import {
 import { formatDate
 } from "../../utils/date";
 
+import { Picker } from "@react-native-picker/picker";
+import { useState } from "react";
+
 export default function RideDetails(){
 
  const router = useRouter();
@@ -95,6 +98,17 @@ export default function RideDetails(){
   isDriver &&
   rideStarted &&
   !r.completed;
+
+const driverCars =
+ cars.filter(
+  c => c.ownerId === user.id
+ );
+
+const [editingCar,setEditingCar] =
+ useState(false);
+
+const [selectedCarId,setSelectedCarId] =
+ useState(r.carId);
 
 function reserveSeat(){
  if(r.completed){
@@ -249,6 +263,94 @@ function completeRide(){
  );
 }
 
+function removePassenger(passengerId:string){
+ if(rideStarted || r.completed){
+  Alert.alert(
+   "Cannot remove",
+   "Ride already started or completed."
+  );
+  return;
+ }
+ Alert.alert(
+  "Remove passenger",
+  "Remove this passenger from the ride?",
+  [
+   {
+    text:"No",
+    style:"cancel"
+   },
+   {
+    text:"Yes",
+    style:"destructive",
+    onPress:()=>{
+     updateRide({
+      ...r,
+      passengers:
+       r.passengers.filter(
+        id => id !== passengerId
+       ),
+      availableSeats:
+       Math.min(
+        r.availableSeats + 1,
+        r.totalSeats
+       )
+     });
+     router.replace(`/ride/${r.id}`);
+    }
+   }
+  ]
+ );
+}
+
+function changeCar(){
+ const newCar =
+  driverCars.find(
+   c => c.id === selectedCarId
+  );
+ if(!newCar) return;
+ const newCarMaxPassengers =
+  newCar.seatCapacity - 1;
+ const currentRideLimit =
+  r.totalSeats;
+ const newRideLimit =
+  Math.min(
+   currentRideLimit,
+   newCarMaxPassengers
+  );
+ if(passengers.length > newRideLimit){
+  Alert.alert(
+   "Car too small",
+   `Current passengers exceed capacity of selected car (max ${newRideLimit}).`
+  );
+  return;
+ }
+ Alert.alert(
+  "Change car",
+  "Confirm car change?",
+  [
+   {
+    text:"No",
+    style:"cancel"
+   },
+   {
+    text:"Yes",
+    onPress:()=>{
+     updateRide({
+      ...r,
+      carId:newCar.id,
+      totalSeats:newRideLimit,
+      availableSeats:
+       newRideLimit -
+       passengers.length
+     });
+     setEditingCar(false);
+     router.replace(`/ride/${r.id}`);
+    }
+   }
+  ]
+ );
+}
+
  return(
   <SafeAreaView style={styles.container}>
 
@@ -320,11 +422,26 @@ function completeRide(){
     </Text>
    )}
 
-   {passengers.map(p => (
-    <Text key={p!.id}>
-     {p!.name}
-    </Text>
-   ))}
+{passengers.map(p => (
+ <View
+  key={p!.id}
+  style={styles.passengerRow}
+ >
+  <Text>
+   {p!.name}
+  </Text>
+  {isDriver && !rideStarted && !ride.completed && (
+   <Text
+    style={styles.remove}
+    onPress={() =>
+     removePassenger(p!.id)
+    }
+   >
+    remove
+   </Text>
+  )}
+ </View>
+))}
 
    {ride.completed && (
     <Text style={styles.completed}>
@@ -346,7 +463,42 @@ function completeRide(){
     />
    )}
 
-   {isDriver && !rideStarted && !ride.completed && (
+  {isDriver && !rideStarted && !ride.completed && !editingCar && driverCars.length > 1 && (
+    <Button
+    title="Change car"
+    onPress={()=> setEditingCar(true)}
+  />
+  )}
+{editingCar && (
+ <>
+  <Text style={styles.section}>
+   Select new car
+  </Text>
+  <Picker
+   selectedValue={selectedCarId}
+   onValueChange={setSelectedCarId}
+  >
+   {driverCars.map(c=>(
+    <Picker.Item
+     key={c.id}
+     label={`${c.model} (${c.licensePlate})`}
+     value={c.id}
+    />
+   ))}
+  </Picker>
+  <Button
+   title="Save car"
+   onPress={changeCar}
+  />
+  <Button
+   title="Cancel"
+   onPress={()=>
+    setEditingCar(false)
+   }
+  />
+ </>
+)}
+   {isDriver && !rideStarted && !ride.completed && !editingCar && (
     <Button
      title="Cancel ride"
      onPress={cancelRide}
@@ -395,6 +547,15 @@ const styles = StyleSheet.create({
  fontSize:16,
  marginBottom:10,
  color:"blue"
-}
+},
 
+passengerRow:{
+ flexDirection:"row",
+ justifyContent:"space-between",
+ alignItems:"center"
+},
+
+remove:{
+ color:"red"
+}
 });
