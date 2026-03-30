@@ -47,6 +47,8 @@ export default function RideDetails(){
 
  if(!ride) return null;
 
+ const r=ride;
+
  const user = getCurrentUser();
 
  const users = getUsers();
@@ -55,12 +57,12 @@ export default function RideDetails(){
 
  const driver =
   users.find(
-   u => u.id === ride.driverId
+   u => u.id === r.driverId
   );
 
  const car =
   cars.find(
-   c => c.id === ride.carId
+   c => c.id === r.carId
   );
 
  const passengers =
@@ -73,13 +75,13 @@ export default function RideDetails(){
    .filter(Boolean);
 
  const isDriver =
-  ride.driverId === user.id;
+  r.driverId === user.id;
 
  const joined =
-  ride.passengers.includes(user.id);
+  r.passengers.includes(user.id);
 
  const rideDate =
-  new Date(ride.departureDateTime);
+  new Date(r.departureDateTime);
 
  const now =
   new Date();
@@ -90,11 +92,11 @@ export default function RideDetails(){
  const canComplete =
   isDriver &&
   rideStarted &&
-  !ride.completed;
+  !r.completed;
 
  function reserveSeat(){
 
-  if(ride.completed){
+  if(r.completed){
    alert("Ride already completed");
    return;
   }
@@ -105,24 +107,24 @@ export default function RideDetails(){
   }
 
   if(
-   ride.womenOnly &&
+   r.womenOnly &&
    user.gender !== "female"
   ){
    alert("Only women allowed");
    return;
   }
 
-  if(ride.availableSeats <= 0){
+  if(r.availableSeats <= 0){
    alert("Ride full");
    return;
   }
 
   updateRide({
-   ...ride,
+   ...r,
    availableSeats:
-    ride.availableSeats - 1,
+    r.availableSeats - 1,
    passengers:[
-    ...ride.passengers,
+    ...r.passengers,
     user.id
    ]
   });
@@ -131,22 +133,22 @@ export default function RideDetails(){
  }
 
  function cancelSeat(){
-  if(rideStarted || ride.completed){
+  if(rideStarted || r.completed){
    alert("Cannot cancel now");
    return;
   }
 
   const newSeats =
    Math.min(
-    ride.availableSeats + 1,
-    ride.totalSeats
+    r.availableSeats + 1,
+    r.totalSeats
    );
 
   updateRide({
-   ...ride,
+   ...r,
    availableSeats:newSeats,
    passengers:
-    ride.passengers.filter(
+    r.passengers.filter(
      p => p !== user.id
     )
   });
@@ -164,7 +166,7 @@ export default function RideDetails(){
     {
      text:"Yes",
      onPress:()=>{
-      deleteRide(ride.id);
+      deleteRide(r.id);
       router.replace("/(tabs)/myRides");
      }
     }
@@ -174,7 +176,7 @@ export default function RideDetails(){
 
  function completeRide(){
   updateRide({
-   ...ride,
+   ...r,
    completed:true
   })
   router.replace("/(tabs)/myRides");

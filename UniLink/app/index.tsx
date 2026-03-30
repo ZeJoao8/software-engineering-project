@@ -26,7 +26,7 @@ export default function SelectUser() {
 
   switchUser(id);
 
-  router.replace("/(tabs)/myRides");
+  router.replace("/(tabs)/searchRide");
 
  }
 
