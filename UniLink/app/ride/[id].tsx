@@ -94,93 +94,158 @@ export default function RideDetails(){
   rideStarted &&
   !r.completed;
 
- function reserveSeat(){
-
-  if(r.completed){
-   alert("Ride already completed");
-   return;
-  }
-
-  if(rideStarted){
-   alert("Ride already started");
-   return;
-  }
-
-  if(
-   r.womenOnly &&
-   user.gender !== "female"
-  ){
-   alert("Only women allowed");
-   return;
-  }
-
-  if(r.availableSeats <= 0){
-   alert("Ride full");
-   return;
-  }
-
-  updateRide({
-   ...r,
-   availableSeats:
-    r.availableSeats - 1,
-   passengers:[
-    ...r.passengers,
-    user.id
-   ]
-  });
-
-  router.replace("/(tabs)/myRides");
- }
-
- function cancelSeat(){
-  if(rideStarted || r.completed){
-   alert("Cannot cancel now");
-   return;
-  }
-
-  const newSeats =
-   Math.min(
-    r.availableSeats + 1,
-    r.totalSeats
-   );
-
-  updateRide({
-   ...r,
-   availableSeats:newSeats,
-   passengers:
-    r.passengers.filter(
-     p => p !== user.id
-    )
-  });
-  router.replace("/(tabs)/myRides");
- }
-
- function cancelRide(){
+function reserveSeat(){
+ if(r.completed){
   Alert.alert(
-   "Cancel ride",
-   "Are you sure you want to cancel this ride?",
-   [
-    {
-     text:"No"
-    },
-    {
-     text:"Yes",
-     onPress:()=>{
-      deleteRide(r.id);
-      router.replace("/(tabs)/myRides");
-     }
-    }
-   ]
+   "Cannot reserve",
+   "This ride is already completed."
   );
+  return;
  }
 
- function completeRide(){
-  updateRide({
-   ...r,
-   completed:true
-  })
-  router.replace("/(tabs)/myRides");
+ if(rideStarted){
+  Alert.alert(
+   "Cannot reserve",
+   "This ride has already started."
+  );
+  return;
  }
+ if(r.womenOnly && user.gender !== "female"
+ ){
+  Alert.alert(
+   "Not allowed",
+   "This ride is restricted to women only."
+  );
+  return;
+ }
+ if(r.availableSeats <= 0){
+  Alert.alert(
+   "Ride full",
+   "There are no seats available."
+  );
+  return;
+ }
+ Alert.alert(
+  "Reserve seat",
+  "Confirm reservation for this ride?",
+  [
+   {
+    text:"No",
+    style:"cancel"
+   },
+   {
+    text:"Yes",
+    onPress:()=>{
+     updateRide({
+      ...r,
+      availableSeats:
+       r.availableSeats - 1,
+      passengers:[
+       ...r.passengers,
+       user.id
+      ]
+     });
+     router.replace("/(tabs)/myRides");
+    }
+   }
+  ]
+ );
+}
+
+function cancelSeat(){
+ if(rideStarted || r.completed){
+  Alert.alert(
+   "Cannot cancel",
+   "This ride has already started or is completed."
+  );
+  return;
+ }
+ Alert.alert(
+  "Cancel reservation",
+  "Are you sure you want to cancel your seat?",
+  [
+   {
+    text:"No",
+    style:"cancel"
+   },
+   {
+    text:"Yes",
+    style:"destructive",
+    onPress:()=>{
+     const newSeats =
+      Math.min(r.availableSeats + 1,r.totalSeats);
+     updateRide({
+      ...r,
+      availableSeats:newSeats,
+      passengers:
+       r.passengers.filter(
+        p => p !== user.id
+       )
+     });
+     router.replace("/(tabs)/myRides");
+    }
+   }
+  ]
+ );
+}
+
+function cancelRide(){
+ if(rideStarted || r.completed){
+  Alert.alert(
+   "Cannot cancel",
+   "This ride has already started or is completed."
+  );
+  return;
+ }
+ Alert.alert(
+  "Cancel ride",
+  "Are you sure you want to cancel this ride?",
+  [
+   {
+    text:"No",
+    style:"cancel"
+   },
+   {
+    text:"Yes",
+    style:"destructive",
+    onPress:()=>{
+     deleteRide(r.id);
+     router.replace("/(tabs)/myRides");
+    }
+   }
+  ]
+ );
+}
+
+function completeRide(){
+ if(!canComplete){
+  Alert.alert(
+   "Cannot complete",
+   "Ride cannot be completed yet."
+  );
+  return;
+ }
+ Alert.alert(
+  "Complete ride",
+  "Mark this ride as completed?",
+  [
+   {
+    text:"No",
+    style:"cancel"
+   },
+   {
+    text:"Yes",
+    onPress:()=>{
+     updateRide({
+      ...r,
+      completed:true
+     });
+     router.replace("/(tabs)/myRides");
+    }
+   }
+  ]
+ );
+}
 
  return(
   <View style={styles.container}>
