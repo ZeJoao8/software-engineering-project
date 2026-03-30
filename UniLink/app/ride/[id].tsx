@@ -6,6 +6,8 @@ import {
  Alert
 } from "react-native";
 
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import {
  useLocalSearchParams,
  useRouter
@@ -248,7 +250,14 @@ function completeRide(){
 }
 
  return(
-  <View style={styles.container}>
+  <SafeAreaView style={styles.container}>
+
+    <Text
+    style={styles.back}
+    onPress={()=> router.back()}
+    >
+    ← Back
+    </Text>
 
    <Text style={styles.title}>
     {ride.origin} → {ride.destination}
@@ -350,7 +359,7 @@ function completeRide(){
      onPress={completeRide}
     />
    )}
-  </View>
+  </SafeAreaView>
  );
 }
 
@@ -380,6 +389,12 @@ const styles = StyleSheet.create({
  tag:{
   marginTop:5,
   color:"purple"
- }
+ },
+
+ back:{
+ fontSize:16,
+ marginBottom:10,
+ color:"blue"
+}
 
 });
