@@ -19,7 +19,8 @@ import {
 } from "react";
 
 import {
- getRides
+ getRides,
+ removeEmptyPastRides
 } from "../../data/rides";
 
 import {
@@ -68,14 +69,16 @@ const [now,setNow] =
 
  );
 
- useEffect(()=>{
-  const interval =
-   setInterval(()=>{
-    setNow(new Date());
-   },10000); 
-  return () =>
-   clearInterval(interval);
- },[]);
+useEffect(()=>{
+ const interval =
+  setInterval(()=>{
+   removeEmptyPastRides();
+   setNow(new Date());
+   setRides([...getRides()]);
+  },10000);
+ return () =>
+  clearInterval(interval);
+},[]);
 
  const availableRides = sortByDateAsc(rides.filter(r =>
    new Date(r.departureDateTime) >= now &&

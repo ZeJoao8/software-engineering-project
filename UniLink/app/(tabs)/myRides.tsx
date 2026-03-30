@@ -26,7 +26,8 @@ import {
 import { sortByDateDesc } from "../../utils/date";  
 
 import RideCard from "../../components/rideCard";
-
+import { removeEmptyPastRides } from "../../data/rides";
+import { getUserCars } from "../../data/cars";
 
 export default function MyRides(){
 
@@ -38,14 +39,13 @@ export default function MyRides(){
  const [user,setUser] =
   useState(getCurrentUser());
 
- useFocusEffect(
+  useFocusEffect(
   useCallback(()=>{
-   setRides([...getRides()]);
-   setUser(getCurrentUser());
+    removeEmptyPastRides();
+    setRides([...getRides()]);
+    setUser(getCurrentUser());
   },[])
-
- );
-
+  );
 
  const driverRides = sortByDateDesc(
    rides.filter(

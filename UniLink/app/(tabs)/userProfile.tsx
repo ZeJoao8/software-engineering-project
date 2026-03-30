@@ -5,7 +5,9 @@ import {
  Text,
  TextInput,
  Button,
- StyleSheet
+ StyleSheet,
+ Alert,
+ ScrollView
 } from "react-native";
 
 import {
@@ -17,222 +19,291 @@ import {
 
 import {
  getUserCars,
- addCar
+ addCar,
+ deleteCar
 } from "../../data/cars";
+
+import { getRides,
+ deleteRide
+} from "../../data/rides";
 
 export default function Profile(){
 
- const [user,setUser]=
+ const [user,setUser] =
   useState(getCurrentUser());
 
- const [showCarForm,setShowCarForm]=
+ const [editing,setEditing] =
   useState(false);
 
- const [model,setModel]=useState("");
+ const [showCarForm,setShowCarForm] =
+  useState(false);
 
- const [color,setColor]=useState("");
+ const [model,setModel] =
+  useState("");
 
- const [plate,setPlate]=useState("");
+ const [color,setColor] =
+  useState("");
 
- const [seats,setSeats]=useState("");
+ const [plate,setPlate] =
+  useState("");
 
- const userCars=
+ const [seats,setSeats] =
+  useState("");
+
+ const userCars =
   getUserCars(user.id);
 
+
+ function startEdit(){
+
+  setEditing(true);
+
+ }
+
+
+ function cancelEdit(){
+  setUser(getCurrentUser());
+  setEditing(false);
+  setShowCarForm(false);
+  setModel("");
+  setColor("");
+  setPlate("");
+  setSeats("");
+ }
+
+
  function saveProfile(){
-
   updateUser(user);
-
   setUser({...user});
-
-  alert("Saved");
-
+  setEditing(false);
+  Alert.alert("Saved");
  }
 
  function changeUser(id:string){
-
   switchUser(id);
-
   setUser(getCurrentUser());
-
+  setEditing(false);
+  setShowCarForm(false);
  }
 
-function addNewCar(){
 
- if(
-  !model.trim() ||
-  !color.trim() ||
-  !plate.trim() ||
-  !seats.trim()
- ){
-
-  alert("Fill all fields");
-  return;
-
- }
-
- if(model.length > 40){
-
-  alert("Model max 40 chars");
-  return;
-
- }
-
- const seatsNumber = Number(seats);
-
- if(!Number.isInteger(seatsNumber) || seatsNumber <= 0){
-
-  alert("Seats must be integer > 0");
-  return;
-
- }
-
- const formattedPlate =
-  plate
-   .toUpperCase()
-   .replace(/\s/g,"");
-
- const plateRegex =
- /^[A-Z0-9-]{6,8}$/;
-
- if(!plateRegex.test(formattedPlate)){
-
-  alert("Invalid plate format");
-  return;
-
- }
-
- const duplicate =
-  getUserCars(user.id)
-   .some(
-
-    c =>
-     c.licensePlate ===
-     formattedPlate
-
-   );
-
- if(duplicate){
-
-  alert("Plate already exists");
-  return;
-
- }
-
- addCar({
-
-  id: Date.now().toString(),
-
-  model: model.trim(),
-
-  color: color.trim(),
-
-  licensePlate: formattedPlate,
-
-  seatCapacity: seatsNumber,
-
-  ownerId: user.id
-
- });
-
- setModel("");
- setColor("");
- setPlate("");
- setSeats("");
-
- setShowCarForm(false);
-
+function removeCar(carId:string){
+ const ridesUsingCar =
+  getRides().filter(
+   r =>
+    r.carId === carId &&
+    !r.completed &&
+    new Date(r.departureDateTime) > new Date()
+  );
+ const warningText =
+  ridesUsingCar.length > 0
+   ? `This will cancel ${ridesUsingCar.length} future ride(s) using this car.`
+   : "Are you sure you want to remove this car?";
+ Alert.alert(
+  "Remove car",
+  warningText,
+  [
+   {
+    text:"No",
+    style:"cancel"
+   },
+   {
+    text:"Yes",
+    style:"destructive",
+    onPress:()=>{
+     ridesUsingCar.forEach(
+      r => deleteRide(r.id)
+     );
+     deleteCar(carId);
+     setUser({...getCurrentUser()});
+    }
+   }
+  ]
+ );
 }
 
+ function addNewCar(){
+  if(
+   !model.trim() ||
+   !color.trim() ||
+   !plate.trim() ||
+   !seats.trim()
+  ){
+   Alert.alert("Fill all fields");
+   return;
+  }
+  if(model.length > 40){
+   Alert.alert("Model max 40 chars");
+   return;
+  }
+  const seatsNumber = Number(seats);
+  if(
+   !Number.isInteger(seatsNumber) ||
+   seatsNumber <= 0
+  ){
+   Alert.alert("Seats must be integer > 0");
+   return;
+  }
+  const formattedPlate =
+   plate.toUpperCase().replace(/\s/g,"");
+  const plateRegex = /^[A-Z0-9-]{6,8}$/;
+  if(!plateRegex.test(formattedPlate)){
+   Alert.alert("Invalid plate format");
+   return;
+  }
+  const duplicate =
+   getUserCars(user.id)
+    .some(
+     c =>
+      c.licensePlate ===
+      formattedPlate
+    );
+  if(duplicate){
+   Alert.alert("Plate already exists");
+   return;
+  }
+  addCar({
+   id: Date.now().toString(),
+   model: model.trim(),
+   color: color.trim(),
+   licensePlate: formattedPlate,
+   seatCapacity: seatsNumber,
+   ownerId: user.id
+  });
+  setModel("");
+  setColor("");
+  setPlate("");
+  setSeats("");
+  setShowCarForm(false);
+ }
+
  return(
-
-  <View style={styles.container}>
-
+  <ScrollView
+    style={styles.container}
+    contentContainerStyle={styles.content}
+  >
    <Text style={styles.title}>
     Profile
    </Text>
-    <Text>Name</Text>
-   <TextInput
-    value={user.name}
-    onChangeText={t=>
-     setUser({...user,name:t})
-    }
-    placeholder="Name"
-    style={styles.input}
-   />
-      <Text>Course</Text>
-   <TextInput
-    value={user.course}
-    onChangeText={t=>
-     setUser({...user,course:t})
-    }
-    placeholder="Course"
-    style={styles.input}
-   />
+   <Text style={styles.section}>
+    Info
+   </Text>
+   <Text>
+    Name: {editing ? (
+    <TextInput
+     value={user.name}
+     onChangeText={t=>
+      setUser({
+       ...user,
+       name:t
+      })
+     }
+     style={styles.input}
+    />
+   ) : (
+    <Text>
+     {user.name}
+    </Text>
+   )}
+   </Text>
 
    <Text>
     Gender: {user.gender}
    </Text>
 
+
    <Text>
     University: {user.university}
    </Text>
 
-   <Button
-    title="Save profile"
-    onPress={saveProfile}
-   />
-
-   <Text style={styles.subtitle}>
-    My Cars
+   <Text>
+    Course: {editing ? (
+    <TextInput
+     value={user.course}
+     onChangeText={t=>
+      setUser({
+       ...user,
+       course:t
+      })
+     }
+     style={styles.input}
+    />
+   ) : (
+    <Text>
+     {user.course}
+    </Text>
+   )}
    </Text>
 
-   {userCars.map(car=>(
-
-    <Text key={car.id}>
-
-     {car.model}
-     {" - "}
-     {car.color}
-     {" - "}
-     {car.licensePlate}
-     {" ("}
-     {car.seatCapacity}
-     {" seats)"}
-
+   <Text style={styles.section}>
+    My Cars
+   </Text>
+   {userCars.length === 0 && (
+    <Text>
+     No cars yet
     </Text>
+   )}
+   {userCars.map(car => (
+    <View
+     key={car.id}
+     style={styles.carRow}
+    >
+     <Text>
+      {car.model}
+      {" - "}
+      {car.color}
+      {" - "}
+      {car.licensePlate}
+      {" ("}
+      {car.seatCapacity}
+      {" seats)"}
+     </Text>
+     {editing && (
+      <Text
+       style={styles.remove}
+       onPress={() =>
+        removeCar(car.id)
+       }
+      >
+       remove
+      </Text>
 
+     )}
+    </View>
    ))}
 
-   <Button
-    title={
-     showCarForm
-      ? "Cancel"
-      : "Add car"
-    }
-    onPress={()=>
-     setShowCarForm(!showCarForm)
-    }
-   />
+   {editing && (
+    <Button
+     title={
+      showCarForm
+       ? "Cancel add car"
+       : "Add car"
+     }
+     onPress={()=>
+      setShowCarForm(
+       !showCarForm
+      )
+     }
+    />
+   )}
 
-   {showCarForm && (
-
+   {editing && showCarForm && (
     <>
-
+    <Text>Model</Text>
      <TextInput
       placeholder="Model"
       value={model}
       onChangeText={setModel}
       style={styles.input}
      />
-
+      <Text>Color</Text>
      <TextInput
       placeholder="Color"
       value={color}
       onChangeText={setColor}
       style={styles.input}
      />
-
+      <Text>License Plate</Text>
      <TextInput
       placeholder="License plate"
       value={plate}
@@ -240,7 +311,7 @@ function addNewCar(){
       autoCapitalize="characters"
       style={styles.input}
      />
-
+      <Text>Number of seats</Text>
      <TextInput
       placeholder="Seats"
       value={seats}
@@ -253,55 +324,88 @@ function addNewCar(){
       title="Save car"
       onPress={addNewCar}
      />
-
     </>
-
    )}
 
-   <Text style={styles.subtitle}>
+   {!editing && (
+    <Button
+     title="Edit profile"
+     onPress={startEdit}
+    />
+   )}
+
+   {editing && (
+    <>
+     <Button
+      title="Save profile"
+      onPress={saveProfile}
+     />
+    
+     <Button
+      title="Cancel"
+      onPress={cancelEdit}
+     />
+    </>
+   )}
+
+   <Text style={styles.section}>
     Switch profile
    </Text>
 
-   {getUsers().map(u=>(
-
+   {getUsers().map(u => (
     <Button
      key={u.id}
-     title={`${u.name} (${u.gender})`}
+     title={
+      `${u.name} (${u.gender})`
+     }
      onPress={()=>
       changeUser(u.id)
      }
     />
-
    ))}
-
-  </View>
-
+  </ScrollView>
  );
-
 }
 
-const styles=StyleSheet.create({
+const styles = StyleSheet.create({
 
  container:{
   flex:1,
+  backgroundColor:"white"
+ },
+
+ content:{
   padding:20,
-  gap:10
+  gap:12
  },
 
  title:{
   fontSize:20,
-  fontWeight:"bold"
+  fontWeight:"bold",
+  marginBottom:5
  },
 
- subtitle:{
+ section:{
   marginTop:20,
-  fontWeight:"bold"
+  fontWeight:"bold",
+  fontSize:16
  },
 
  input:{
   borderWidth:1,
-  padding:10,
-  borderRadius:5
+  padding:12,
+  borderRadius:6
+ },
+
+ carRow:{
+  flexDirection:"row",
+  justifyContent:"space-between",
+  alignItems:"center",
+  paddingVertical:4
+ },
+
+ remove:{
+  color:"red"
  }
 
 });

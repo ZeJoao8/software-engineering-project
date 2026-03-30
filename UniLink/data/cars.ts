@@ -14,23 +14,21 @@ let cars: Car[] = [
 ];
 
 export function getCars() {
-
  return cars;
-
 }
 
 export function getUserCars(userId: string) {
-
  return cars.filter(
-
   c => c.ownerId === userId
-
  );
-
 }
 
 export function addCar(car: Car) {
-
  cars = [...cars, car];
+}
 
+export function deleteCar(id:string){
+ cars = cars.filter(
+  c => c.id !== id
+ );
 }

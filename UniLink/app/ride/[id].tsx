@@ -396,21 +396,27 @@ function changeCar(){
     {driver?.name}
    </Text>
 
-   <Text style={styles.section}>
+    <Text style={styles.section}>
     Car
-   </Text>
+    </Text>
 
-   <Text>
-    {car?.model}
-   </Text>
-
-   <Text>
-    {car?.color}
-   </Text>
-
-   <Text>
-    {car?.licensePlate}
-   </Text>
+    {car ? (
+    <>
+      <Text>
+      {car.model}
+      </Text>
+      <Text>
+      {car.color}
+      </Text>
+      <Text>
+      {car.licensePlate}
+      </Text>
+    </>
+    ) : (
+    <Text>
+      Vehicle information unavailable
+    </Text>
+    )}
 
    <Text style={styles.section}>
     Passengers
