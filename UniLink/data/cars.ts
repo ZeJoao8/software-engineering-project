@@ -8,7 +8,7 @@ let cars: Car[] = [
   color: "White",
   licensePlate: "AA-00-11",
   seatCapacity: 5,
-  ownerId: "1"
+  ownerId: "joao@feup.pt"
  },
 
 ];

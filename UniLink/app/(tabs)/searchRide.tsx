@@ -30,6 +30,10 @@ import {
 import RideCard from "../../components/rideCard";
 
 import { formatDate, sortByDateAsc } from "../../utils/date";
+import { layout } from "../../styles/layout";
+import { components } from "../../styles/components";
+import { colors, spacing } from "../../styles/theme"; 
+import { forms } from "../../styles/forms";
 
 
 export default function Home(){
@@ -109,117 +113,154 @@ useEffect(()=>{
   ));
 
 
- return(
+return(
 
-  <View style={styles.container}>
-   <Text style={styles.title}>
-    Search Rides
-   </Text>
+<View style={layout.screen}>
 
-   <TextInput
-    placeholder="Origin"
-    value={originFilter}
-    maxLength={40}
-    onChangeText={
-     setOriginFilter
-    }
-    style={styles.input}
-   />
-
-   <TextInput
-    placeholder="Destination"
-    value={destinationFilter}
-    maxLength={40}
-    onChangeText={
-     setDestinationFilter
-    }
-    style={styles.input}
-   />
-
-   <TextInput
-    placeholder="Date (ex: 28/03 or 28/03 14:30)"
-    value={dateFilter}
-    onChangeText={
-     setDateFilter
-    }
-    style={styles.input}
-   />
-
-   <TextInput
-    placeholder="Min seats"
-    value={minSeats}
-    keyboardType="numeric"
-    onChangeText={
-     setMinSeats
-    }
-    style={styles.input}
-   />
-
-   {user?.gender === "Female" &&(
-    <View style={styles.row}>
-    <Text>
-     Women only
-    </Text>
-    <Switch
-     value={womenOnlyFilter}
-     onValueChange={
-      setWomenOnlyFilter
-     }
-    />
-   </View>
-   )}
-
-   {availableRides.length === 0 && (
-    <Text>
-     No rides found
-    </Text>
-   )}
-
-   <FlatList
-    data={availableRides}
-    keyExtractor={i=>i.id}
-    renderItem={({item})=>(
-     <RideCard
-      ride={item}
-      onPress={()=>
-       router.push(
-        `/ride/${item.id}`
-       )
-      }
-     />
-    )}
-   />
-
-  </View>
- );
-}
+<Text style={layout.title}>
+ Search rides
+</Text>
 
 
-const styles = StyleSheet.create({
+{/* FILTERS */}
+<View style={components.card}>
 
- container:{
-  flex:1,
-  padding:20
- },
+<Text style={layout.subtitle}>
+ Origin
+</Text>
 
- title:{
-  fontSize:22,
-  fontWeight:"bold",
-  marginBottom:10
- },
+<TextInput
+ placeholder="Origin"
+ value={originFilter}
+ onChangeText={setOriginFilter}
+ style={forms.input}
+/>
 
- input:{
-  borderWidth:1,
-  padding:8,
-  borderRadius:5,
-  marginBottom:10
- },
 
- row:{
-  flexDirection:"row",
-  justifyContent:"space-between",
-  alignItems:"center",
-  marginBottom:10
+<View style={{height:spacing.sm}} />
+
+<Text style={layout.subtitle}>
+ Destination
+</Text>
+
+<TextInput
+ placeholder="Destination"
+ value={destinationFilter}
+ onChangeText={setDestinationFilter}
+ style={forms.input}
+/>
+
+
+<View style={{height:spacing.sm}} />
+
+<Text style={layout.subtitle}>
+ Date
+</Text>
+
+<TextInput
+ placeholder="ex: 30/03 or 30/03 14:00"
+ value={dateFilter}
+ onChangeText={setDateFilter}
+ style={forms.input}
+/>
+
+
+<View style={{height:spacing.sm}} />
+
+<Text style={layout.subtitle}>
+ Minimum seats
+</Text>
+
+<TextInput
+ placeholder="1"
+ value={minSeats}
+ keyboardType="numeric"
+ onChangeText={setMinSeats}
+ style={forms.input}
+/>
+
+
+{user.gender === "Female" && (
+
+<View style={{
+ flexDirection:"row",
+ justifyContent:"space-between",
+ alignItems:"center",
+ marginTop:spacing.sm
+}}>
+
+<Text style={layout.subtitle}>
+ Women only
+</Text>
+
+<Switch
+ value={womenOnlyFilter}
+ onValueChange={setWomenOnlyFilter}
+
+ trackColor={{
+  false:"#d1d5db",
+  true:"#fbcfe8"
+ }}
+
+ thumbColor={
+  womenOnlyFilter
+   ? colors.women
+   : "#f9fafb"
  }
+/>
 
-});
+</View>
+
+)}
+
+</View>
+
+
+
+{/* RESULTS */}
+
+{availableRides.length === 0 ? (
+
+<View style={components.card}>
+
+<Text style={{color:colors.textLight}}>
+ No rides found
+</Text>
+
+</View>
+
+) : (
+
+<FlatList
+ data={availableRides}
+
+ keyExtractor={i=>i.id}
+
+ contentContainerStyle={{
+  paddingBottom:spacing.xl
+ }}
+
+ renderItem={({item}) => (
+
+<View style={{marginBottom:spacing.md}}>
+
+<RideCard
+ ride={item}
+
+ onPress={() =>
+  router.push(`/ride/${item.id}`)
+ }
+/>
+
+</View>
+
+ )}
+
+ />
+
+)}
+
+</View>
+
+);
+}

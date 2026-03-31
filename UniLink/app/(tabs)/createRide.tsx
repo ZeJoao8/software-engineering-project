@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 
 import {
+ ScrollView,
  View,
  Text,
  TextInput,
@@ -8,6 +9,11 @@ import {
  Switch,
  StyleSheet
 } from "react-native";
+
+import { layout } from "../../styles/layout";
+import { forms } from "../../styles/forms";
+import { components } from "../../styles/components";
+import { colors, spacing } from "../../styles/theme";
 
 import { Picker } from "@react-native-picker/picker";
 
@@ -58,11 +64,18 @@ export default function CreateRide(){
  const [womenOnly,setWomenOnly] =
   useState(false);
 
- const [date,setDate] =
-  useState(new Date());
+const now = new Date();
 
- const [time,setTime] =
-  useState(new Date());
+const defaultDeparture = new Date();
+defaultDeparture.setMinutes(
+ defaultDeparture.getMinutes() + 60
+);
+
+const [date,setDate] =
+ useState(defaultDeparture);
+
+const [time,setTime] =
+ useState(defaultDeparture);
 
  const [showDate,setShowDate] =
   useState(false);
@@ -171,172 +184,208 @@ export default function CreateRide(){
 
  }
 
- if(cars.length === 0){
+if(cars.length === 0){
   return(
-   <View style={styles.container}>
-    <Text style={styles.title}>
+   <View style={layout.screen}>
+
+    <Text style={layout.title}>
      Create Ride
     </Text>
-    <Text>
-     Add a car first in Profile
-    </Text>
+
+    <View style={components.card}>
+      <Text style={layout.subtitle}>
+       No car available
+      </Text>
+      <Text style={{marginBottom:spacing.md}}>
+       You need to add a car before creating a ride.
+      </Text>
+      <View style={components.button}>
+        <Text
+        style={components.buttonText}
+        onPress={()=>router.push("/(tabs)/userProfile")}
+        >
+          Go to profile
+        </Text>
+      </View>
+    </View>
    </View>
   );
-
- }
+}
 
 
  return(
 
-  <View style={styles.container}>
+  <ScrollView 
+  style={layout.screen}
+  contentContainerStyle={{paddingBottom:spacing.xl}}
+  >
 
-   <Text style={styles.title}>
+   <Text style={layout.title}>
     Create Ride
    </Text>
 
-   <TextInput
+  <View style={components.card}>
+
+  <Text style={layout.subtitle}>
+  Origin
+  </Text>
+
+  <TextInput
     placeholder="Origin"
     value={origin}
     maxLength={40}
     onChangeText={setOrigin}
-    style={styles.input}
-   />
+    style={forms.input}
+  />
 
-   <TextInput
+  <View style={{height:6}} />
+
+   <Text style={layout.subtitle}>
+    Destination
+   </Text>
+
+  <TextInput
     placeholder="Destination"
     value={destination}
     maxLength={40}
     onChangeText={setDestination}
-    style={styles.input}
+    style={forms.input}
+  />
+
+  </View>
+
+
+   <View style={components.card}>
+
+ <Text style={layout.subtitle}>
+  Date
+ </Text>
+
+  <View style={components.outlineButton}>
+  <Text
+    style={components.outlineButtonText}
+    onPress={()=>setShowDate(true)}
+  >
+    {date.toDateString()}
+  </Text>
+  </View>
+
+ {showDate && (
+  <DateTimePicker
+   value={date}
+   mode="date"
+   onChange={(e,d)=>{
+    setShowDate(false);
+    if(d) setDate(d);
+   }}
+  />
+ )}
+
+ <View style={{height:6}} />
+
+
+ <Text style={layout.subtitle}>
+  Time
+ </Text>
+
+<View style={components.outlineButton}>
+ <Text
+  style={components.outlineButtonText}
+  onPress={()=>setShowTime(true)}
+ >
+  {time.toLocaleTimeString([], {hour:"2-digit",
+      minute:"2-digit"}) 
+  }
+ </Text>
+</View>
+
+ {showTime && (
+  <DateTimePicker
+   value={time}
+   mode="time"
+   onChange={(e,t)=>{
+    setShowTime(false);
+    if(t) setTime(t);
+   }}
+  />
+ )}
+
+ <View style={{height:6}} />
+
+
+<Text style={layout.subtitle}>
+ Car
+</Text>
+
+<View style={components.pickerWrapper}>
+
+ <Picker
+  selectedValue={selectedCar}
+  onValueChange={setSelectedCar}
+  dropdownIconColor={colors.primary}
+  style={{color:colors.primary, fontWeight:"600"}}
+ >
+  {cars.map(c=>(
+   <Picker.Item
+    key={c.id}
+    label={`${c.model} (${c.licensePlate})`}
+    value={c.id}
+    style={{color:"black", fontWeight:"600"}}
    />
+  ))}
+ </Picker>
 
+</View>
 
-   <Text>Date</Text>
+ <View style={{height:6}} />
 
-   <Button
-    title={
-     date.toDateString()
-    }
-    onPress={()=>
-     setShowDate(true)
-    }
+ <Text style={layout.subtitle}>
+  Seats
+ </Text>
+ <TextInput
+  placeholder={`1-${car.seatCapacity-1} seats`}
+  value={seats}
+  onChangeText={setSeats}
+  keyboardType="numeric"
+  style={forms.input}
+ />
 
-   />
+</View>
 
+ {user?.gender === "Female" && (
 
-   {showDate && (
-    <DateTimePicker
-     value={date}
-     mode="date"
-     onChange={(e,d)=>{
-      setShowDate(false);
-      if(d)
-       setDate(d);
-     }}
-    />
-   )}
+ <View style={components.card}>
 
+  <View style={{
+   flexDirection:"row",
+   justifyContent:"space-between",
+   alignItems:"center"
+  }}>
 
-   <Text>Time</Text>
-   <Button
-    title={
-     time.toLocaleTimeString([],{
-      hour:"2-digit",
-      minute:"2-digit"
-     })
-    }
-    onPress={()=>
-     setShowTime(true)
-    }
-   />
+   <Text style={layout.subtitle}>
+    Women only
+   </Text>
 
-
-   {showTime && (
-    <DateTimePicker
-     value={time}
-     mode="time"
-     onChange={(e,t)=>{
-      setShowTime(false);
-      if(t)
-       setTime(t);
-     }}
-    />
-   )}
-
-   <Text>Car</Text>
-
-   <Picker
-    selectedValue={selectedCar}
-    onValueChange={
-     setSelectedCar
-    }
-   >
-    {cars.map(c=>(
-     <Picker.Item
-      key={c.id}
-      label={`${c.model} (${c.licensePlate})`}
-      value={c.id}
-     />
-    ))}
-
-   </Picker>
-
-   <TextInput
-    placeholder={`1-${car.seatCapacity-1} seats`}
-    value={seats}
-    onChangeText={setSeats}
-    keyboardType="numeric"
-    style={styles.input}
-   />
-
-  {user?.gender === "Female" && (
-   <View style={styles.row}>
-    <Text>
-     Women only
-    </Text>
-    <Switch
-     value={womenOnly}
-     onValueChange={
-      setWomenOnly
-     }
-    />
-   </View>
+  <Switch
+    value={womenOnly}
+    onValueChange={setWomenOnly}
+    trackColor={{false:"#d1d5db",true:"#fbcfe8"}}
+    thumbColor={womenOnly ? "#ec4899" : "#f9fafb"}
+  />
+  </View>
+ </View>
   )}
   
-   <Button
-    title="Create Ride"
+  <View style={components.button}>
+  <Text
+    style={components.buttonText}
     onPress={createRide}
-   />
+  >
+    CREATE RIDE
+  </Text>
   </View>
+  </ScrollView>
 
  );
 
 }
-
-
-const styles = StyleSheet.create({
-
- container:{
-  flex:1,
-  padding:20,
-  gap:10
- },
-
- title:{
-  fontSize:20,
-  fontWeight:"bold"
- },
-
- input:{
-  borderWidth:1,
-  padding:10,
-  borderRadius:5
- },
-
- row:{
-  flexDirection:"row",
-  justifyContent:"space-between",
-  alignItems:"center"
- }
-
-});

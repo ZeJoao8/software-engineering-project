@@ -29,6 +29,9 @@ import { sortByDateDesc } from "../../utils/date";
 import RideCard from "../../components/rideCard";
 import { removeEmptyPastRides } from "../../data/rides";
 import { getUserCars } from "../../data/cars";
+import { components } from "../../styles/components";
+import { layout } from "../../styles/layout";
+import { spacing, colors } from "../../styles/theme";
 
 export default function MyRides(){
 
@@ -88,58 +91,115 @@ useEffect(()=>{
  }
 
 
- return(
-  <View style={styles.container}>
-   <Text style={styles.title}>
-    Driver
-   </Text>
-   {driverRides.length === 0 && (
-    <Text>
-     No rides created
-    </Text>
-   )}
+return(
 
-   <FlatList
-    data={driverRides}
-    keyExtractor={i=>i.id}
-    renderItem={({item})=>
-     renderRide(item)
-    }
-   />
+<View style={layout.screen}>
 
-   <Text style={styles.title}>
-    Passenger
-   </Text>
-   {passengerRides.length === 0 && (
-    <Text>
-     No reservations
-    </Text>
-   )}
-
-   <FlatList
-    data={passengerRides}
-    keyExtractor={i=>i.id}
-    renderItem={({item})=>
-     renderRide(item)
-    }
-   />
-  </View>
- );
-}
+<Text style={layout.title}>
+ My rides
+</Text>
 
 
-const styles = StyleSheet.create({
+{/* DRIVER */}
+<View style={components.card}>
 
- container:{
-  flex:1,
-  padding:20,
-  gap:10
- },
+<Text style={layout.subtitle}>
+ Driver
+</Text>
 
- title:{
-  fontSize:20,
-  fontWeight:"bold",
-  marginTop:10
+{driverRides.length === 0 ? (
+
+<Text style={{color:colors.textLight}}>
+ No rides created
+</Text>
+
+) : (
+
+<FlatList
+
+ data={driverRides}
+
+ keyExtractor={i=>i.id}
+
+ scrollEnabled={false}
+
+ renderItem={({item}) => (
+
+<View style={{marginTop:spacing.sm}}>
+
+<RideCard
+
+ ride={item}
+
+ showOccupancyLabel
+
+ onPress={() =>
+  router.push(`/ride/${item.id}`)
  }
 
-});
+/>
+
+</View>
+
+ )}
+
+ />
+
+)}
+
+</View>
+
+
+
+{/* PASSENGER */}
+<View style={components.card}>
+
+<Text style={layout.subtitle}>
+ Passenger
+</Text>
+
+{passengerRides.length === 0 ? (
+
+<Text style={{color:colors.textLight}}>
+ No reservations
+</Text>
+
+) : (
+
+<FlatList
+
+ data={passengerRides}
+
+ keyExtractor={i=>i.id}
+
+ scrollEnabled={false}
+
+ renderItem={({item}) => (
+
+<View style={{marginBottom:spacing.sm}}>
+
+<RideCard
+
+ ride={item}
+
+ onPress={() =>
+  router.push(`/ride/${item.id}`)
+ }
+
+/>
+
+</View>
+
+ )}
+
+ />
+
+)}
+
+</View>
+
+
+</View>
+
+);
+}

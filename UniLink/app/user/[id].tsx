@@ -20,6 +20,10 @@ import {
  getUserCars
 } from "../../data/cars";
 
+import { components } from "../../styles/components";
+import { forms } from "../../styles/forms";
+import { layout } from "../../styles/layout";
+import { colors, spacing } from "../../styles/theme";
 
 export default function PublicProfile(){
 
@@ -46,97 +50,128 @@ export default function PublicProfile(){
   getUserCars(user.email);
 
 
- return(
+return(
 
-  <SafeAreaView style={styles.container}>
-
-   <Text
-    style={styles.back}
-    onPress={()=> router.back()}
-   >
-    ← Back
-   </Text>
+<SafeAreaView style={layout.screen}>
 
 
-   <Text style={styles.title}>
-    {user.name}
-   </Text>
+<Text
+ style={{
+  color:colors.primary,
+  marginBottom:spacing.sm,
+  fontWeight:"600"
+ }}
+
+ onPress={()=> router.back()}
+>
+ ← Back
+</Text>
 
 
-   <Text style={styles.section}>
-    Info
-   </Text>
+
+<Text style={layout.title}>
+ {user.name}
+</Text>
 
 
-   <Text>
-    Gender: {user.gender}
-   </Text>
 
-   <Text>
-    University: {user.university}
-   </Text>
+{/* INFO */}
+<View style={components.card}>
 
-   <Text>
-    Course: {user.course}
-   </Text>
+<Text style={layout.subtitle}>
+ Info
+</Text>
 
 
-   <Text style={styles.section}>
-    Cars
-   </Text>
+<Text style={forms.label}>
+ Gender
+</Text>
+
+<Text>
+ {user.gender}
+</Text>
 
 
-   {cars.length === 0 && (
-    <Text>
-     No cars
-    </Text>
-   )}
+<View style={{height:spacing.sm}} />
 
 
-   {cars.map(c => (
+<Text style={forms.label}>
+ University
+</Text>
 
-    <Text key={c.id}>
-
-     {c.model}
-     {" - "}
-     {c.color}
-     {" - "}
-     {c.licensePlate}
-
-    </Text>
-
-   ))}
-
-  </SafeAreaView>
-
- );
-
-}
+<Text>
+ {user.university}
+</Text>
 
 
-const styles =
- StyleSheet.create({
+<View style={{height:spacing.sm}} />
 
- container:{
-  flex:1,
-  padding:20,
-  gap:10
- },
 
- title:{
-  fontSize:22,
-  fontWeight:"bold"
- },
+<Text style={forms.label}>
+ Course
+</Text>
 
- section:{
-  marginTop:15,
-  fontWeight:"bold"
- },
+<Text>
+ {user.course}
+</Text>
 
- back:{
-  fontSize:16,
-  marginBottom:10,
-  color:"blue"
- }
+</View>
 
-});
+
+
+{/* CARS */}
+<View style={components.card}>
+
+<Text style={layout.subtitle}>
+ Cars
+</Text>
+
+
+{cars.length === 0 ? (
+
+<Text style={{color:colors.textLight}}>
+ No cars
+</Text>
+
+) : (
+
+cars.map(c => (
+
+<View
+ key={c.id}
+
+ style={{
+  marginBottom:spacing.sm
+ }}
+>
+
+<Text style={{fontWeight:"500"}}>
+ {c.model}
+</Text>
+
+
+<Text style={{color:colors.textLight}}>
+ {c.color}
+</Text>
+
+
+<Text style={{
+  fontWeight:"600"
+ }}>
+ {c.licensePlate}
+</Text>
+
+
+</View>
+
+))
+
+)}
+
+</View>
+
+
+
+</SafeAreaView>
+
+);}

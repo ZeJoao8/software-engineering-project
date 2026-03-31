@@ -34,6 +34,10 @@ import { formatDate
 import { Picker } from "@react-native-picker/picker";
 import { useState } from "react";
 
+import { components } from "../../styles/components";
+import { layout } from "../../styles/layout";
+import { colors, spacing } from "../../styles/theme";
+
 export default function RideDetails(){
 
  const router = useRouter();
@@ -352,233 +356,412 @@ function changeCar(){
 }
 
  return(
-  <SafeAreaView style={styles.container}>
 
-    <Text
-    style={styles.back}
-    onPress={()=> router.back()}
-    >
-    ← Back
-    </Text>
+<SafeAreaView style={layout.screen}>
 
-   <Text style={styles.title}>
-    {ride.origin} → {ride.destination}
-   </Text>
+<Text
+ style={{
+  color:colors.primary,
+  marginBottom:spacing.sm,
+  fontWeight:"600"
+ }}
 
-   <Text>
-    {formatDate(
-     ride.departureDateTime
-    )}
-   </Text>
+ onPress={()=> router.back()}
+>
+ ← Back
+</Text>
 
-   <Text>
-    Seats:
-    {" "}
-    {
-     ride.totalSeats -
-     ride.availableSeats
-    }
-    {" / "}
-    {ride.totalSeats}
-   </Text>
 
-   {ride.womenOnly && (
-    <Text style={styles.tag}>
-     Women only
-    </Text>
-   )}
 
-   <Text style={styles.section}>
-    Driver
-   </Text>
+{/* ROUTE */}
+<View style={components.card}>
 
-    <Text
-    style={styles.link}
-    onPress={() =>{
-      if(driver?.email === user?.email) router.push("/(tabs)/userProfile");
-      else router.push(`/user/${driver?.email}`)
-    }
-    }
-    >
-    {driver?.name}
-    </Text>
+<Text style={layout.title}>
+ {ride.origin} → {ride.destination}
+</Text>
 
-    <Text style={styles.section}>
-    Car
-    </Text>
-    {car ? (
-    <>
-      <Text>
-      {car.model}
-      </Text>
-      <Text>
-      {car.color}
-      </Text>
-      <Text>
-      {car.licensePlate}
-      </Text>
-    </>
-    ) : (
-    <Text>
-      Vehicle information unavailable
-    </Text>
-    )}
+<Text style={{
+ marginBottom:spacing.sm
+}}>
+ {formatDate(ride.departureDateTime)}
+</Text>
 
-   <Text style={styles.section}>
-    Passengers
-   </Text>
 
-   {passengers.length === 0 && (
-    <Text>
-     No passengers yet
-    </Text>
-   )}
+<Text style={{fontWeight:"500", color:colors.textLight}}>
+
+ {ride.totalSeats - ride.availableSeats}
+ {" / "}
+ {ride.totalSeats}
+ {" seats"}
+
+</Text>
+
+
+<View style={{
+ flexDirection:"row",
+ gap:8,
+ marginTop:spacing.sm
+}}>
+
+
+{ride.womenOnly && (
+
+<Text style={{
+ backgroundColor:"#fce7f3",
+ color:colors.women,
+ paddingHorizontal:8,
+ paddingVertical:3,
+ borderRadius:6,
+ fontSize:12,
+ fontWeight:"600"
+}}>
+ women only
+</Text>
+
+)}
+
+
+{ride.completed && (
+
+<Text style={{
+ backgroundColor:"#dcfce7",
+ color:colors.primaryDark,
+ paddingHorizontal:8,
+ paddingVertical:3,
+ borderRadius:6,
+ fontSize:12,
+ fontWeight:"600"
+}}>
+ Completed
+</Text>
+
+)}
+
+</View>
+
+</View>
+
+
+
+{/* DRIVER */}
+<View style={components.card}>
+
+<Text style={layout.subtitle}>
+ Driver
+</Text>
+
+<Text
+ style={{color:colors.primary,fontWeight:"600"}}
+
+ onPress={()=>{
+
+  if(driver?.email === user.email)
+
+   router.push("/(tabs)/userProfile");
+
+  else
+
+   router.push(`/user/${driver?.email}`);
+
+ }}
+>
+ {driver?.name}
+</Text>
+
+</View>
+
+
+
+{/* CAR */}
+<View style={components.card}>
+
+<Text style={layout.subtitle}>
+ Car
+</Text>
+
+{car ? (
+
+<>
+
+<Text>
+ {car.model}
+</Text>
+
+<Text style={{color:colors.textLight}}>
+ {car.color}
+</Text>
+
+<Text style={{fontWeight:"600", paddingBottom:spacing.sm}}>
+ {car.licensePlate}
+</Text>
+{isDriver && !rideStarted && !ride.completed && !editingCar && driverCars.length > 1 && (
+
+
+<View style={components.outlineButton}>
+
+<Text
+ style={components.outlineButtonText}
+ onPress={()=> setEditingCar(true)}
+>
+
+ Change car
+
+</Text>
+
+</View>
+
+
+)}
+
+</>
+
+) : (
+
+<Text style={{color:colors.textLight}}>
+ Vehicle unavailable
+</Text>
+
+)}
+
+</View>
+
+
+
+{/* PASSENGERS */}
+<View style={components.card}>
+
+<Text style={layout.subtitle}>
+ Passengers
+</Text>
+
+
+{passengers.length === 0 && (
+
+<Text style={{color:colors.textLight}}>
+ No passengers yet
+</Text>
+
+)}
+
 
 {passengers.map(p => (
- <View
-  key={p!.email}
-  style={styles.passengerRow}
- >
-  <Text
-  style={styles.link}
-  onPress={() =>{
-    if(p!.email===user.email) router.push("/(tabs)/userProfile");
-    else router.push(`/user/${p!.email}`)
-  }
-  }
-  >
-  {p!.name}
-  </Text>
-  {isDriver && !rideStarted && !ride.completed && (
-   <Text
-    style={styles.remove}
-    onPress={() =>
-     removePassenger(p!.email)
-    }
-   >
-    remove
-   </Text>
-  )}
- </View>
+
+<View
+ key={p!.email}
+
+ style={{
+  flexDirection:"row",
+  justifyContent:"space-between",
+  alignItems:"center",
+  marginBottom:spacing.sm
+ }}
+>
+
+<Text
+ style={{color:colors.primary, fontWeight:"500"}}
+
+ onPress={()=>{
+
+  if(p!.email === user.email)
+
+   router.push("/(tabs)/userProfile");
+
+  else
+
+   router.push(`/user/${p!.email}`);
+
+ }}
+>
+
+ {p!.name}
+
+</Text>
+
+
+
+{isDriver && !rideStarted && !ride.completed && (
+
+<Text
+ style={{
+  color:colors.danger,
+  fontWeight:"600"
+ }}
+
+ onPress={() =>
+  removePassenger(p!.email)
+ }
+>
+
+ remove
+
+</Text>
+
+)}
+
+</View>
+
 ))}
 
-   {ride.completed && (
-    <Text style={styles.completed}>
-     Completed
-    </Text>
-   )}
+</View>
 
-   {!isDriver && !joined && !rideStarted && !ride.completed && (
-    <Button
-     title="Reserve seat"
-     onPress={reserveSeat}
-    />
-   )}
 
-   {joined && !isDriver && !rideStarted && !ride.completed && (
-    <Button
-     title="Cancel reservation"
-     onPress={cancelSeat}
-    />
-   )}
-
-  {isDriver && !rideStarted && !ride.completed && !editingCar && driverCars.length > 1 && (
-    <Button
-    title="Change car"
-    onPress={()=> setEditingCar(true)}
-  />
-  )}
+{/* CHANGE CAR */}
 {editingCar && (
- <>
-  <Text style={styles.section}>
-   Select new car
-  </Text>
-  <Picker
-   selectedValue={selectedCarId}
-   onValueChange={setSelectedCarId}
-  >
-   {driverCars.map(c=>(
-    <Picker.Item
-     key={c.id}
-     label={`${c.model} (${c.licensePlate})`}
-     value={c.id}
-    />
-   ))}
-  </Picker>
-  <Button
-   title="Save car"
-   onPress={changeCar}
-  />
-  <Button
-   title="Cancel"
-   onPress={()=>
-    setEditingCar(false)
-   }
-  />
- </>
+
+<View style={components.card}>
+
+<Text style={layout.subtitle}>
+ Select new car
+</Text>
+
+
+<View style={components.pickerWrapper}>
+
+<Picker
+ selectedValue={selectedCarId}
+ onValueChange={setSelectedCarId}
+
+ dropdownIconColor={colors.primary}
+
+ style={{
+  color:colors.primary,
+  fontWeight:"600"
+ }}
+>
+
+{driverCars.map(c=>(
+
+<Picker.Item
+ key={c.id}
+ label={`${c.model} (${c.licensePlate})`}
+ value={c.id}
+ style={{color:"black"}}
+/>
+
+))}
+
+</Picker>
+
+</View>
+
+
+<View style={{height:spacing.sm}} />
+
+
+<View style={components.button}>
+
+<Text
+ style={components.buttonText}
+ onPress={changeCar}
+>
+
+ Save car
+
+</Text>
+
+</View>
+
+
+<View style={{height:spacing.sm}} />
+
+
+<View style={components.outlineButton}>
+
+<Text
+ style={components.outlineButtonText}
+ onPress={()=> setEditingCar(false)}
+>
+
+ Cancel
+
+</Text>
+
+</View>
+
+</View>
+
 )}
-   {isDriver && !rideStarted && !ride.completed && !editingCar && (
-    <Button
-     title="Cancel ride"
-     onPress={cancelRide}
-    />
-   )}
 
-   {canComplete && (
-    <Button
-     title="Complete ride"
-     onPress={completeRide}
-    />
-   )}
-  </SafeAreaView>
- );
+
+
+{/* PASSENGER ACTIONS */}
+{!isDriver && !joined && !rideStarted && !ride.completed && (
+
+<View style={components.button}>
+
+<Text
+ style={components.buttonText}
+ onPress={reserveSeat}
+>
+
+ Reserve seat
+
+</Text>
+
+</View>
+
+)}
+
+
+
+{joined && !isDriver && !rideStarted && !ride.completed && (
+
+<View style={components.button}>
+
+<Text
+ style={components.buttonText}
+ onPress={cancelSeat}
+>
+
+ Cancel reservation
+
+</Text>
+
+</View>
+
+)}
+
+
+
+{/* DRIVER CONTROLS */}
+{isDriver && !rideStarted && !ride.completed && !editingCar && (
+
+<View style={components.button}>
+
+<Text
+ style={components.buttonText}
+ onPress={cancelRide}
+>
+
+ Cancel ride
+
+</Text>
+
+</View>
+
+)}
+
+
+
+{canComplete && (
+
+<View style={components.button}>
+
+<Text
+ style={components.buttonText}
+ onPress={completeRide}
+>
+
+ Complete ride
+
+</Text>
+
+</View>
+
+)}
+
+
+</SafeAreaView>
+
+);
 }
-
-const styles = StyleSheet.create({
-
- container:{
-  flex:1,
-  padding:20,
-  gap:10
- },
-
- title:{
-  fontSize:22,
-  fontWeight:"bold"
- },
-
- section:{
-  marginTop:15,
-  fontWeight:"bold"
- },
-
- completed:{
-  color:"green",
-  fontWeight:"bold"
- },
-
- tag:{
-  marginTop:5,
-  color:"purple"
- },
-
- back:{
- fontSize:16,
- marginBottom:10,
- color:"blue"
-},
-
-passengerRow:{
- flexDirection:"row",
- justifyContent:"space-between",
- alignItems:"center"
-},
-
-remove:{
- color:"red"
-},
-
-link:{
- color:"blue"
-},
-});
