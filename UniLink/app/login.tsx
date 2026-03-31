@@ -1,116 +1,116 @@
 import { useState } from "react";
 
 import {
- View,
- Text,
- TextInput,
- Button,
- StyleSheet,
- Alert
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  Alert
 } from "react-native";
 
 import {
- loginUser,
- registerUser
+  loginUser,
+  registerUser
 } from "../data/user";
 
 import {
- useRouter
+  useRouter
 } from "expo-router";
 
 import { Picker } from "@react-native-picker/picker";
 
-export default function Login(){
+export default function Login() {
 
- const router = useRouter();
+  const router = useRouter();
 
- const [registerMode,setRegisterMode] = useState(false);
+  const [registerMode, setRegisterMode] = useState(false);
 
- const [email,setEmail] = useState("");
+  const [email, setEmail] = useState("");
 
- const [password,setPassword] = useState("");
+  const [password, setPassword] = useState("");
 
- const [name,setName] = useState("");
+  const [name, setName] = useState("");
 
- const [university,setUniversity] = useState("");
+  const [university, setUniversity] = useState("");
 
- const [course,setCourse] = useState("");
+  const [course, setCourse] = useState("");
 
- const [gender,setGender] =
-  useState<"Male"|"Female">("Male");
+  const [gender, setGender] =
+    useState<"Male" | "Female">("Male");
 
 
- function login(){
+  function login() {
 
-  const success =
-   loginUser(email,password);
+    const success =
+      loginUser(email, password);
 
-  if(!success){
+    if (!success) {
 
-   Alert.alert(
-    "Login failed",
-    "Invalid email or password"
-   );
+      Alert.alert(
+        "Login failed",
+        "Invalid email or password"
+      );
 
-   return;
+      return;
+
+    }
+
+    router.replace("/(tabs)/searchRide");
 
   }
 
-  router.replace("/(tabs)/searchRide");
 
- }
-
-
- function register(){
-  if(
-   !name.trim() ||
-   !email.trim() ||
-   !password.trim() ||
-   !university.trim() ||
-   !course.trim()
-  ){
-   Alert.alert(
-    "Error",
-    "Fill all fields"
-   );
-   return;
+  function register() {
+    if (
+      !name.trim() ||
+      !email.trim() ||
+      !password.trim() ||
+      !university.trim() ||
+      !course.trim()
+    ) {
+      Alert.alert(
+        "Error",
+        "Fill all fields"
+      );
+      return;
+    }
+    const user =
+      registerUser(
+        name,
+        email,
+        password,
+        university,
+        course,
+        gender
+      );
+    if (!user) return;
+    router.replace("/(tabs)/searchRide");
   }
-  const user =
-   registerUser(
-    name,
-    email,
-    password,
-    university,
-    course,
-    gender
-   );
-  if(!user) return;
-  router.replace("/(tabs)/searchRide");
- }
 
 
- return(
-  <View style={styles.container}>
-   <Text style={styles.title}>
-    UniLink
-   </Text>
-   {registerMode && (
-    <TextInput
-     placeholder="Name"
-     value={name}
-     onChangeText={setName}
-     style={styles.input}
-    />
-   )}
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>
+        UniLink
+      </Text>
+      {registerMode && (
+        <TextInput
+          placeholder="Name"
+          value={name}
+          onChangeText={setName}
+          style={styles.input}
+        />
+      )}
 
-   <TextInput
-    placeholder="Email"
-    value={email}
-    onChangeText={setEmail}
-    autoCapitalize="none"
-    keyboardType="email-address"
-    style={styles.input}
-   />
+      <TextInput
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+        keyboardType="email-address"
+        style={styles.input}
+      />
 
    <TextInput
     placeholder="Password"
@@ -219,4 +219,4 @@ const styles =
   textAlign:"center"
  }
 
-});
+  });

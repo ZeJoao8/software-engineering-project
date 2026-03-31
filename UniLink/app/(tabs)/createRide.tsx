@@ -6,7 +6,8 @@ import {
  TextInput,
  Button,
  Switch,
- StyleSheet
+ StyleSheet,
+ ScrollView
 } from "react-native";
 
 import { Picker } from "@react-native-picker/picker";
@@ -173,14 +174,14 @@ export default function CreateRide(){
 
  if(cars.length === 0){
   return(
-   <View style={styles.container}>
+   <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
     <Text style={styles.title}>
      Create Ride
     </Text>
     <Text>
      Add a car first in Profile
     </Text>
-   </View>
+   </ScrollView>
   );
 
  }
@@ -188,7 +189,7 @@ export default function CreateRide(){
 
  return(
 
-  <View style={styles.container}>
+  <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
 
    <Text style={styles.title}>
     Create Ride
@@ -200,6 +201,7 @@ export default function CreateRide(){
     maxLength={40}
     onChangeText={setOrigin}
     style={styles.input}
+    testID="originInput"
    />
 
    <TextInput
@@ -208,6 +210,7 @@ export default function CreateRide(){
     maxLength={40}
     onChangeText={setDestination}
     style={styles.input}
+    testID="destinationInput"
    />
 
 
@@ -287,6 +290,7 @@ export default function CreateRide(){
     onChangeText={setSeats}
     keyboardType="numeric"
     style={styles.input}
+    testID="seatsInput"
    />
 
   {user?.gender === "Female" && (
@@ -306,8 +310,9 @@ export default function CreateRide(){
    <Button
     title="Create Ride"
     onPress={createRide}
+    testID="createRideButton"
    />
-  </View>
+  </ScrollView>
 
  );
 
@@ -318,6 +323,10 @@ const styles = StyleSheet.create({
 
  container:{
   flex:1,
+  backgroundColor: "#fff",
+ },
+
+ scrollContent: {
   padding:20,
   gap:10
  },
