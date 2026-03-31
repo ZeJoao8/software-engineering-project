@@ -1,33 +1,34 @@
 import { useState } from "react";
 
 import {
- View,
- Text,
- TextInput,
- Button,
- StyleSheet,
- Alert,
- ScrollView
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  Alert,
+  ScrollView
 } from "react-native";
 
 import {
- getCurrentUser,
- getUsers,
+  getCurrentUser,
+  getUsers,
   updateUser,
 } from "../../data/user";
 
 import {
- getUserCars,
- addCar,
- deleteCar
+  getUserCars,
+  addCar,
+  deleteCar
 } from "../../data/cars";
 
-import { getRides,
- deleteRide
+import {
+  getRides,
+  deleteRide
 } from "../../data/rides";
 
 import { useRouter }
- from "expo-router";
+  from "expo-router";
 
 import { logoutUser } from "../../data/user";
 
@@ -37,468 +38,475 @@ import { layout } from "../../styles/layout";
 import { colors } from "../../styles/theme";
 import { spacing } from "../../styles/theme";
 
-const router = useRouter();
+export default function Profile() {
 
-export default function Profile(){
+  const router = useRouter();
 
- const [user,setUser] =
-  useState(getCurrentUser());
+  const [user, setUser] =
+    useState(getCurrentUser());
 
- const [editing,setEditing] =
-  useState(false);
+  const [editing, setEditing] =
+    useState(false);
 
- const [showCarForm,setShowCarForm] =
-  useState(false);
+  const [showCarForm, setShowCarForm] =
+    useState(false);
 
- const [model,setModel] =
-  useState("");
+  const [model, setModel] =
+    useState("");
 
- const [color,setColor] =
-  useState("");
+  const [color, setColor] =
+    useState("");
 
- const [plate,setPlate] =
-  useState("");
+  const [plate, setPlate] =
+    useState("");
 
- const [seats,setSeats] =
-  useState("");
+  const [seats, setSeats] =
+    useState("");
 
- const userCars =
-  getUserCars(user.email);
-
-
- function startEdit(){
-
-  setEditing(true);
-
- }
+  const userCars =
+    getUserCars(user.email);
 
 
- function cancelEdit(){
-  setUser(getCurrentUser());
-  setEditing(false);
-  setShowCarForm(false);
-  setModel("");
-  setColor("");
-  setPlate("");
-  setSeats("");
- }
+  function startEdit() {
 
+    setEditing(true);
 
- function saveProfile(){
-  updateUser(user);
-  setUser({...user});
-  setEditing(false);
-  Alert.alert("Saved");
- }
-
-function removeCar(carId:string){
- const ridesUsingCar =
-  getRides().filter(
-   r =>
-    r.carId === carId &&
-    !r.completed &&
-    new Date(r.departureDateTime) > new Date()
-  );
- const warningText =
-  ridesUsingCar.length > 0
-   ? `This will cancel ${ridesUsingCar.length} future ride(s) using this car.`
-   : "Are you sure you want to remove this car?";
- Alert.alert(
-  "Remove car",
-  warningText,
-  [
-   {
-    text:"No",
-    style:"cancel"
-   },
-   {
-    text:"Yes",
-    style:"destructive",
-    onPress:()=>{
-     ridesUsingCar.forEach(
-      r => deleteRide(r.id)
-     );
-     deleteCar(carId);
-     setUser({...getCurrentUser()});
-    }
-   }
-  ]
- );
-}
-
- function addNewCar(){
-  if(
-   !model.trim() ||
-   !color.trim() ||
-   !plate.trim() ||
-   !seats.trim()
-  ){
-   Alert.alert("Fill all fields");
-   return;
   }
-  if(model.length > 40){
-   Alert.alert("Model max 40 chars");
-   return;
+
+
+  function cancelEdit() {
+    setUser(getCurrentUser());
+    setEditing(false);
+    setShowCarForm(false);
+    setModel("");
+    setColor("");
+    setPlate("");
+    setSeats("");
   }
-  const seatsNumber = Number(seats);
-  if(
-   !Number.isInteger(seatsNumber) ||
-   seatsNumber <= 0
-  ){
-   Alert.alert("Seats must be integer > 0");
-   return;
+
+
+  function saveProfile() {
+    updateUser(user);
+    setUser({ ...user });
+    setEditing(false);
+    Alert.alert("Saved");
   }
-  const formattedPlate =
-   plate.toUpperCase().replace(/\s/g,"");
-  const plateRegex = /^[A-Z0-9-]{6,8}$/;
-  if(!plateRegex.test(formattedPlate)){
-   Alert.alert("Invalid plate format");
-   return;
-  }
-  const duplicate =
-   getUserCars(user.email)
-    .some(
-     c =>
-      c.licensePlate ===
-      formattedPlate
+
+  function removeCar(carId: string) {
+    const ridesUsingCar =
+      getRides().filter(
+        r =>
+          r.carId === carId &&
+          !r.completed &&
+          new Date(r.departureDateTime) > new Date()
+      );
+    const warningText =
+      ridesUsingCar.length > 0
+        ? `This will cancel ${ridesUsingCar.length} future ride(s) using this car.`
+        : "Are you sure you want to remove this car?";
+    Alert.alert(
+      "Remove car",
+      warningText,
+      [
+        {
+          text: "No",
+          style: "cancel"
+        },
+        {
+          text: "Yes",
+          style: "destructive",
+          onPress: () => {
+            ridesUsingCar.forEach(
+              r => deleteRide(r.id)
+            );
+            deleteCar(carId);
+            setUser({ ...getCurrentUser() });
+          }
+        }
+      ]
     );
-  if(duplicate){
-   Alert.alert("Plate already exists");
-   return;
   }
-  addCar({
-   id: Date.now().toString(),
-   model: model.trim(),
-   color: color.trim(),
-   licensePlate: formattedPlate,
-   seatCapacity: seatsNumber,
-   ownerId: user.email
-  });
-  setModel("");
-  setColor("");
-  setPlate("");
-  setSeats("");
-  setShowCarForm(false);
- }
 
-return(
-
-<ScrollView
- style={layout.screen}
- contentContainerStyle={{paddingBottom:spacing.xl}}
->
-
-<Text style={layout.title}>
- Profile
-</Text>
-
-
-{/* USER INFO */}
-<View style={components.card}>
-
-<Text style={layout.subtitle}>
- Info
-</Text>
-
-<Text style={forms.label}>
- Name
-</Text>
-
-{editing ? (
- <TextInput
-  value={user.name}
-  onChangeText={t=>
-   setUser({...user,name:t})
-  }
-  style={forms.input}
-/>
-) : (
- <Text>{user.name}</Text>
-)}
-
-
-<View style={{height:spacing.sm}} />
-
-<Text style={forms.label}>
- Gender
-</Text>
-
-<Text>
- {user.gender}
-</Text>
-
-
-<View style={{height:spacing.sm}} />
-
-<Text style={forms.label}>
- University
-</Text>
-
-<Text>
- {user.university}
-</Text>
-
-
-<View style={{height:spacing.sm}} />
-
-<Text style={forms.label}>
- Course
-</Text>
-
-{editing ? (
- <TextInput
-  value={user.course}
-  onChangeText={t=>
-   setUser({...user,course:t})
-  }
-  style={forms.input}
-/>
-) : (
- <Text>
-  {user.course}
- </Text>
-)}
-
-
-<View style={{height:spacing.md}} />
-
-{!editing ? (
-
-<View style={components.outlineButton}>
- <Text
-  style={components.outlineButtonText}
-  onPress={startEdit}
- >
-  Edit profile
- </Text>
-</View>
-
-) : (
-
-<>
-<View style={components.button}>
- <Text
-  style={components.buttonText}
-  onPress={saveProfile}
- >
-  Save profile
- </Text>
-</View>
-
-<View style={{height:spacing.sm}} />
-
-<View style={components.outlineButton}>
- <Text
-  style={components.outlineButtonText}
-  onPress={cancelEdit}
- >
-  Cancel
- </Text>
-</View>
-</>
-
-)}
-
-</View>
-
-
-
-{/* CARS */}
-<View style={components.card}>
-
-<Text style={layout.subtitle}>
- My cars
-</Text>
-
-
-{userCars.length === 0 && (
-<Text style={{color:colors.textLight}}>
- No cars yet
-</Text>
-)}
-
-
-{userCars.map(car => (
-
-<View
- key={car.id}
- style={{
-  flexDirection:"row",
-  justifyContent:"space-between",
-  alignItems:"center",
-  marginBottom:spacing.sm
- }}
->
-
-<Text>
- {car.model} • {car.licensePlate}
-</Text>
-
-
-{editing && (
-
-<Text
- style={{
-  color:colors.danger,
-  fontWeight:"600"
- }}
- onPress={() =>
-  removeCar(car.id)
- }
->
- remove
-</Text>
-
-)}
-
-</View>
-
-))}
-
-
-{editing && (
-
-<View style={{marginTop:spacing.sm}}>
-
-<View style={components.outlineButton}>
- <Text
-  style={components.outlineButtonText}
-  onPress={()=>setShowCarForm(!showCarForm)}
- >
-  {showCarForm ? "Cancel" : "Add car"}
- </Text>
-</View>
-
-</View>
-
-)}
-
-</View>
-
-
-
-{editing && showCarForm && (
-
-<View style={components.card}>
-
-<Text style={layout.subtitle}>
- Add car
-</Text>
-
-
-<Text style={forms.label}>
- Model
-</Text>
-
-<TextInput
- value={model}
- onChangeText={setModel}
- style={forms.input}
-/>
-
-
-<View style={{height:spacing.sm}} />
-
-<Text style={forms.label}>
- Color
-</Text>
-
-<TextInput
- value={color}
- onChangeText={setColor}
- style={forms.input}
-/>
-
-
-<View style={{height:spacing.sm}} />
-
-<Text style={forms.label}>
- Plate
-</Text>
-
-<TextInput
- value={plate}
- onChangeText={setPlate}
- autoCapitalize="characters"
- style={forms.input}
-/>
-
-
-<View style={{height:spacing.sm}} />
-
-<Text style={forms.label}>
- Seats
-</Text>
-
-<TextInput
- value={seats}
- onChangeText={setSeats}
- keyboardType="numeric"
- style={forms.input}
-/>
-
-
-<View style={{marginTop:spacing.md}}>
-
-<View style={components.button}>
- <Text
-  style={components.buttonText}
-  onPress={addNewCar}
- >
-  Save car
- </Text>
-</View>
-
-</View>
-
-</View>
-
-)}
-
-
-
-{/* LOGOUT */}
-<View style={components.card}>
-
-<Text style={layout.subtitle}>
- Session
-</Text>
-
-
-<View style={components.button}>
-
-<Text
- style={components.buttonText}
-
- onPress={() =>
- Alert.alert(
-  "Logout",
-  "Are you sure?",
-  [
-   {text:"Cancel"},
-   {
-    text:"Logout",
-    style:"destructive",
-
-    onPress:()=>{
-     logoutUser();
-     router.replace("/login");
+  function addNewCar() {
+    if (
+      !model.trim() ||
+      !color.trim() ||
+      !plate.trim() ||
+      !seats.trim()
+    ) {
+      Alert.alert("Fill all fields");
+      return;
     }
-   }
-  ]
- )
- }
->
+    if (model.length > 40) {
+      Alert.alert("Model max 40 chars");
+      return;
+    }
+    const seatsNumber = Number(seats);
+    if (
+      !Number.isInteger(seatsNumber) ||
+      seatsNumber <= 0
+    ) {
+      Alert.alert("Seats must be integer > 0");
+      return;
+    }
+    const formattedPlate =
+      plate.toUpperCase().replace(/\s/g, "");
+    const plateRegex = /^[A-Z0-9-]{6,8}$/;
+    if (!plateRegex.test(formattedPlate)) {
+      Alert.alert("Invalid plate format");
+      return;
+    }
+    const duplicate =
+      getUserCars(user.email)
+        .some(
+          c =>
+            c.licensePlate ===
+            formattedPlate
+        );
+    if (duplicate) {
+      Alert.alert("Plate already exists");
+      return;
+    }
+    addCar({
+      id: Date.now().toString(),
+      model: model.trim(),
+      color: color.trim(),
+      licensePlate: formattedPlate,
+      seatCapacity: seatsNumber,
+      ownerId: user.email
+    });
+    setModel("");
+    setColor("");
+    setPlate("");
+    setSeats("");
+    setShowCarForm(false);
+  }
 
- Logout
+  return (
 
-</Text>
+    <View style={{ flex: 1, backgroundColor: colors.primarySoft }}>
+      <ScrollView
+        style={layout.scrollScreen}
+        contentContainerStyle={{
+          flexGrow: 1,
+          padding: spacing.lg,
+          paddingBottom: 80
+        }}
+        keyboardDismissMode="on-drag"
+      >
 
-</View>
+      <Text style={layout.title}>
+        Profile
+      </Text>
 
-</View>
 
-</ScrollView>
+      {/* USER INFO */}
+      <View style={components.card}>
 
-);
+        <Text style={layout.subtitle}>
+          Info
+        </Text>
+
+        <Text style={forms.label}>
+          Name
+        </Text>
+
+        {editing ? (
+          <TextInput
+            value={user.name}
+            onChangeText={t =>
+              setUser({ ...user, name: t })
+            }
+            style={forms.input}
+          />
+        ) : (
+          <Text>{user.name}</Text>
+        )}
+
+
+        <View style={{ height: spacing.sm }} />
+
+        <Text style={forms.label}>
+          Gender
+        </Text>
+
+        <Text>
+          {user.gender}
+        </Text>
+
+
+        <View style={{ height: spacing.sm }} />
+
+        <Text style={forms.label}>
+          University
+        </Text>
+
+        <Text>
+          {user.university}
+        </Text>
+
+
+        <View style={{ height: spacing.sm }} />
+
+        <Text style={forms.label}>
+          Course
+        </Text>
+
+        {editing ? (
+          <TextInput
+            value={user.course}
+            onChangeText={t =>
+              setUser({ ...user, course: t })
+            }
+            style={forms.input}
+          />
+        ) : (
+          <Text>
+            {user.course}
+          </Text>
+        )}
+
+
+        <View style={{ height: spacing.md }} />
+
+        {!editing ? (
+
+          <View style={components.outlineButton}>
+            <Text
+              style={components.outlineButtonText}
+              onPress={startEdit}
+            >
+              Edit profile
+            </Text>
+          </View>
+
+        ) : (
+
+          <>
+            <View style={components.button}>
+              <Text
+                style={components.buttonText}
+                onPress={saveProfile}
+              >
+                Save profile
+              </Text>
+            </View>
+
+            <View style={{ height: spacing.sm }} />
+
+            <View style={components.outlineButton}>
+              <Text
+                style={components.outlineButtonText}
+                onPress={cancelEdit}
+              >
+                Cancel
+              </Text>
+            </View>
+          </>
+
+        )}
+
+      </View>
+
+
+
+      {/* CARS */}
+      <View style={components.card}>
+
+        <Text style={layout.subtitle}>
+          My cars
+        </Text>
+
+
+        {userCars.length === 0 && (
+          <Text style={{ color: colors.textLight }}>
+            No cars yet
+          </Text>
+        )}
+
+
+        {userCars.map(car => (
+
+          <View
+            key={car.id}
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: spacing.sm
+            }}
+          >
+
+            <Text>
+              {car.model} • {car.licensePlate}
+            </Text>
+
+
+            {editing && (
+
+              <Text
+                style={{
+                  color: colors.danger,
+                  fontWeight: "600"
+                }}
+                onPress={() =>
+                  removeCar(car.id)
+                }
+              >
+                remove
+              </Text>
+
+            )}
+
+          </View>
+
+        ))}
+
+
+        {editing && (
+
+          <View style={{ marginTop: spacing.sm }}>
+
+            <View style={components.outlineButton}>
+              <Text
+                style={components.outlineButtonText}
+                onPress={() => setShowCarForm(!showCarForm)}
+              >
+                {showCarForm ? "Cancel" : "Add car"}
+              </Text>
+            </View>
+
+          </View>
+
+        )}
+
+      </View>
+
+
+
+      {editing && showCarForm && (
+
+        <View style={components.card}>
+
+          <Text style={layout.subtitle}>
+            Add car
+          </Text>
+
+
+          <Text style={forms.label}>
+            Model
+          </Text>
+
+          <TextInput
+            value={model}
+            onChangeText={setModel}
+            style={forms.input}
+          />
+
+
+          <View style={{ height: spacing.sm }} />
+
+          <Text style={forms.label}>
+            Color
+          </Text>
+
+          <TextInput
+            value={color}
+            onChangeText={setColor}
+            style={forms.input}
+          />
+
+
+          <View style={{ height: spacing.sm }} />
+
+          <Text style={forms.label}>
+            Plate
+          </Text>
+
+          <TextInput
+            value={plate}
+            onChangeText={setPlate}
+            autoCapitalize="characters"
+            style={forms.input}
+          />
+
+
+          <View style={{ height: spacing.sm }} />
+
+          <Text style={forms.label}>
+            Seats
+          </Text>
+
+          <TextInput
+            value={seats}
+            onChangeText={setSeats}
+            keyboardType="numeric"
+            style={forms.input}
+          />
+
+
+          <View style={{ marginTop: spacing.md }}>
+
+            <View style={components.button}>
+              <Text
+                style={components.buttonText}
+                onPress={addNewCar}
+              >
+                Save car
+              </Text>
+            </View>
+
+          </View>
+
+        </View>
+
+      )}
+
+
+
+      {/* LOGOUT */}
+      <View style={components.card}>
+
+        <Text style={layout.subtitle}>
+          Session
+        </Text>
+
+
+        <View style={components.button}>
+
+          <Text
+            style={components.buttonText}
+
+            onPress={() =>
+              Alert.alert(
+                "Logout",
+                "Are you sure?",
+                [
+                  { text: "Cancel" },
+                  {
+                    text: "Logout",
+                    style: "destructive",
+
+                    onPress: () => {
+                      logoutUser();
+                      router.replace("/login");
+                    }
+                  }
+                ]
+              )
+            }
+          >
+
+            Logout
+
+          </Text>
+
+        </View>
+
+      </View>
+
+    </ScrollView>
+    </View>
+
+  );
 }

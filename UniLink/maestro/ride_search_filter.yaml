@@ -11,4 +11,9 @@ appId: host.exp.Exponent
 - inputText: "Porto"
 - tapOn: { id: "destinationInput" }
 - inputText: "Feup"
-- assertVisible: "No rides found" 
+- tapOn: { id: "minSeatsInput" }
+- inputText: "1"
+- pressKey: Enter
+
+- assertVisible: "RideCard" 
+- 

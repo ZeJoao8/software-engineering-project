@@ -216,8 +216,13 @@ export default function CreateRide() {
   return (
 
     <ScrollView
-      style={layout.screen}
-      contentContainerStyle={{ paddingBottom: spacing.xl }}
+      style={layout.scrollScreen}
+      contentContainerStyle={{
+        flexGrow: 1,
+        padding: spacing.lg,
+        paddingBottom: spacing.xl
+      }}
+      keyboardShouldPersistTaps="handled"
     >
 
       <Text style={layout.title}>

@@ -9,10 +9,15 @@ import {
 
 export const layout = StyleSheet.create({
 
- screen:{
+  screen:{
   flex:1,
   backgroundColor: colors.primarySoft,
   padding: spacing.lg
+ },
+
+ scrollScreen: {
+  flex: 1,
+  backgroundColor: colors.primarySoft,
  },
 
  title:{
