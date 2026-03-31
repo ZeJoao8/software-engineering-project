@@ -1,18 +1,28 @@
 import { useState } from "react";
 
 import {
+<<<<<<< HEAD
  View,
  Text,
  TextInput,
  ScrollView,
  Alert
+=======
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  Alert
+>>>>>>> test/auth-and-ride
 } from "react-native";
 
 import {
- loginUser,
- registerUser
+  loginUser,
+  registerUser
 } from "../data/user";
 
+<<<<<<< HEAD
 import { useRouter } from "expo-router";
 
 import { Picker } from "@react-native-picker/picker";
@@ -24,45 +34,62 @@ import { spacing, colors } from "../styles/theme";
 
 
 export default function Login(){
+=======
+import {
+  useRouter
+} from "expo-router";
 
- const router = useRouter();
+import { Picker } from "@react-native-picker/picker";
 
- const [registerMode,setRegisterMode] = useState(false);
+export default function Login() {
+>>>>>>> test/auth-and-ride
 
- const [email,setEmail] = useState("");
+  const router = useRouter();
 
- const [password,setPassword] = useState("");
+  const [registerMode, setRegisterMode] = useState(false);
 
+  const [email, setEmail] = useState("");
+
+  const [password, setPassword] = useState("");
+
+<<<<<<< HEAD
  const [confirmPassword,setConfirmPassword] = useState("");
 
  const [name,setName] = useState("");
+=======
+  const [name, setName] = useState("");
+>>>>>>> test/auth-and-ride
 
- const [university,setUniversity] = useState("");
+  const [university, setUniversity] = useState("");
 
- const [course,setCourse] = useState("");
+  const [course, setCourse] = useState("");
 
- const [gender,setGender] =
-  useState<"Male"|"Female">("Male");
+  const [gender, setGender] =
+    useState<"Male" | "Female">("Male");
 
 
- function login(){
+  function login() {
 
-  const success =
-   loginUser(email,password);
+    const success =
+      loginUser(email, password);
 
-  if(!success){
+    if (!success) {
 
-   Alert.alert(
-    "Login failed",
-    "Invalid email or password"
-   );
+      Alert.alert(
+        "Login failed",
+        "Invalid email or password"
+      );
 
-   return;
+      return;
+
+    }
+
+    router.replace("/(tabs)/searchRide");
 
   }
 
-  router.replace("/(tabs)/searchRide");
 
+<<<<<<< HEAD
  }
 
 
@@ -142,6 +169,137 @@ export default function Login(){
 <ScrollView
  style={layout.screen}
  contentContainerStyle={{
+=======
+  function register() {
+    if (
+      !name.trim() ||
+      !email.trim() ||
+      !password.trim() ||
+      !university.trim() ||
+      !course.trim()
+    ) {
+      Alert.alert(
+        "Error",
+        "Fill all fields"
+      );
+      return;
+    }
+    const user =
+      registerUser(
+        name,
+        email,
+        password,
+        university,
+        course,
+        gender
+      );
+    if (!user) return;
+    router.replace("/(tabs)/searchRide");
+  }
+
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>
+        UniLink
+      </Text>
+      {registerMode && (
+        <TextInput
+          placeholder="Name"
+          value={name}
+          onChangeText={setName}
+          style={styles.input}
+        />
+      )}
+
+      <TextInput
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+        keyboardType="email-address"
+        style={styles.input}
+      />
+
+   <TextInput
+    placeholder="Password"
+    value={password}
+    onChangeText={setPassword}
+    secureTextEntry
+    style={styles.input}
+   />
+   {registerMode && (
+    <>
+     <TextInput
+      placeholder="University"
+      value={university}
+      onChangeText={setUniversity}
+      style={styles.input}
+     />
+     <TextInput
+      placeholder="Course"
+      value={course}
+      onChangeText={setCourse}
+      style={styles.input}
+     />
+     <Text>Gender</Text>
+     <Picker
+      selectedValue={gender}
+      onValueChange={setGender}
+     >
+      <Picker.Item
+       label="Male"
+       value="Male"
+      />
+      <Picker.Item
+       label="Female"
+       value="Female"
+      />
+     </Picker>
+    </>
+   )}
+
+   {registerMode ? (
+    <Button
+     title="Create account"
+     onPress={register}
+    />
+   ) : (
+    <Button
+     title="Login"
+     onPress={login}
+    />
+   )}
+   <Text
+    style={styles.link}
+    onPress={()=>setRegisterMode(!registerMode)}
+   >
+    {registerMode
+     ? "Already have account?"
+     : "Create account"}
+   </Text>
+
+
+   {!registerMode && (
+    <Text style={styles.hint}>
+     test accounts:
+     {"\n"}
+     joao@feup.pt / 1234
+     {"\n"}
+     maria@feup.pt / 1234
+    </Text>
+   )}
+  </View>
+ );
+}
+
+
+const styles =
+ StyleSheet.create({
+
+ container:{
+  flex:1,
+>>>>>>> test/auth-and-ride
   justifyContent:"center",
   flexGrow:1
  }}
@@ -312,6 +470,7 @@ export default function Login(){
  }
 >
 
+<<<<<<< HEAD
 {registerMode
  ? "CREATE ACCOUNT"
  : "LOGIN"}
@@ -378,3 +537,6 @@ maria@feup.pt / 1234
  );
 
 }
+=======
+  });
+>>>>>>> test/auth-and-ride

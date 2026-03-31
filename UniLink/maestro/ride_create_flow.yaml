@@ -1,0 +1,30 @@
+appId: host.exp.Exponent
+---
+- tapOn: "Email"
+- inputText: "joao@feup.pt"
+- tapOn: "Password"
+- inputText: "1234"
+- tapOn: "Login"
+
+- assertVisible: "Search Rides"
+- tapOn: { id: "createTab" }
+- assertVisible: "Create Ride"
+
+- tapOn: "Origin"
+- inputText: "Porto"
+- tapOn: "Destination"
+- inputText: "Lisbon"
+- pressKey: Enter
+- hideKeyboard
+- tapOn: "1-4 seats" 
+- inputText: "3"
+- pressKey: Enter
+
+- tapOn: { id: "createRideButton" }
+
+- assertVisible: "Ride created"
+- tapOn: "OK"
+
+- assertVisible: "My Rides"
+- assertNotVisible: "No rides created"
+

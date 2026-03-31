@@ -7,7 +7,8 @@ import {
  TextInput,
  Button,
  Switch,
- StyleSheet
+ StyleSheet,
+ ScrollView
 } from "react-native";
 
 import { layout } from "../../styles/layout";
@@ -186,6 +187,7 @@ const [time,setTime] =
 
 if(cars.length === 0){
   return(
+<<<<<<< HEAD
    <View style={layout.screen}>
 
     <Text style={layout.title}>
@@ -209,16 +211,30 @@ if(cars.length === 0){
       </View>
     </View>
    </View>
+=======
+   <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+    <Text style={styles.title}>
+     Create Ride
+    </Text>
+    <Text>
+     Add a car first in Profile
+    </Text>
+   </ScrollView>
+>>>>>>> test/auth-and-ride
   );
 }
 
 
  return(
 
+<<<<<<< HEAD
   <ScrollView 
   style={layout.screen}
   contentContainerStyle={{paddingBottom:spacing.xl}}
   >
+=======
+  <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+>>>>>>> test/auth-and-ride
 
    <Text style={layout.title}>
     Create Ride
@@ -235,8 +251,14 @@ if(cars.length === 0){
     value={origin}
     maxLength={40}
     onChangeText={setOrigin}
+<<<<<<< HEAD
     style={forms.input}
   />
+=======
+    style={styles.input}
+    testID="originInput"
+   />
+>>>>>>> test/auth-and-ride
 
   <View style={{height:6}} />
 
@@ -249,6 +271,7 @@ if(cars.length === 0){
     value={destination}
     maxLength={40}
     onChangeText={setDestination}
+<<<<<<< HEAD
     style={forms.input}
   />
 
@@ -331,6 +354,10 @@ if(cars.length === 0){
     label={`${c.model} (${c.licensePlate})`}
     value={c.id}
     style={{color:"black", fontWeight:"600"}}
+=======
+    style={styles.input}
+    testID="destinationInput"
+>>>>>>> test/auth-and-ride
    />
   ))}
  </Picker>
@@ -366,6 +393,7 @@ if(cars.length === 0){
     Women only
    </Text>
 
+<<<<<<< HEAD
   <Switch
     value={womenOnly}
     onValueChange={setWomenOnly}
@@ -374,18 +402,113 @@ if(cars.length === 0){
   />
   </View>
  </View>
+=======
+
+   {showTime && (
+    <DateTimePicker
+     value={time}
+     mode="time"
+     onChange={(e,t)=>{
+      setShowTime(false);
+      if(t)
+       setTime(t);
+     }}
+    />
+   )}
+
+   <Text>Car</Text>
+
+   <Picker
+    selectedValue={selectedCar}
+    onValueChange={
+     setSelectedCar
+    }
+   >
+    {cars.map(c=>(
+     <Picker.Item
+      key={c.id}
+      label={`${c.model} (${c.licensePlate})`}
+      value={c.id}
+     />
+    ))}
+
+   </Picker>
+
+   <TextInput
+    placeholder={`1-${car.seatCapacity-1} seats`}
+    value={seats}
+    onChangeText={setSeats}
+    keyboardType="numeric"
+    style={styles.input}
+    testID="seatsInput"
+   />
+
+  {user?.gender === "Female" && (
+   <View style={styles.row}>
+    <Text>
+     Women only
+    </Text>
+    <Switch
+     value={womenOnly}
+     onValueChange={
+      setWomenOnly
+     }
+    />
+   </View>
+>>>>>>> test/auth-and-ride
   )}
   
   <View style={components.button}>
   <Text
     style={components.buttonText}
     onPress={createRide}
+<<<<<<< HEAD
   >
     CREATE RIDE
   </Text>
   </View>
+=======
+    testID="createRideButton"
+   />
+>>>>>>> test/auth-and-ride
   </ScrollView>
 
  );
 
+<<<<<<< HEAD
 }
+=======
+}
+
+
+const styles = StyleSheet.create({
+
+ container:{
+  flex:1,
+  backgroundColor: "#fff",
+ },
+
+ scrollContent: {
+  padding:20,
+  gap:10
+ },
+
+ title:{
+  fontSize:20,
+  fontWeight:"bold"
+ },
+
+ input:{
+  borderWidth:1,
+  padding:10,
+  borderRadius:5
+ },
+
+ row:{
+  flexDirection:"row",
+  justifyContent:"space-between",
+  alignItems:"center"
+ }
+
+});
+>>>>>>> test/auth-and-ride

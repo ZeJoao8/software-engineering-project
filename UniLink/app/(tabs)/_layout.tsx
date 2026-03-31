@@ -3,6 +3,7 @@ import { Tabs } from "expo-router";
 
 export default function TabsLayout() {
 
+<<<<<<< HEAD
  return (
     
   <Tabs
@@ -32,29 +33,34 @@ export default function TabsLayout() {
    }}
 
   >
+=======
+    return (
 
-   <Tabs.Screen
-    name="searchRide"
-    options={{ title: "Search" }}
-   />
+        <Tabs>
+>>>>>>> test/auth-and-ride
 
-   <Tabs.Screen
-    name="createRide"
-    options={{ title: "Create" }}
-   />
+            <Tabs.Screen
+                name="searchRide"
+                options={{ title: "Search", tabBarButtonTestID: "searchTab" }}
+            />
 
-   <Tabs.Screen
-    name="myRides"
-    options={{ title: "My Rides" }}
-   />
+            <Tabs.Screen
+                name="createRide"
+                options={{ title: "Create", tabBarButtonTestID: "createTab" }}
+            />
 
-   <Tabs.Screen
-    name="userProfile"
-    options={{ title: "Profile" }}
-   />
+            <Tabs.Screen
+                name="myRides"
+                options={{ title: "My Rides", tabBarButtonTestID: "myRidesTab" }}
+            />
 
-  </Tabs>
+            <Tabs.Screen
+                name="userProfile"
+                options={{ title: "Profile", tabBarButtonTestID: "profileTab" }}
+            />
 
- );
+        </Tabs>
+
+    );
 
 }
