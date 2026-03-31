@@ -1,14 +1,13 @@
 import { useState, useCallback } from "react";
 
 import {
- ScrollView,
- View,
- Text,
- TextInput,
- Button,
- Switch,
- StyleSheet,
- ScrollView
+  ScrollView,
+  View,
+  Text,
+  TextInput,
+  Button,
+  Switch,
+  StyleSheet
 } from "react-native";
 
 import { layout } from "../../styles/layout";
@@ -19,496 +18,379 @@ import { colors, spacing } from "../../styles/theme";
 import { Picker } from "@react-native-picker/picker";
 
 import DateTimePicker
- from "@react-native-community/datetimepicker";
+  from "@react-native-community/datetimepicker";
 
 import {
- addRide
+  addRide
 } from "../../data/rides";
 
 import {
- getUserCars
+  getUserCars
 } from "../../data/cars";
 
 import {
- getCurrentUser
+  getCurrentUser
 } from "../../data/user";
 
 import {
- useFocusEffect,
- useRouter
+  useFocusEffect,
+  useRouter
 } from "expo-router";
 
-export default function CreateRide(){
+export default function CreateRide() {
 
- const router = useRouter();
+  const router = useRouter();
 
- const [user,setUser] =
-  useState(getCurrentUser());
+  const [user, setUser] =
+    useState(getCurrentUser());
 
- const [cars,setCars] =
-  useState(getUserCars(user.email));
+  const [cars, setCars] =
+    useState(getUserCars(user.email));
 
- const [origin,setOrigin] =
-  useState("");
+  const [origin, setOrigin] =
+    useState("");
 
- const [destination,setDestination] =
-  useState("");
+  const [destination, setDestination] =
+    useState("");
 
- const [selectedCar,setSelectedCar] =
-  useState<string | undefined>(
-   cars[0]?.id
+  const [selectedCar, setSelectedCar] =
+    useState<string | undefined>(
+      cars[0]?.id
+    );
+
+  const [seats, setSeats] =
+    useState("");
+
+  const [womenOnly, setWomenOnly] =
+    useState(false);
+
+  const now = new Date();
+
+  const defaultDeparture = new Date();
+  defaultDeparture.setMinutes(
+    defaultDeparture.getMinutes() + 60
   );
 
- const [seats,setSeats] =
-  useState("");
+  const [date, setDate] =
+    useState(defaultDeparture);
 
- const [womenOnly,setWomenOnly] =
-  useState(false);
+  const [time, setTime] =
+    useState(defaultDeparture);
 
-const now = new Date();
+  const [showDate, setShowDate] =
+    useState(false);
 
-const defaultDeparture = new Date();
-defaultDeparture.setMinutes(
- defaultDeparture.getMinutes() + 60
-);
-
-const [date,setDate] =
- useState(defaultDeparture);
-
-const [time,setTime] =
- useState(defaultDeparture);
-
- const [showDate,setShowDate] =
-  useState(false);
-
- const [showTime,setShowTime] =
-  useState(false);
+  const [showTime, setShowTime] =
+    useState(false);
 
 
- useFocusEffect(
+  useFocusEffect(
 
-  useCallback(()=>{
+    useCallback(() => {
 
-   const current = getCurrentUser();
+      const current = getCurrentUser();
 
-   const userCars =
-    getUserCars(current.email);
-    setUser(current);
-    setCars(userCars);
-   setSelectedCar(
-    userCars[0]?.id
-   );
+      const userCars =
+        getUserCars(current.email);
+      setUser(current);
+      setCars(userCars);
+      setSelectedCar(
+        userCars[0]?.id
+      );
 
-   setOrigin("");
-   setDestination("");
-   setSeats("");
-   setWomenOnly(false);
+      setOrigin("");
+      setDestination("");
+      setSeats("");
+      setWomenOnly(false);
 
-  },[])
+    }, [])
 
- );
-
-
- const car =
-  cars.find(
-   c => c.id === selectedCar
   );
 
 
- function createRide(){
+  const car =
+    cars.find(
+      c => c.id === selectedCar
+    );
 
-  if(
-   !origin.trim() ||
-   !destination.trim() ||
-   !car
-  ){
-   alert("Fill all fields");
-   return;
+
+  function createRide() {
+
+    if (
+      !origin.trim() ||
+      !destination.trim() ||
+      !car
+    ) {
+      alert("Fill all fields");
+      return;
+    }
+
+    if (origin.trim().toLowerCase() ===
+      destination.trim().toLowerCase()
+    ) {
+      alert("Origin and destination must differ");
+      return;
+    }
+
+    const seatsNumber = Number(seats);
+
+    if (!Number.isInteger(seatsNumber)) {
+      alert("Seats must be integer");
+      return;
+    }
+
+    if (seatsNumber < 1) {
+      alert("Must allow at least 1 passenger");
+      return;
+    }
+
+    if (seatsNumber > car.seatCapacity - 1) {
+      alert(`Max passengers ${car.seatCapacity - 1}`);
+      return;
+    }
+
+    const departure =
+      new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate(),
+        time.getHours(),
+        time.getMinutes()
+      );
+
+    if (departure < new Date()) {
+      alert("Cannot create ride in past");
+      return;
+    }
+
+    addRide({
+
+      id: Date.now().toString(),
+      driverId: user.email,
+      carId: car.id,
+      origin: origin.trim(),
+      destination: destination.trim(),
+      departureDateTime: departure.toISOString(),
+      availableSeats: seatsNumber,
+      totalSeats: seatsNumber,
+      womenOnly,
+      passengers: [],
+      completed: false
+    });
+
+    alert("Ride created");
+
+    router.replace("/(tabs)/myRides");
+
   }
 
-  if(origin.trim().toLowerCase() ===
-   destination.trim().toLowerCase()
-  ){
-   alert("Origin and destination must differ");
-   return;
+  if (cars.length === 0) {
+    return (
+      <View style={layout.screen}>
+
+        <Text style={layout.title}>
+          Create Ride
+        </Text>
+
+        <View style={components.card}>
+          <Text style={layout.subtitle}>
+            No car available
+          </Text>
+          <Text style={{ marginBottom: spacing.md }}>
+            You need to add a car before creating a ride.
+          </Text>
+          <View style={components.button}>
+            <Text
+              style={components.buttonText}
+              onPress={() => router.push("/(tabs)/userProfile")}
+            >
+              Go to profile
+            </Text>
+          </View>
+        </View>
+      </View>
+    );
   }
 
-  const seatsNumber =Number(seats);
 
-  if(!Number.isInteger(seatsNumber)){
-   alert("Seats must be integer");
-   return;
-  }
+  return (
 
-  if(seatsNumber < 1){
-    alert("Must allow at least 1 passenger");
-   return;
-  }
+    <ScrollView
+      style={layout.screen}
+      contentContainerStyle={{ paddingBottom: spacing.xl }}
+    >
 
-  if(seatsNumber >car.seatCapacity - 1){
-   alert(`Max passengers ${car.seatCapacity-1}`);
-   return;
-  }
-
-  const departure =
-   new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    time.getHours(),
-    time.getMinutes()
-   );
-
-  if(departure < new Date()){
-   alert("Cannot create ride in past");
-   return;
-  }
-
-  addRide({
-
-   id: Date.now().toString(),
-   driverId: user.email,
-   carId:car.id,
-   origin:origin.trim(),
-   destination:destination.trim(),
-   departureDateTime:departure.toISOString(),
-   availableSeats:seatsNumber,
-   totalSeats:seatsNumber,
-   womenOnly,
-   passengers:[],
-   completed:false
-  });
-
-  alert("Ride created");
-
-  router.replace("/(tabs)/myRides");
-
- }
-
-if(cars.length === 0){
-  return(
-<<<<<<< HEAD
-   <View style={layout.screen}>
-
-    <Text style={layout.title}>
-     Create Ride
-    </Text>
-
-    <View style={components.card}>
-      <Text style={layout.subtitle}>
-       No car available
+      <Text style={layout.title}>
+        Create Ride
       </Text>
-      <Text style={{marginBottom:spacing.md}}>
-       You need to add a car before creating a ride.
-      </Text>
+
+      <View style={components.card}>
+
+        <Text style={layout.subtitle}>
+          Origin
+        </Text>
+
+        <TextInput
+          placeholder="Origin"
+          value={origin}
+          maxLength={40}
+          onChangeText={setOrigin}
+          style={forms.input}
+          testID="originInput"
+        />
+
+        <View style={{ height: 6 }} />
+
+        <Text style={layout.subtitle}>
+          Destination
+        </Text>
+
+        <TextInput
+          placeholder="Destination"
+          value={destination}
+          maxLength={40}
+          onChangeText={setDestination}
+          style={forms.input}
+          testID="destinationInput"
+        />
+
+      </View>
+
+
+      <View style={components.card}>
+
+        <Text style={layout.subtitle}>
+          Date
+        </Text>
+
+        <View style={components.outlineButton}>
+          <Text
+            style={components.outlineButtonText}
+            onPress={() => setShowDate(true)}
+          >
+            {date.toDateString()}
+          </Text>
+        </View>
+
+        {showDate && (
+          <DateTimePicker
+            value={date}
+            mode="date"
+            onChange={(e, d) => {
+              setShowDate(false);
+              if (d) setDate(d);
+            }}
+          />
+        )}
+
+        <View style={{ height: 6 }} />
+
+
+        <Text style={layout.subtitle}>
+          Time
+        </Text>
+
+        <View style={components.outlineButton}>
+          <Text
+            style={components.outlineButtonText}
+            onPress={() => setShowTime(true)}
+          >
+            {time.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit"
+            })
+            }
+          </Text>
+        </View>
+
+        {showTime && (
+          <DateTimePicker
+            value={time}
+            mode="time"
+            onChange={(e, t) => {
+              setShowTime(false);
+              if (t) setTime(t);
+            }}
+          />
+        )}
+
+        <View style={{ height: 6 }} />
+
+
+        <Text style={layout.subtitle}>
+          Car
+        </Text>
+
+        <View style={components.pickerWrapper}>
+
+          <Picker
+            selectedValue={selectedCar}
+            onValueChange={setSelectedCar}
+            dropdownIconColor={colors.primary}
+            style={{ color: colors.primary, fontWeight: "600" }}
+          >
+            {cars.map(c => (
+              <Picker.Item
+                key={c.id}
+                label={`${c.model} (${c.licensePlate})`}
+                value={c.id}
+                style={{ color: "black", fontWeight: "600" }}
+              />
+            ))}
+          </Picker>
+
+        </View>
+
+        <View style={{ height: 6 }} />
+
+        <Text style={layout.subtitle}>
+          Seats
+        </Text>
+        <TextInput
+          placeholder={`1-${car.seatCapacity - 1} seats`}
+          value={seats}
+          onChangeText={setSeats}
+          keyboardType="numeric"
+          style={forms.input}
+        />
+
+      </View>
+
+      {user?.gender === "Female" && (
+
+        <View style={components.card}>
+
+          <View style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center"
+          }}>
+
+            <Text style={layout.subtitle}>
+              Women only
+            </Text>
+
+            <Switch
+              value={womenOnly}
+              onValueChange={setWomenOnly}
+              trackColor={{ false: "#d1d5db", true: "#fbcfe8" }}
+              thumbColor={womenOnly ? "#ec4899" : "#f9fafb"}
+            />
+          </View>
+        </View>
+      )}
+
       <View style={components.button}>
         <Text
-        style={components.buttonText}
-        onPress={()=>router.push("/(tabs)/userProfile")}
+          style={components.buttonText}
+          onPress={createRide}
+          testID="createRideButton"
         >
-          Go to profile
+          CREATE RIDE
         </Text>
       </View>
-    </View>
-   </View>
-=======
-   <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-    <Text style={styles.title}>
-     Create Ride
-    </Text>
-    <Text>
-     Add a car first in Profile
-    </Text>
-   </ScrollView>
->>>>>>> test/auth-and-ride
+    </ScrollView>
+
   );
+
 }
-
-
- return(
-
-<<<<<<< HEAD
-  <ScrollView 
-  style={layout.screen}
-  contentContainerStyle={{paddingBottom:spacing.xl}}
-  >
-=======
-  <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
->>>>>>> test/auth-and-ride
-
-   <Text style={layout.title}>
-    Create Ride
-   </Text>
-
-  <View style={components.card}>
-
-  <Text style={layout.subtitle}>
-  Origin
-  </Text>
-
-  <TextInput
-    placeholder="Origin"
-    value={origin}
-    maxLength={40}
-    onChangeText={setOrigin}
-<<<<<<< HEAD
-    style={forms.input}
-  />
-=======
-    style={styles.input}
-    testID="originInput"
-   />
->>>>>>> test/auth-and-ride
-
-  <View style={{height:6}} />
-
-   <Text style={layout.subtitle}>
-    Destination
-   </Text>
-
-  <TextInput
-    placeholder="Destination"
-    value={destination}
-    maxLength={40}
-    onChangeText={setDestination}
-<<<<<<< HEAD
-    style={forms.input}
-  />
-
-  </View>
-
-
-   <View style={components.card}>
-
- <Text style={layout.subtitle}>
-  Date
- </Text>
-
-  <View style={components.outlineButton}>
-  <Text
-    style={components.outlineButtonText}
-    onPress={()=>setShowDate(true)}
-  >
-    {date.toDateString()}
-  </Text>
-  </View>
-
- {showDate && (
-  <DateTimePicker
-   value={date}
-   mode="date"
-   onChange={(e,d)=>{
-    setShowDate(false);
-    if(d) setDate(d);
-   }}
-  />
- )}
-
- <View style={{height:6}} />
-
-
- <Text style={layout.subtitle}>
-  Time
- </Text>
-
-<View style={components.outlineButton}>
- <Text
-  style={components.outlineButtonText}
-  onPress={()=>setShowTime(true)}
- >
-  {time.toLocaleTimeString([], {hour:"2-digit",
-      minute:"2-digit"}) 
-  }
- </Text>
-</View>
-
- {showTime && (
-  <DateTimePicker
-   value={time}
-   mode="time"
-   onChange={(e,t)=>{
-    setShowTime(false);
-    if(t) setTime(t);
-   }}
-  />
- )}
-
- <View style={{height:6}} />
-
-
-<Text style={layout.subtitle}>
- Car
-</Text>
-
-<View style={components.pickerWrapper}>
-
- <Picker
-  selectedValue={selectedCar}
-  onValueChange={setSelectedCar}
-  dropdownIconColor={colors.primary}
-  style={{color:colors.primary, fontWeight:"600"}}
- >
-  {cars.map(c=>(
-   <Picker.Item
-    key={c.id}
-    label={`${c.model} (${c.licensePlate})`}
-    value={c.id}
-    style={{color:"black", fontWeight:"600"}}
-=======
-    style={styles.input}
-    testID="destinationInput"
->>>>>>> test/auth-and-ride
-   />
-  ))}
- </Picker>
-
-</View>
-
- <View style={{height:6}} />
-
- <Text style={layout.subtitle}>
-  Seats
- </Text>
- <TextInput
-  placeholder={`1-${car.seatCapacity-1} seats`}
-  value={seats}
-  onChangeText={setSeats}
-  keyboardType="numeric"
-  style={forms.input}
- />
-
-</View>
-
- {user?.gender === "Female" && (
-
- <View style={components.card}>
-
-  <View style={{
-   flexDirection:"row",
-   justifyContent:"space-between",
-   alignItems:"center"
-  }}>
-
-   <Text style={layout.subtitle}>
-    Women only
-   </Text>
-
-<<<<<<< HEAD
-  <Switch
-    value={womenOnly}
-    onValueChange={setWomenOnly}
-    trackColor={{false:"#d1d5db",true:"#fbcfe8"}}
-    thumbColor={womenOnly ? "#ec4899" : "#f9fafb"}
-  />
-  </View>
- </View>
-=======
-
-   {showTime && (
-    <DateTimePicker
-     value={time}
-     mode="time"
-     onChange={(e,t)=>{
-      setShowTime(false);
-      if(t)
-       setTime(t);
-     }}
-    />
-   )}
-
-   <Text>Car</Text>
-
-   <Picker
-    selectedValue={selectedCar}
-    onValueChange={
-     setSelectedCar
-    }
-   >
-    {cars.map(c=>(
-     <Picker.Item
-      key={c.id}
-      label={`${c.model} (${c.licensePlate})`}
-      value={c.id}
-     />
-    ))}
-
-   </Picker>
-
-   <TextInput
-    placeholder={`1-${car.seatCapacity-1} seats`}
-    value={seats}
-    onChangeText={setSeats}
-    keyboardType="numeric"
-    style={styles.input}
-    testID="seatsInput"
-   />
-
-  {user?.gender === "Female" && (
-   <View style={styles.row}>
-    <Text>
-     Women only
-    </Text>
-    <Switch
-     value={womenOnly}
-     onValueChange={
-      setWomenOnly
-     }
-    />
-   </View>
->>>>>>> test/auth-and-ride
-  )}
-  
-  <View style={components.button}>
-  <Text
-    style={components.buttonText}
-    onPress={createRide}
-<<<<<<< HEAD
-  >
-    CREATE RIDE
-  </Text>
-  </View>
-=======
-    testID="createRideButton"
-   />
->>>>>>> test/auth-and-ride
-  </ScrollView>
-
- );
-
-<<<<<<< HEAD
-}
-=======
-}
-
-
-const styles = StyleSheet.create({
-
- container:{
-  flex:1,
-  backgroundColor: "#fff",
- },
-
- scrollContent: {
-  padding:20,
-  gap:10
- },
-
- title:{
-  fontSize:20,
-  fontWeight:"bold"
- },
-
- input:{
-  borderWidth:1,
-  padding:10,
-  borderRadius:5
- },
-
- row:{
-  flexDirection:"row",
-  justifyContent:"space-between",
-  alignItems:"center"
- }
-
-});
->>>>>>> test/auth-and-ride

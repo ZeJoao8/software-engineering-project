@@ -10,9 +10,9 @@ appId: host.exp.Exponent
 - tapOn: { id: "createTab" }
 - assertVisible: "Create Ride"
 
-- tapOn: "Origin"
+- tapOn: { id: "originInput" }
 - inputText: "Porto"
-- tapOn: "Destination"
+- tapOn: { id: "destinationInput" }
 - inputText: "Lisbon"
 - pressKey: Enter
 - hideKeyboard

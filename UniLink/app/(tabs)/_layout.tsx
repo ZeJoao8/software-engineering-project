@@ -3,41 +3,35 @@ import { Tabs } from "expo-router";
 
 export default function TabsLayout() {
 
-<<<<<<< HEAD
- return (
-    
-  <Tabs
-
-   screenOptions={{
-
-    headerStyle:{
-     backgroundColor: colors.primary
-    },
-
-    headerTitleStyle:{
-     color: colors.primarySoft,      
-     fontWeight:"600"
-    },
-
-    headerTintColor: colors.text, 
-
-    tabBarStyle:{
-     backgroundColor: colors.primary,
-     borderTopColor:"#e5e7eb"
-    },
-
-    tabBarActiveTintColor: colors.primarySoft,
-
-    tabBarInactiveTintColor:colors.primaryDark
-
-   }}
-
-  >
-=======
     return (
 
-        <Tabs>
->>>>>>> test/auth-and-ride
+        <Tabs
+
+            screenOptions={{
+
+                headerStyle: {
+                    backgroundColor: colors.primary
+                },
+
+                headerTitleStyle: {
+                    color: colors.primarySoft,
+                    fontWeight: "600"
+                },
+
+                headerTintColor: colors.text,
+
+                tabBarStyle: {
+                    backgroundColor: colors.primary,
+                    borderTopColor: "#e5e7eb"
+                },
+
+                tabBarActiveTintColor: colors.primarySoft,
+
+                tabBarInactiveTintColor: colors.primaryDark
+
+            }}
+
+        >
 
             <Tabs.Screen
                 name="searchRide"

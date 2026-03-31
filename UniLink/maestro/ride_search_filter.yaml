@@ -7,8 +7,8 @@ appId: host.exp.Exponent
 - inputText: "1234"
 - tapOn: "Login"
 
-- tapOn: "Origin"
+- tapOn: { id: "originInput" }
 - inputText: "Porto"
-- tapOn: "Destination"
+- tapOn: { id: "destinationInput" }
 - inputText: "Feup"
 - assertVisible: "No rides found" 

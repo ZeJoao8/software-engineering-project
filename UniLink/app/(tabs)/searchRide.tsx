@@ -1,30 +1,30 @@
 import {
- View,
- Text,
- FlatList,
- TextInput,
- Switch,
- StyleSheet
+  View,
+  Text,
+  FlatList,
+  TextInput,
+  Switch,
+  StyleSheet
 } from "react-native";
 
 import {
- useRouter,
- useFocusEffect
+  useRouter,
+  useFocusEffect
 } from "expo-router";
 
 import {
- useState,
- useCallback,
- useEffect
+  useState,
+  useCallback,
+  useEffect
 } from "react";
 
 import {
- getRides,
- removeEmptyPastRides
+  getRides,
+  removeEmptyPastRides
 } from "../../data/rides";
 
 import {
- getCurrentUser
+  getCurrentUser
 } from "../../data/user";
 
 import RideCard from "../../components/rideCard";
@@ -32,235 +32,238 @@ import RideCard from "../../components/rideCard";
 import { formatDate, sortByDateAsc } from "../../utils/date";
 import { layout } from "../../styles/layout";
 import { components } from "../../styles/components";
-import { colors, spacing } from "../../styles/theme"; 
+import { colors, spacing } from "../../styles/theme";
 import { forms } from "../../styles/forms";
 
 
-export default function Home(){
+export default function Home() {
 
- const router = useRouter();
+  const router = useRouter();
 
- const [rides,setRides] =
-  useState(getRides());
+  const [rides, setRides] =
+    useState(getRides());
 
- const [user,setUser] =
-  useState(getCurrentUser());
+  const [user, setUser] =
+    useState(getCurrentUser());
 
- const [originFilter,setOriginFilter] =
-  useState("");
+  const [originFilter, setOriginFilter] =
+    useState("");
 
- const [destinationFilter,setDestinationFilter] =
-  useState("");
+  const [destinationFilter, setDestinationFilter] =
+    useState("");
 
- const [dateFilter,setDateFilter] =
-  useState("");
+  const [dateFilter, setDateFilter] =
+    useState("");
 
- const [womenOnlyFilter,setWomenOnlyFilter] =
-  useState(false);
+  const [womenOnlyFilter, setWomenOnlyFilter] =
+    useState(false);
 
- const [minSeats,setMinSeats] =
-  useState("");
+  const [minSeats, setMinSeats] =
+    useState("");
 
-const [now,setNow] =
- useState(new Date());
+  const [now, setNow] =
+    useState(new Date());
 
- useFocusEffect(
-  useCallback(()=>{
-   setRides([...getRides()]);
-   setUser(getCurrentUser());
-  },[])
- );
+  useFocusEffect(
+    useCallback(() => {
+      setRides([...getRides()]);
+      setUser(getCurrentUser());
+    }, [])
+  );
 
-useEffect(()=>{
- const interval =
-  setInterval(()=>{
-   removeEmptyPastRides();
-   setNow(new Date());
-   setRides([...getRides()]);
-  },10000);
- return () =>
-  clearInterval(interval);
-},[]);
+  useEffect(() => {
+    const interval =
+      setInterval(() => {
+        removeEmptyPastRides();
+        setNow(new Date());
+        setRides([...getRides()]);
+      }, 10000);
+    return () =>
+      clearInterval(interval);
+  }, []);
 
- const availableRides = sortByDateAsc(rides.filter(r =>
-   new Date(r.departureDateTime) >= now &&
-   r.availableSeats > 0 &&
-   r.driverId !== user.email &&
-   !r.passengers.includes(user.email) &&
-   r.origin.toLowerCase()
-    .includes(originFilter.toLowerCase()
+  const availableRides = sortByDateAsc(rides.filter(r =>
+    new Date(r.departureDateTime) >= now &&
+    r.availableSeats > 0 &&
+    r.driverId !== user.email &&
+    !r.passengers.includes(user.email) &&
+    r.origin.toLowerCase()
+      .includes(originFilter.toLowerCase()
+      ) &&
+    r.destination.toLowerCase().includes(
+      destinationFilter.toLowerCase()
     ) &&
-   r.destination.toLowerCase().includes(
-     destinationFilter.toLowerCase()
+    formatDate(r.departureDateTime)
+      .toLowerCase()
+      .includes(dateFilter.toLowerCase()
+      ) &&
+    (
+      user?.gender === "Female" ||
+      !r.womenOnly
     ) &&
-   formatDate(r.departureDateTime)
-    .toLowerCase()
-    .includes(dateFilter.toLowerCase()
-   ) &&
-   (
-    user?.gender === "Female" ||
-    !r.womenOnly
-   ) &&
-   (
-    !minSeats ||
-    r.availableSeats >=
-    Number(minSeats)
-   ) && 
-   (
-    !womenOnlyFilter ||
-    r.womenOnly
-   )
+    (
+      !minSeats ||
+      r.availableSeats >=
+      Number(minSeats)
+    ) &&
+    (
+      !womenOnlyFilter ||
+      r.womenOnly
+    )
   ));
 
 
-return(
+  return (
 
-<View style={layout.screen}>
+    <View style={layout.screen}>
 
-<Text style={layout.title}>
- Search rides
-</Text>
-
-
-{/* FILTERS */}
-<View style={components.card}>
-
-<Text style={layout.subtitle}>
- Origin
-</Text>
-
-<TextInput
- placeholder="Origin"
- value={originFilter}
- onChangeText={setOriginFilter}
- style={forms.input}
-/>
+      <Text style={layout.title}>
+        Search rides
+      </Text>
 
 
-<View style={{height:spacing.sm}} />
+      {/* FILTERS */}
+      <View style={components.card}>
 
-<Text style={layout.subtitle}>
- Destination
-</Text>
+        <Text style={layout.subtitle}>
+          Origin
+        </Text>
 
-<TextInput
- placeholder="Destination"
- value={destinationFilter}
- onChangeText={setDestinationFilter}
- style={forms.input}
-/>
-
-
-<View style={{height:spacing.sm}} />
-
-<Text style={layout.subtitle}>
- Date
-</Text>
-
-<TextInput
- placeholder="ex: 30/03 or 30/03 14:00"
- value={dateFilter}
- onChangeText={setDateFilter}
- style={forms.input}
-/>
+        <TextInput
+          placeholder="Origin"
+          value={originFilter}
+          onChangeText={setOriginFilter}
+          style={forms.input}
+          testID="originInput"
+        />
 
 
-<View style={{height:spacing.sm}} />
+        <View style={{ height: spacing.sm }} />
 
-<Text style={layout.subtitle}>
- Minimum seats
-</Text>
+        <Text style={layout.subtitle}>
+          Destination
+        </Text>
 
-<TextInput
- placeholder="1"
- value={minSeats}
- keyboardType="numeric"
- onChangeText={setMinSeats}
- style={forms.input}
-/>
-
-
-{user.gender === "Female" && (
-
-<View style={{
- flexDirection:"row",
- justifyContent:"space-between",
- alignItems:"center",
- marginTop:spacing.sm
-}}>
-
-<Text style={layout.subtitle}>
- Women only
-</Text>
-
-<Switch
- value={womenOnlyFilter}
- onValueChange={setWomenOnlyFilter}
-
- trackColor={{
-  false:"#d1d5db",
-  true:"#fbcfe8"
- }}
-
- thumbColor={
-  womenOnlyFilter
-   ? colors.women
-   : "#f9fafb"
- }
-/>
-
-</View>
-
-)}
-
-</View>
+        <TextInput
+          placeholder="Destination"
+          value={destinationFilter}
+          onChangeText={setDestinationFilter}
+          style={forms.input}
+          testID="destinationInput"
+        />
 
 
+        <View style={{ height: spacing.sm }} />
 
-{/* RESULTS */}
+        <Text style={layout.subtitle}>
+          Date
+        </Text>
 
-{availableRides.length === 0 ? (
+        <TextInput
+          placeholder="ex: 30/03 or 30/03 14:00"
+          value={dateFilter}
+          onChangeText={setDateFilter}
+          style={forms.input}
+        />
 
-<View style={components.card}>
 
-<Text style={{color:colors.textLight}}>
- No rides found
-</Text>
+        <View style={{ height: spacing.sm }} />
 
-</View>
+        <Text style={layout.subtitle}>
+          Minimum seats
+        </Text>
 
-) : (
+        <TextInput
+          placeholder="1"
+          value={minSeats}
+          keyboardType="numeric"
+          onChangeText={setMinSeats}
+          style={forms.input}
+          testID="minSeatsInput"
+        />
 
-<FlatList
- data={availableRides}
 
- keyExtractor={i=>i.id}
+        {user.gender === "Female" && (
 
- contentContainerStyle={{
-  paddingBottom:spacing.xl
- }}
+          <View style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginTop: spacing.sm
+          }}>
 
- renderItem={({item}) => (
+            <Text style={layout.subtitle}>
+              Women only
+            </Text>
 
-<View style={{marginBottom:spacing.md}}>
+            <Switch
+              value={womenOnlyFilter}
+              onValueChange={setWomenOnlyFilter}
 
-<RideCard
- ride={item}
+              trackColor={{
+                false: "#d1d5db",
+                true: "#fbcfe8"
+              }}
 
- onPress={() =>
-  router.push(`/ride/${item.id}`)
- }
-/>
+              thumbColor={
+                womenOnlyFilter
+                  ? colors.women
+                  : "#f9fafb"
+              }
+            />
 
-</View>
+          </View>
 
- )}
+        )}
 
- />
+      </View>
 
-)}
 
-</View>
 
-);
+      {/* RESULTS */}
+
+      {availableRides.length === 0 ? (
+
+        <View style={components.card}>
+
+          <Text style={{ color: colors.textLight }}>
+            No rides found
+          </Text>
+
+        </View>
+
+      ) : (
+
+        <FlatList
+          data={availableRides}
+
+          keyExtractor={i => i.id}
+
+          contentContainerStyle={{
+            paddingBottom: spacing.xl
+          }}
+
+          renderItem={({ item }) => (
+
+            <View style={{ marginBottom: spacing.md }}>
+
+              <RideCard
+                ride={item}
+
+                onPress={() =>
+                  router.push(`/ride/${item.id}`)
+                }
+              />
+
+            </View>
+
+          )}
+
+        />
+
+      )}
+
+    </View>
+
+  );
 }

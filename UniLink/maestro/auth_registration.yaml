@@ -22,9 +22,8 @@ appId: host.exp.Exponent
 - inputText: "LEIC"
 - pressKey: Enter
 
-- hideKeyboard
 
 - tapOn: { id: "genderPicker" }
-- tapOn: "Female"
+- tapOn: "Male"
 - tapOn: { id: "registerButton" }
 - assertVisible: "Search Rides"
