@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   View,
@@ -13,19 +13,20 @@ import {
 
 import {
   getCurrentUser,
-  getUsers,
   updateUser,
 } from "../../data/user";
 
 import {
   getUserCars,
   addCar,
-  deleteCar
+  deleteCar,
+  subscribeToCarsChanges
 } from "../../data/cars";
 
 import {
   getRides,
-  deleteRide
+  deleteRide,
+  subscribeToRidesChanges
 } from "../../data/rides";
 
 import { useRouter }
@@ -64,8 +65,37 @@ export default function Profile() {
   const [seats, setSeats] =
     useState("");
 
+  const [, setVersion] =
+    useState(0);
+
+  if (!user) {
+    return null;
+  }
+
+  const activeUser = user;
+
   const userCars =
-    getUserCars(user.email);
+    getUserCars(
+      activeUser.uid,
+      activeUser.email
+    );
+
+  useEffect(() => {
+    const rerender = () => {
+      setVersion(value => value + 1);
+    };
+
+    const unsubscribeCars =
+      subscribeToCarsChanges(rerender);
+
+    const unsubscribeRides =
+      subscribeToRidesChanges(rerender);
+
+    return () => {
+      unsubscribeCars();
+      unsubscribeRides();
+    };
+  }, []);
 
 
   function startEdit() {
@@ -76,7 +106,13 @@ export default function Profile() {
 
 
   function cancelEdit() {
-    setUser(getCurrentUser());
+    const current =
+      getCurrentUser();
+
+    if (current) {
+      setUser(current);
+    }
+
     setEditing(false);
     setShowCarForm(false);
     setModel("");
@@ -86,9 +122,9 @@ export default function Profile() {
   }
 
 
-  function saveProfile() {
-    updateUser(user);
-    setUser({ ...user });
+  async function saveProfile() {
+    await updateUser(activeUser);
+    setUser({ ...activeUser });
     setEditing(false);
     Alert.alert("Saved");
   }
@@ -116,19 +152,26 @@ export default function Profile() {
         {
           text: "Yes",
           style: "destructive",
-          onPress: () => {
-            ridesUsingCar.forEach(
-              r => deleteRide(r.id)
+          onPress: async () => {
+            await Promise.all(
+              ridesUsingCar.map(
+                ride => deleteRide(ride.id)
+              )
             );
-            deleteCar(carId);
-            setUser({ ...getCurrentUser() });
+            await deleteCar(carId);
+            const current =
+              getCurrentUser();
+
+            if (current) {
+              setUser({ ...current });
+            }
           }
         }
       ]
     );
   }
 
-  function addNewCar() {
+  async function addNewCar() {
     if (
       !model.trim() ||
       !color.trim() ||
@@ -158,7 +201,10 @@ export default function Profile() {
       return;
     }
     const duplicate =
-      getUserCars(user.email)
+      getUserCars(
+        activeUser.uid,
+        activeUser.email
+      )
         .some(
           c =>
             c.licensePlate ===
@@ -168,13 +214,13 @@ export default function Profile() {
       Alert.alert("Plate already exists");
       return;
     }
-    addCar({
+    await addCar({
       id: Date.now().toString(),
       model: model.trim(),
       color: color.trim(),
       licensePlate: formattedPlate,
       seatCapacity: seatsNumber,
-      ownerId: user.email
+      ownerId: activeUser.uid
     });
     setModel("");
     setColor("");
@@ -214,14 +260,14 @@ export default function Profile() {
 
         {editing ? (
           <TextInput
-            value={user.name}
+            value={activeUser.name}
             onChangeText={t =>
-              setUser({ ...user, name: t })
+              setUser({ ...activeUser, name: t })
             }
             style={forms.input}
           />
         ) : (
-          <Text>{user.name}</Text>
+          <Text>{activeUser.name}</Text>
         )}
 
 
@@ -232,7 +278,7 @@ export default function Profile() {
         </Text>
 
         <Text>
-          {user.gender}
+          {activeUser.gender}
         </Text>
 
 
@@ -243,7 +289,7 @@ export default function Profile() {
         </Text>
 
         <Text>
-          {user.university}
+          {activeUser.university}
         </Text>
 
 
@@ -255,15 +301,15 @@ export default function Profile() {
 
         {editing ? (
           <TextInput
-            value={user.course}
+            value={activeUser.course}
             onChangeText={t =>
-              setUser({ ...user, course: t })
+              setUser({ ...activeUser, course: t })
             }
             style={forms.input}
           />
         ) : (
           <Text>
-            {user.course}
+            {activeUser.course}
           </Text>
         )}
 
@@ -444,7 +490,7 @@ export default function Profile() {
 
           <View style={{ marginTop: spacing.md }}>
 
-            <Pressable style={components.button} onPress={addNewCar}>
+            <Pressable style={components.button} onPress={() => void addNewCar()}>
               <Text
                 style={components.buttonText}
               >
@@ -479,8 +525,8 @@ export default function Profile() {
                     text: "Logout",
                     style: "destructive",
 
-                    onPress: () => {
-                      logoutUser();
+                    onPress: async () => {
+                      await logoutUser();
                       router.replace("/login");
                     }
                   }

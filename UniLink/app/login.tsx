@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
  View,
@@ -6,12 +6,17 @@ import {
  TextInput,
  ScrollView,
  Alert,
- Pressable
+ Pressable,
+ ActivityIndicator
 } from "react-native";
 
 import {
+ getCurrentUser,
+ isAuthReady,
  loginUser,
- registerUser
+ registerUser,
+ subscribeToAuthChanges,
+ waitForAuthReady,
 } from "../data/user";
 
 import { useRouter } from "expo-router";
@@ -45,29 +50,63 @@ export default function Login(){
  const [gender,setGender] =
   useState<"Male"|"Female">("Male");
 
+ const [loading, setLoading] =
+  useState(false);
 
- function login(){
+ const [ready, setReady] =
+  useState(isAuthReady());
+
+ useEffect(() => {
+  let mounted = true;
+
+  function syncState() {
+   if (!mounted) return;
+   setReady(isAuthReady());
+
+   if (getCurrentUser()) {
+    router.replace("/(tabs)/searchRide");
+   }
+  }
+
+  syncState();
+
+  const unsubscribe =
+   subscribeToAuthChanges(syncState);
+
+  void waitForAuthReady().then(syncState);
+
+  return () => {
+   mounted = false;
+   unsubscribe();
+  };
+ }, [router]);
+
+
+ async function login(){
+
+  if(loading) return;
+
+  setLoading(true);
 
   const success =
-   loginUser(email,password);
+   await loginUser(email,password);
 
   if(!success){
-
-   Alert.alert(
-    "Login failed",
-    "Invalid email or password"
-   );
+   setLoading(false);
 
    return;
 
   }
 
+  setLoading(false);
   router.replace("/(tabs)/searchRide");
 
  }
 
 
- function register(){
+ async function register(){
+
+  if(loading) return;
 
   if(
    !name.trim() ||
@@ -119,8 +158,10 @@ export default function Login(){
 
   }
 
+  setLoading(true);
+
   const user =
-   registerUser(
+   await registerUser(
     name,
     email,
     password,
@@ -130,11 +171,27 @@ export default function Login(){
    );
 
   if(!user){
+   setLoading(false);
    return;
   }
 
+  setLoading(false);
   router.replace("/(tabs)/searchRide");
 
+ }
+
+ if(!ready){
+  return(
+   <View
+    style={{
+     flex:1,
+     justifyContent:"center",
+     alignItems:"center"
+    }}
+   >
+    <ActivityIndicator color={colors.primary} />
+   </View>
+  );
  }
 
 
@@ -315,9 +372,11 @@ export default function Login(){
  style={components.buttonText}
 >
 
-{registerMode
- ? "CREATE ACCOUNT"
- : "LOGIN"}
+{loading
+ ? "LOADING..."
+ : registerMode
+   ? "CREATE ACCOUNT"
+   : "LOGIN"}
 
 </Text>
 
@@ -358,16 +417,19 @@ test accounts:
 
 {"\n"}
 
-joao@feup.pt / 1234
+joao@feup.pt / 123456
 
 {"\n"}
 
-maria@feup.pt / 1234
+maria@feup.pt / 123456
+
+{"\n"}
+
+ana@feup.pt / 123456
 
 </Text>
 
 )}
-
 
 </View>
 

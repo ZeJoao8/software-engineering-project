@@ -22,7 +22,7 @@ import {
 
 import {
  getCurrentUser,
- getUsers
+ getUserById
 } from "../../data/user";
 
 import {
@@ -61,14 +61,14 @@ export default function RideDetails(){
 
  const user = getCurrentUser();
 
- const users = getUsers();
+ if(!user) return null;
+
+ const activeUser = user;
 
  const cars = getCars();
 
  const driver =
-  users.find(
-   u => u.email === r.driverId
-  );
+  getUserById(r.driverId);
 
  const car =
   cars.find(
@@ -78,17 +78,17 @@ export default function RideDetails(){
  const passengers =
   ride.passengers
    .map(id =>
-    users.find(
-     u => u.email === id
-    )
+    getUserById(id)
    )
    .filter(Boolean);
 
  const isDriver =
-  r.driverId === user.email;
+  r.driverId === activeUser.uid ||
+  r.driverId === activeUser.email;
 
  const joined =
-  r.passengers.includes(user.email);
+  r.passengers.includes(activeUser.uid) ||
+  r.passengers.includes(activeUser.email);
 
  const rideDate =
   new Date(r.departureDateTime);
@@ -106,7 +106,9 @@ export default function RideDetails(){
 
 const driverCars =
  cars.filter(
-  c => c.ownerId === user.email
+  c =>
+   c.ownerId === activeUser.uid ||
+   c.ownerId === activeUser.email
  );
 
 const [editingCar,setEditingCar] =
@@ -131,7 +133,7 @@ function reserveSeat(){
   );
   return;
  }
- if(r.womenOnly && user.gender !== "Female"
+ if(r.womenOnly && activeUser.gender !== "Female"
  ){
   Alert.alert(
    "Not allowed",
@@ -156,14 +158,14 @@ function reserveSeat(){
    },
    {
     text:"Yes",
-    onPress:()=>{
-     updateRide({
+     onPress: async ()=>{
+      await updateRide({
       ...r,
       availableSeats:
        r.availableSeats - 1,
       passengers:[
        ...r.passengers,
-       user.email
+       activeUser.uid
       ]
      });
      router.replace("/(tabs)/myRides");
@@ -192,15 +194,17 @@ function cancelSeat(){
    {
     text:"Yes",
     style:"destructive",
-    onPress:()=>{
-     const newSeats =
-      Math.min(r.availableSeats + 1,r.totalSeats);
-     updateRide({
+     onPress: async ()=>{
+      const newSeats =
+       Math.min(r.availableSeats + 1,r.totalSeats);
+      await updateRide({
       ...r,
       availableSeats:newSeats,
       passengers:
        r.passengers.filter(
-        p => p !== user.email
+         p =>
+          p !== activeUser.uid &&
+          p !== activeUser.email
        )
      });
      router.replace("/(tabs)/myRides");
@@ -229,9 +233,9 @@ function cancelRide(){
    {
     text:"Yes",
     style:"destructive",
-    onPress:()=>{
-     deleteRide(r.id);
-     router.replace("/(tabs)/myRides");
+     onPress: async ()=>{
+      await deleteRide(r.id);
+      router.replace("/(tabs)/myRides");
     }
    }
   ]
@@ -256,8 +260,8 @@ function completeRide(){
    },
    {
     text:"Yes",
-    onPress:()=>{
-     updateRide({
+     onPress: async ()=>{
+      await updateRide({
       ...r,
       completed:true
      });
@@ -287,8 +291,8 @@ function removePassenger(passengerId:string){
    {
     text:"Yes",
     style:"destructive",
-    onPress:()=>{
-     updateRide({
+     onPress: async ()=>{
+      await updateRide({
       ...r,
       passengers:
        r.passengers.filter(
@@ -339,8 +343,8 @@ function changeCar(){
    },
    {
     text:"Yes",
-    onPress:()=>{
-     updateRide({
+     onPress: async ()=>{
+      await updateRide({
       ...r,
       carId:newCar.id,
       totalSeats:newRideLimit,
@@ -456,13 +460,13 @@ function changeCar(){
 
  onPress={()=>{
 
-  if(driver?.email === user.email)
+  if(driver?.uid === activeUser.uid)
 
    router.push("/(tabs)/userProfile");
 
   else
 
-   router.push(`/user/${driver?.email}`);
+   router.push(`/user/${driver?.uid}`);
 
  }}
 >
@@ -545,7 +549,7 @@ function changeCar(){
 {passengers.map(p => (
 
 <View
- key={p!.email}
+ key={p!.uid}
 
  style={{
   flexDirection:"row",
@@ -560,13 +564,13 @@ function changeCar(){
 
  onPress={()=>{
 
-  if(p!.email === user.email)
+  if(p!.uid === activeUser.uid)
 
    router.push("/(tabs)/userProfile");
 
   else
 
-   router.push(`/user/${p!.email}`);
+   router.push(`/user/${p!.uid}`);
 
  }}
 >
@@ -586,7 +590,7 @@ function changeCar(){
  }}
 
  onPress={() =>
-  removePassenger(p!.email)
+  removePassenger(p!.uid)
  }
 >
 

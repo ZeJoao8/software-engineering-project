@@ -17,7 +17,8 @@ import {
 } from "react";
 
 import {
- getRides
+ getRides,
+ subscribeToRidesChanges
 } from "../../data/rides";
 
 import {
@@ -56,24 +57,39 @@ export default function MyRides(){
   );
 
 useEffect(()=>{
+ const unsubscribe =
+  subscribeToRidesChanges(()=>{
+   setNow(new Date());
+   setRides([...getRides()]);
+  });
+
  const interval =
   setInterval(()=>{
    removeEmptyPastRides();
    setNow(new Date());
    setRides([...getRides()]);
   },10000);
- return () =>
+
+ return () => {
+  unsubscribe();
   clearInterval(interval);
+ };
 },[]);
+
+ if(!user) return null;
 
  const driverRides = sortByDateDesc(
    rides.filter(
-   r => r.driverId === user.email
+   r =>
+    r.driverId === user.uid ||
+    r.driverId === user.email
   ));
 
  const passengerRides = sortByDateDesc(
    rides.filter(
-   r => r.passengers.includes(user.email)
+   r =>
+    r.passengers.includes(user.uid) ||
+    r.passengers.includes(user.email)
   ));
 
  function renderRide(item:any){

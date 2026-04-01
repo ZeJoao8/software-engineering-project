@@ -20,7 +20,8 @@ import {
 
 import {
   getRides,
-  removeEmptyPastRides
+  removeEmptyPastRides,
+  subscribeToRidesChanges
 } from "../../data/rides";
 
 import {
@@ -72,20 +73,32 @@ export default function Home() {
   );
 
   useEffect(() => {
+    const unsubscribe =
+      subscribeToRidesChanges(() => {
+        setNow(new Date());
+        setRides([...getRides()]);
+      });
+
     const interval =
       setInterval(() => {
         removeEmptyPastRides();
         setNow(new Date());
         setRides([...getRides()]);
       }, 10000);
-    return () =>
+    return () => {
+      unsubscribe();
       clearInterval(interval);
+    };
   }, []);
+
+  if(!user) return null;
 
   const availableRides = sortByDateAsc(rides.filter(r =>
     new Date(r.departureDateTime) >= now &&
     r.availableSeats > 0 &&
+    r.driverId !== user.uid &&
     r.driverId !== user.email &&
+    !r.passengers.includes(user.uid) &&
     !r.passengers.includes(user.email) &&
     r.origin.toLowerCase()
       .includes(originFilter.toLowerCase()
@@ -98,7 +111,7 @@ export default function Home() {
       .includes(dateFilter.toLowerCase()
       ) &&
     (
-      user?.gender === "Female" ||
+      user.gender === "Female" ||
       !r.womenOnly
     ) &&
     (

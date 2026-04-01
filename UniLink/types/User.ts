@@ -1,5 +1,7 @@
 export interface User {
 
+ uid: string;
+
  name: string;
 
  university: string;
@@ -9,7 +11,5 @@ export interface User {
  gender: "Male" | "Female";
 
  email: string;
-
- password: string;
 
 }

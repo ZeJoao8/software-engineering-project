@@ -13,7 +13,7 @@ import {
 } from "expo-router";
 
 import {
- getUsers
+ getUserById
 } from "../../data/user";
 
 import {
@@ -39,15 +39,13 @@ export default function PublicProfile(){
 
  const user =
   id
-   ? getUsers().find(
-      u => u.email === id
-     )
+   ? getUserById(id)
    : undefined;
 
  if(!user) return null;
 
  const cars =
-  getUserCars(user.email);
+  getUserCars(user.uid, user.email);
 
 
 return(

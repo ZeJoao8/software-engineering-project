@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 import {
   ScrollView,
@@ -26,7 +26,8 @@ import {
 } from "../../data/rides";
 
 import {
-  getUserCars
+  getUserCars,
+  subscribeToCarsChanges
 } from "../../data/cars";
 
 import {
@@ -46,7 +47,14 @@ export default function CreateRide() {
     useState(getCurrentUser());
 
   const [cars, setCars] =
-    useState(getUserCars(user.email));
+    useState(
+      user
+        ? getUserCars(
+            user.uid,
+            user.email
+          )
+        : []
+    );
 
   const [origin, setOrigin] =
     useState("");
@@ -84,7 +92,6 @@ export default function CreateRide() {
   const [showTime, setShowTime] =
     useState(false);
 
-
   useFocusEffect(
 
     useCallback(() => {
@@ -92,7 +99,12 @@ export default function CreateRide() {
       const current = getCurrentUser();
 
       const userCars =
-        getUserCars(current.email);
+        current
+          ? getUserCars(
+              current.uid,
+              current.email
+            )
+          : [];
       setUser(current);
       setCars(userCars);
       setSelectedCar(
@@ -108,14 +120,41 @@ export default function CreateRide() {
 
   );
 
+  useEffect(() => {
+    return subscribeToCarsChanges(() => {
+      const current = getCurrentUser();
+      const nextCars =
+        current
+          ? getUserCars(
+              current.uid,
+              current.email
+            )
+          : [];
 
-  const car =
-    cars.find(
-      c => c.id === selectedCar
-    );
+      setCars(nextCars);
+      setSelectedCar(currentSelected =>
+        nextCars.some(
+          car => car.id === currentSelected
+        )
+          ? currentSelected
+          : nextCars[0]?.id
+      );
+    });
+  }, []);
+
+  if (!user) {
+    return null;
+  }
+
+  const activeUser = user;
 
 
-  function createRide() {
+  async function createRide() {
+
+    const car =
+      cars.find(
+        c => c.id === selectedCar
+      );
 
     if (
       !origin.trim() ||
@@ -164,10 +203,10 @@ export default function CreateRide() {
       return;
     }
 
-    addRide({
+    await addRide({
 
       id: Date.now().toString(),
-      driverId: user.email,
+      driverId: activeUser.uid,
       carId: car.id,
       origin: origin.trim(),
       destination: destination.trim(),
@@ -211,6 +250,12 @@ export default function CreateRide() {
       </View>
     );
   }
+
+  const car =
+    cars.find(
+      currentCar =>
+        currentCar.id === selectedCar
+    ) ?? cars[0];
 
 
   return (
@@ -359,7 +404,7 @@ export default function CreateRide() {
 
       </View>
 
-      {user?.gender === "Female" && (
+      {activeUser.gender === "Female" && (
 
         <View style={components.card}>
 
@@ -383,7 +428,7 @@ export default function CreateRide() {
         </View>
       )}
 
-      <Pressable style={components.button} onPress={createRide}>
+      <Pressable style={components.button} onPress={() => void createRide()}>
         <Text
           style={components.buttonText}
           testID="createRideButton"
