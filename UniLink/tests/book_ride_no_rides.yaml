@@ -1,0 +1,22 @@
+appId: host.exp.Exponent
+---
+
+- tapOn: "UniLink"
+
+- assertVisible: "Select Profile"
+- tapOn: "JOÃO (MALE)"
+
+- assertVisible: "Search Rides"
+
+- tapOn: "Origin"
+- inputText: "lisboa"
+
+- tapOn: "Destination"
+- inputText: "porto"
+
+- tapOn: "Date (ex: 28/03 or 28/03 14:30)"
+- inputText: "01/01"
+
+- hideKeyboard
+
+- assertVisible: "No rides found"
