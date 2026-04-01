@@ -10,6 +10,16 @@ export interface Ride {
 
   destination: string;
 
+  originCoords?: {
+    latitude: number;
+    longitude: number;
+  };
+
+  destinationCoords?: {
+    latitude: number;
+    longitude: number;
+  };
+
   departureDateTime: string;
 
   availableSeats: number;

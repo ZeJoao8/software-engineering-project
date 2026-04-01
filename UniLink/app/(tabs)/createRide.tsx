@@ -7,7 +7,8 @@ import {
   TextInput,
   Button,
   Switch,
-  StyleSheet
+  StyleSheet,
+  TouchableOpacity
 } from "react-native";
 
 import { layout } from "../../styles/layout";
@@ -37,6 +38,11 @@ import {
   useRouter
 } from "expo-router";
 
+import MapPicker from "../../components/MapPicker";
+import RouteMap from "../../components/RouteMap";
+import * as Location from "expo-location";
+import { searchLocations } from "../../utils/location";
+
 export default function CreateRide() {
 
   const router = useRouter();
@@ -64,6 +70,18 @@ export default function CreateRide() {
   const [womenOnly, setWomenOnly] =
     useState(false);
 
+  const [originCoords, setOriginCoords] =
+    useState<{ latitude: number; longitude: number } | undefined>();
+
+  const [destinationCoords, setDestinationCoords] =
+    useState<{ latitude: number; longitude: number } | undefined>();
+
+  const [showOriginPicker, setShowOriginPicker] =
+    useState(false);
+
+  const [showDestinationPicker, setShowDestinationPicker] =
+    useState(false);
+
   const now = new Date();
 
   const defaultDeparture = new Date();
@@ -83,6 +101,12 @@ export default function CreateRide() {
   const [showTime, setShowTime] =
     useState(false);
 
+  const [originSuggestions, setOriginSuggestions] =
+    useState<any[]>([]);
+
+  const [destinationSuggestions, setDestinationSuggestions] =
+    useState<any[]>([]);
+
 
   useFocusEffect(
 
@@ -100,6 +124,8 @@ export default function CreateRide() {
 
       setOrigin("");
       setDestination("");
+      setOriginCoords(undefined);
+      setDestinationCoords(undefined);
       setSeats("");
       setWomenOnly(false);
 
@@ -112,6 +138,65 @@ export default function CreateRide() {
     cars.find(
       c => c.id === selectedCar
     );
+
+
+  async function handleSelectOrigin(coords: { latitude: number; longitude: number }) {
+    setOriginCoords(coords);
+    try {
+      const [address] = await Location.reverseGeocodeAsync(coords);
+      if (address) {
+        const name = address.street || address.name || `${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)}`;
+        setOrigin(name);
+      }
+    } catch {
+      setOrigin(`${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)}`);
+    }
+  }
+
+  async function handleSelectDestination(coords: { latitude: number; longitude: number }) {
+    setDestinationCoords(coords);
+    try {
+      const [address] = await Location.reverseGeocodeAsync(coords);
+      if (address) {
+        const name = address.street || address.name || `${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)}`;
+        setDestination(name);
+      }
+    } catch {
+      setDestination(`${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)}`);
+    }
+  }
+
+  const fetchOriginSuggestions = async (text: string) => {
+    setOrigin(text);
+    if (text.length >= 3) {
+      const results = await searchLocations(text);
+      setOriginSuggestions(results);
+    } else {
+      setOriginSuggestions([]);
+    }
+  };
+
+  const fetchDestinationSuggestions = async (text: string) => {
+    setDestination(text);
+    if (text.length >= 3) {
+      const results = await searchLocations(text);
+      setDestinationSuggestions(results);
+    } else {
+      setDestinationSuggestions([]);
+    }
+  };
+
+  const selectOriginSuggestion = (suggestion: any) => {
+    setOrigin(suggestion.name);
+    setOriginCoords({ latitude: suggestion.latitude, longitude: suggestion.longitude });
+    setOriginSuggestions([]);
+  };
+
+  const selectDestinationSuggestion = (suggestion: any) => {
+    setDestination(suggestion.name);
+    setDestinationCoords({ latitude: suggestion.latitude, longitude: suggestion.longitude });
+    setDestinationSuggestions([]);
+  };
 
 
   function createRide() {
@@ -170,6 +255,8 @@ export default function CreateRide() {
       carId: car.id,
       origin: origin.trim(),
       destination: destination.trim(),
+      originCoords,
+      destinationCoords,
       departureDateTime: departure.toISOString(),
       availableSeats: seatsNumber,
       totalSeats: seatsNumber,
@@ -239,9 +326,41 @@ export default function CreateRide() {
           placeholder="Origin"
           value={origin}
           maxLength={40}
-          onChangeText={setOrigin}
+          onChangeText={fetchOriginSuggestions}
           style={forms.input}
           testID="originInput"
+        />
+
+        {originSuggestions.length > 0 && (
+          <View style={styles.suggestionsContainer}>
+            {originSuggestions.map((s, i) => (
+              <TouchableOpacity
+                key={i}
+                style={styles.suggestionItem}
+                onPress={() => selectOriginSuggestion(s)}
+              >
+                <Text style={styles.suggestionText}>{s.name}</Text>
+                <Text style={styles.suggestionSubtext}>{s.city}, {s.country}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
+        <View style={components.outlineButton}>
+          <Text
+            style={components.outlineButtonText}
+            onPress={() => setShowOriginPicker(true)}
+          >
+            {originCoords ? "Location Picked ✓" : "Pick on Map"}
+          </Text>
+        </View>
+
+        <MapPicker
+          visible={showOriginPicker}
+          title="Pick Origin"
+          onClose={() => setShowOriginPicker(false)}
+          onSelect={handleSelectOrigin}
+          initialLocation={originCoords}
         />
 
         <View style={{ height: 6 }} />
@@ -254,10 +373,53 @@ export default function CreateRide() {
           placeholder="Destination"
           value={destination}
           maxLength={40}
-          onChangeText={setDestination}
+          onChangeText={fetchDestinationSuggestions}
           style={forms.input}
           testID="destinationInput"
         />
+
+        {destinationSuggestions.length > 0 && (
+          <View style={styles.suggestionsContainer}>
+            {destinationSuggestions.map((s, i) => (
+              <TouchableOpacity
+                key={i}
+                style={styles.suggestionItem}
+                onPress={() => selectDestinationSuggestion(s)}
+              >
+                <Text style={styles.suggestionText}>{s.name}</Text>
+                <Text style={styles.suggestionSubtext}>{s.city}, {s.country}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
+        <View style={components.outlineButton}>
+          <Text
+            style={components.outlineButtonText}
+            onPress={() => setShowDestinationPicker(true)}
+          >
+            {destinationCoords ? "Location Picked ✓" : "Pick on Map"}
+          </Text>
+        </View>
+
+        <MapPicker
+          visible={showDestinationPicker}
+          title="Pick Destination"
+          onClose={() => setShowDestinationPicker(false)}
+          onSelect={handleSelectDestination}
+          initialLocation={destinationCoords}
+        />
+
+        {(originCoords || destinationCoords) && (
+          <View style={{ marginTop: spacing.md }}>
+            <RouteMap
+              origin={originCoords}
+              destination={destinationCoords}
+              originName={origin || "Origin"}
+              destinationName={destination || "Destination"}
+            />
+          </View>
+        )}
 
       </View>
 
@@ -399,3 +561,34 @@ export default function CreateRide() {
   );
 
 }
+
+const styles = StyleSheet.create({
+  suggestionsContainer: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    marginTop: -8,
+    marginBottom: spacing.md,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    zIndex: 1000,
+  },
+  suggestionItem: {
+    padding: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6',
+  },
+  suggestionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  suggestionSubtext: {
+    fontSize: 12,
+    color: colors.textLight,
+  },
+});

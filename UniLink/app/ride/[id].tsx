@@ -38,6 +38,8 @@ import { components } from "../../styles/components";
 import { layout } from "../../styles/layout";
 import { colors, spacing } from "../../styles/theme";
 
+import RouteMap from "../../components/RouteMap";
+
 export default function RideDetails(){
 
  const router = useRouter();
@@ -54,11 +56,17 @@ export default function RideDetails(){
    ? getRides().find(r => r.id === id)
    : undefined;
 
- if(!ride) return null;
+ const user = getCurrentUser();
+
+ const [editingCar,setEditingCar] =
+  useState(false);
+
+ const [selectedCarId,setSelectedCarId] =
+  useState(ride?.carId || "");
+
+ if(!ride || !user) return null;
 
  const r=ride;
-
- const user = getCurrentUser();
 
  const users = getUsers();
 
@@ -108,12 +116,6 @@ const driverCars =
   c => c.ownerId === user.email
  );
 
-const [editingCar,setEditingCar] =
- useState(false);
-
-const [selectedCarId,setSelectedCarId] =
- useState(r.carId);
-
 function reserveSeat(){
  if(r.completed){
   Alert.alert(
@@ -130,7 +132,7 @@ function reserveSeat(){
   );
   return;
  }
- if(r.womenOnly && user.gender !== "Female"
+ if(r.womenOnly && user!.gender !== "Female"
  ){
   Alert.alert(
    "Not allowed",
@@ -162,7 +164,7 @@ function reserveSeat(){
        r.availableSeats - 1,
       passengers:[
        ...r.passengers,
-       user.email
+       user!.email
       ]
      });
      router.replace("/(tabs)/myRides");
@@ -199,7 +201,7 @@ function cancelSeat(){
       availableSeats:newSeats,
       passengers:
        r.passengers.filter(
-        p => p !== user.email
+        p => p !== user!.email
        )
      });
      router.replace("/(tabs)/myRides");
@@ -439,6 +441,17 @@ function changeCar(){
 
 </View>
 
+{r.originCoords && r.destinationCoords && (
+  <View style={{ marginTop: spacing.md }}>
+    <RouteMap
+      origin={r.originCoords}
+      destination={r.destinationCoords}
+      originName={r.origin}
+      destinationName={r.destination}
+    />
+  </View>
+)}
+
 </View>
 
 
@@ -455,7 +468,7 @@ function changeCar(){
 
  onPress={()=>{
 
-  if(driver?.email === user.email)
+  if(driver?.email === user!.email)
 
    router.push("/(tabs)/userProfile");
 
@@ -562,7 +575,7 @@ function changeCar(){
 
  onPress={()=>{
 
-  if(p!.email === user.email)
+  if(p!.email === user!.email)
 
    router.push("/(tabs)/userProfile");
 
