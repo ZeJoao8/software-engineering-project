@@ -11,7 +11,7 @@ UniLink/web-build/
 UniLink/expo-env.d.ts
 
 # Environment files
-UniLink/.env
+# Keep the shared Expo public config versioned; ignore only machine-specific overrides.
 UniLink/.env*.local
 
 # Build and debug output
