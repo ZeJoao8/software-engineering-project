@@ -4,7 +4,8 @@ import {
  FlatList,
  Pressable,
  TextInput,
- StyleSheet
+ StyleSheet,
+ Linking
 } from "react-native";
 
 import {
@@ -21,7 +22,6 @@ import { getRides } from "../../data/rides";
 import { getCurrentUser } from "../../data/user";
 
 export default function Home() {
-
  const router = useRouter();
 
  const [rides, setRides] =
@@ -41,60 +41,51 @@ export default function Home() {
 
  useFocusEffect(
   useCallback(() => {
-
    setRides([...getRides()]);
    setUser(getCurrentUser());
-
   }, [])
  );
 
- function formatDate(iso:string) {
-
+ function formatDate(iso: string) {
   const d = new Date(iso);
 
   return (
    d.toLocaleDateString()
    + " "
-   + d.toLocaleTimeString([],{
-    hour:"2-digit",
-    minute:"2-digit"
+   + d.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit"
    })
   );
-
  }
 
  const availableRides =
   rides.filter(r =>
-
    r.availableSeats > 0 &&
-
    r.driverId !== user.id &&
-
    !r.passengers.includes(user.id) &&
-
    r.origin
     .toLowerCase()
     .includes(originFilter.toLowerCase()) &&
-
    r.destination
     .toLowerCase()
     .includes(destinationFilter.toLowerCase()) &&
-
    formatDate(r.departureDateTime)
     .toLowerCase()
     .includes(dateFilter.toLowerCase())
-
   );
 
  return (
-
   <View style={styles.container}>
-
-   <Text style={styles.title}>
+   <Text
+    style={styles.title}
+    testID="search-title"
+   >
     Search Rides
    </Text>
 
    <TextInput
+    testID="origin-input"
     placeholder="Origin"
     value={originFilter}
     onChangeText={setOriginFilter}
@@ -102,6 +93,7 @@ export default function Home() {
    />
 
    <TextInput
+    testID="destination-input"
     placeholder="Destination"
     value={destinationFilter}
     onChangeText={setDestinationFilter}
@@ -109,6 +101,7 @@ export default function Home() {
    />
 
    <TextInput
+    testID="date-input"
     placeholder="Date (ex: 28/03 or 28/03 14:30)"
     value={dateFilter}
     onChangeText={setDateFilter}
@@ -116,27 +109,32 @@ export default function Home() {
    />
 
    {availableRides.length === 0 && (
-    <Text>No rides found</Text>
+    <View style={styles.noRidesBox}>
+      <Text testID="no-rides-message">
+        No rides found
+      </Text>
+      
+      <Pressable
+        testID="stcp-link"
+        onPress={() => Linking.openURL("https://stcp.pt")}
+      >
+        <Text style={styles.linkText}>
+          See STCP schedules
+        </Text>
+      </Pressable>
+    </View>
    )}
 
    <FlatList
-
     data={availableRides}
-
     keyExtractor={i => i.id}
-
     renderItem={({ item }) => (
-
      <Pressable
-
       style={styles.card}
-
       onPress={() =>
        router.push(`/ride/${item.id}`)
       }
-
      >
-
       <Text style={styles.route}>
        {item.origin} → {item.destination}
       </Text>
@@ -154,54 +152,57 @@ export default function Home() {
         Women only
        </Text>
       )}
-
      </Pressable>
-
     )}
-
    />
-
   </View>
-
  );
-
 }
 
 const styles = StyleSheet.create({
-
- container:{
-  flex:1,
-  padding:20
+ container: {
+  flex: 1,
+  padding: 20
  },
 
- title:{
-  fontSize:22,
-  fontWeight:"bold",
-  marginBottom:10
+ title: {
+  fontSize: 22,
+  fontWeight: "bold",
+  marginBottom: 10
  },
 
- input:{
-  borderWidth:1,
-  padding:8,
-  borderRadius:5,
-  marginBottom:10
+ input: {
+  borderWidth: 1,
+  padding: 8,
+  borderRadius: 5,
+  marginBottom: 10
  },
 
- card:{
-  borderWidth:1,
-  padding:15,
-  marginBottom:10,
-  borderRadius:8
+ card: {
+  borderWidth: 1,
+  padding: 15,
+  marginBottom: 10,
+  borderRadius: 8
  },
 
- route:{
-  fontWeight:"bold",
-  fontSize:16
+ route: {
+  fontWeight: "bold",
+  fontSize: 16
  },
 
- tag:{
-  marginTop:5,
-  color:"purple"
+ tag: {
+  marginTop: 5,
+  color: "purple"
+ },
+
+ noRidesBox: {
+  marginTop: 8,
+  gap: 8
+ },
+
+ linkText: {
+  color: "#2563eb",
+  textDecorationLine: "underline",
+  fontWeight: "600"
  }
-
 });

@@ -1,0 +1,32 @@
+appId: host.exp.Exponent
+---
+- assertVisible: "Select Profile"
+
+- tapOn: "João (male)"
+
+- waitForAnimationToEnd
+
+- assertVisible: "Search Rides"
+
+- tapOn:
+    id: "origin-input"
+- inputText: "LIDL Areosa"
+
+- tapOn:
+    id: "destination-input"
+- inputText: "FEUP"
+
+- tapOn:
+    id: "date-input"
+- inputText: "10/05"
+
+- hideKeyboard
+
+- assertVisible:
+    id: "no-rides-message"
+
+- assertVisible:
+    id: "stcp-link"
+
+- tapOn:
+    id: "stcp-link"
