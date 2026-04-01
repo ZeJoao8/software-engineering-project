@@ -1,2 +1,33 @@
-#macOS
+# OS files
 .DS_Store
+Thumbs.db
+
+# Expo app
+UniLink/node_modules/
+UniLink/.expo/
+UniLink/.expo-export-test/
+UniLink/dist/
+UniLink/web-build/
+UniLink/expo-env.d.ts
+
+# Environment files
+UniLink/.env
+UniLink/.env*.local
+
+# Build and debug output
+UniLink/.metro-health-check*
+UniLink/npm-debug.*
+UniLink/yarn-debug.*
+UniLink/yarn-error.*
+UniLink/*.tsbuildinfo
+
+# Native and signing files
+UniLink/.kotlin/
+UniLink/*.orig.*
+UniLink/*.jks
+UniLink/*.p8
+UniLink/*.p12
+UniLink/*.key
+UniLink/*.mobileprovision
+UniLink/ios/
+UniLink/android/

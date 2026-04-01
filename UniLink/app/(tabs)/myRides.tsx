@@ -1,8 +1,7 @@
 import {
  View,
  Text,
- FlatList,
- StyleSheet
+ FlatList
 } from "react-native";
 
 import {
@@ -18,6 +17,7 @@ import {
 
 import {
  getRides,
+ removeEmptyPastRides,
  subscribeToRidesChanges
 } from "../../data/rides";
 
@@ -28,8 +28,6 @@ import {
 import { sortByDateDesc } from "../../utils/date";  
 
 import RideCard from "../../components/rideCard";
-import { removeEmptyPastRides } from "../../data/rides";
-import { getUserCars } from "../../data/cars";
 import { components } from "../../styles/components";
 import { layout } from "../../styles/layout";
 import { spacing, colors } from "../../styles/theme";
@@ -44,10 +42,6 @@ export default function MyRides(){
  const [user,setUser] =
   useState(getCurrentUser());
 
-  
-  const [now,setNow] =
-  useState(new Date());
-
   useFocusEffect(
   useCallback(()=>{
     removeEmptyPastRides();
@@ -59,14 +53,12 @@ export default function MyRides(){
 useEffect(()=>{
  const unsubscribe =
   subscribeToRidesChanges(()=>{
-   setNow(new Date());
    setRides([...getRides()]);
   });
 
  const interval =
   setInterval(()=>{
    removeEmptyPastRides();
-   setNow(new Date());
    setRides([...getRides()]);
   },10000);
 
@@ -91,21 +83,6 @@ useEffect(()=>{
     r.passengers.includes(user.uid) ||
     r.passengers.includes(user.email)
   ));
-
- function renderRide(item:any){
-  return(
-   <RideCard
-    ride={item}
-    showOccupancyLabel
-    onPress={()=>
-     router.push(
-      `/ride/${item.id}`
-     )
-    }
-   />
-  );
- }
-
 
 return(
 

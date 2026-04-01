@@ -4,8 +4,6 @@ import {
   View,
   Text,
   TextInput,
-  Button,
-  StyleSheet,
   Alert,
   ScrollView,
   Pressable
@@ -14,6 +12,7 @@ import {
 import {
   getCurrentUser,
   updateUser,
+  logoutUser
 } from "../../data/user";
 
 import {
@@ -32,13 +31,10 @@ import {
 import { useRouter }
   from "expo-router";
 
-import { logoutUser } from "../../data/user";
-
 import { components } from "../../styles/components";
 import { forms } from "../../styles/forms";
 import { layout } from "../../styles/layout";
-import { colors } from "../../styles/theme";
-import { spacing } from "../../styles/theme";
+import { colors, spacing } from "../../styles/theme";
 
 export default function Profile() {
 
@@ -68,18 +64,6 @@ export default function Profile() {
   const [, setVersion] =
     useState(0);
 
-  if (!user) {
-    return null;
-  }
-
-  const activeUser = user;
-
-  const userCars =
-    getUserCars(
-      activeUser.uid,
-      activeUser.email
-    );
-
   useEffect(() => {
     const rerender = () => {
       setVersion(value => value + 1);
@@ -97,6 +81,17 @@ export default function Profile() {
     };
   }, []);
 
+  if (!user) {
+    return null;
+  }
+
+  const activeUser = user;
+
+  const userCars =
+    getUserCars(
+      activeUser.uid,
+      activeUser.email
+    );
 
   function startEdit() {
 

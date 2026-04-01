@@ -1,7 +1,6 @@
 import {
  View,
- Text,
- StyleSheet
+ Text
 } from "react-native";
 
 import { SafeAreaView }

@@ -3,8 +3,7 @@ import {
   Text,
   FlatList,
   TextInput,
-  Switch,
-  StyleSheet
+  Switch
 } from "react-native";
 
 import {

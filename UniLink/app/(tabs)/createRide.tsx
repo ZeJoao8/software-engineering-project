@@ -5,9 +5,7 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   Switch,
-  StyleSheet,
   Pressable
 } from "react-native";
 
@@ -72,8 +70,6 @@ export default function CreateRide() {
 
   const [womenOnly, setWomenOnly] =
     useState(false);
-
-  const now = new Date();
 
   const defaultDeparture = new Date();
   defaultDeparture.setMinutes(

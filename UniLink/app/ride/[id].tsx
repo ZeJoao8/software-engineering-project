@@ -1,8 +1,6 @@
 import {
  View,
  Text,
- Button,
- StyleSheet,
  Alert,
  Pressable
 } from "react-native";
@@ -33,7 +31,7 @@ import { formatDate
 } from "../../utils/date";
 
 import { Picker } from "@react-native-picker/picker";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { components } from "../../styles/components";
 import { layout } from "../../styles/layout";
@@ -54,6 +52,16 @@ export default function RideDetails(){
   id
    ? getRides().find(r => r.id === id)
    : undefined;
+
+ const [editingCar,setEditingCar] =
+  useState(false);
+
+ const [selectedCarId,setSelectedCarId] =
+  useState<string | undefined>(ride?.carId);
+
+ useEffect(() => {
+  setSelectedCarId(ride?.carId);
+ }, [ride?.carId]);
 
  if(!ride) return null;
 
@@ -110,12 +118,6 @@ const driverCars =
    c.ownerId === activeUser.uid ||
    c.ownerId === activeUser.email
  );
-
-const [editingCar,setEditingCar] =
- useState(false);
-
-const [selectedCarId,setSelectedCarId] =
- useState(r.carId);
 
 function reserveSeat(){
  if(r.completed){
