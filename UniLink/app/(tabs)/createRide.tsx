@@ -7,7 +7,8 @@ import {
   TextInput,
   Button,
   Switch,
-  StyleSheet
+  StyleSheet,
+  Pressable
 } from "react-native";
 
 import { layout } from "../../styles/layout";
@@ -199,14 +200,13 @@ export default function CreateRide() {
           <Text style={{ marginBottom: spacing.md }}>
             You need to add a car before creating a ride.
           </Text>
-          <View style={components.button}>
+          <Pressable style={components.button}  onPress={() => router.push("/(tabs)/userProfile")}>
             <Text
               style={components.buttonText}
-              onPress={() => router.push("/(tabs)/userProfile")}
             >
               Go to profile
             </Text>
-          </View>
+          </Pressable>
         </View>
       </View>
     );
@@ -268,14 +268,13 @@ export default function CreateRide() {
           Date
         </Text>
 
-        <View style={components.outlineButton}>
+        <Pressable style={components.outlineButton} onPress={() => setShowDate(true)}>
           <Text
             style={components.outlineButtonText}
-            onPress={() => setShowDate(true)}
           >
             {date.toDateString()}
           </Text>
-        </View>
+        </Pressable>
 
         {showDate && (
           <DateTimePicker
@@ -295,10 +294,9 @@ export default function CreateRide() {
           Time
         </Text>
 
-        <View style={components.outlineButton}>
+        <Pressable style={components.outlineButton} onPress={() => setShowTime(true)}>
           <Text
             style={components.outlineButtonText}
-            onPress={() => setShowTime(true)}
           >
             {time.toLocaleTimeString([], {
               hour: "2-digit",
@@ -306,7 +304,7 @@ export default function CreateRide() {
             })
             }
           </Text>
-        </View>
+        </Pressable>
 
         {showTime && (
           <DateTimePicker
@@ -385,15 +383,14 @@ export default function CreateRide() {
         </View>
       )}
 
-      <View style={components.button}>
+      <Pressable style={components.button} onPress={createRide}>
         <Text
           style={components.buttonText}
-          onPress={createRide}
           testID="createRideButton"
         >
           CREATE RIDE
         </Text>
-      </View>
+      </Pressable>
     </ScrollView>
 
   );

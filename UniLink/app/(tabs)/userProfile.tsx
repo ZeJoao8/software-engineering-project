@@ -7,7 +7,8 @@ import {
   Button,
   StyleSheet,
   Alert,
-  ScrollView
+  ScrollView,
+  Pressable
 } from "react-native";
 
 import {
@@ -271,37 +272,34 @@ export default function Profile() {
 
         {!editing ? (
 
-          <View style={components.outlineButton}>
+          <Pressable style={components.outlineButton} onPress={startEdit}>
             <Text
               style={components.outlineButtonText}
-              onPress={startEdit}
             >
               Edit profile
             </Text>
-          </View>
+          </Pressable>
 
         ) : (
 
           <>
-            <View style={components.button}>
+            <Pressable style={components.button} onPress={saveProfile}>
               <Text
                 style={components.buttonText}
-                onPress={saveProfile}
               >
                 Save profile
               </Text>
-            </View>
+            </Pressable>
 
             <View style={{ height: spacing.sm }} />
 
-            <View style={components.outlineButton}>
+            <Pressable style={components.outlineButton} onPress={cancelEdit}>
               <Text
                 style={components.outlineButtonText}
-                onPress={cancelEdit}
               >
                 Cancel
               </Text>
-            </View>
+            </Pressable>
           </>
 
         )}
@@ -367,14 +365,13 @@ export default function Profile() {
 
           <View style={{ marginTop: spacing.sm }}>
 
-            <View style={components.outlineButton}>
+            <Pressable style={components.outlineButton} onPress={() => setShowCarForm(!showCarForm)}>
               <Text
                 style={components.outlineButtonText}
-                onPress={() => setShowCarForm(!showCarForm)}
               >
                 {showCarForm ? "Cancel" : "Add car"}
               </Text>
-            </View>
+            </Pressable>
 
           </View>
 
@@ -447,14 +444,13 @@ export default function Profile() {
 
           <View style={{ marginTop: spacing.md }}>
 
-            <View style={components.button}>
+            <Pressable style={components.button} onPress={addNewCar}>
               <Text
                 style={components.buttonText}
-                onPress={addNewCar}
               >
                 Save car
               </Text>
-            </View>
+            </Pressable>
 
           </View>
 
@@ -472,12 +468,8 @@ export default function Profile() {
         </Text>
 
 
-        <View style={components.button}>
-
-          <Text
-            style={components.buttonText}
-
-            onPress={() =>
+        <Pressable style={components.button}
+          onPress={() =>
               Alert.alert(
                 "Logout",
                 "Are you sure?",
@@ -496,13 +488,12 @@ export default function Profile() {
               )
             }
           >
-
+          <Text
+            style={components.buttonText}
+          >
             Logout
-
           </Text>
-
-        </View>
-
+        </Pressable>
       </View>
 
     </ScrollView>

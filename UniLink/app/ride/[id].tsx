@@ -3,7 +3,8 @@ import {
  Text,
  Button,
  StyleSheet,
- Alert
+ Alert,
+ Pressable
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -497,18 +498,15 @@ function changeCar(){
 {isDriver && !rideStarted && !ride.completed && !editingCar && driverCars.length > 1 && (
 
 
-<View style={components.outlineButton}>
-
+<Pressable style={components.outlineButton}  
+  onPress={()=> setEditingCar(true)}
+>
 <Text
  style={components.outlineButtonText}
- onPress={()=> setEditingCar(true)}
 >
-
  Change car
-
 </Text>
-
-</View>
+</Pressable>
 
 
 )}
@@ -648,36 +646,29 @@ function changeCar(){
 <View style={{height:spacing.sm}} />
 
 
-<View style={components.button}>
+<Pressable style={components.button}  onPress={changeCar}>
 
 <Text
  style={components.buttonText}
- onPress={changeCar}
 >
-
  Save car
-
 </Text>
 
-</View>
+</Pressable>
 
 
 <View style={{height:spacing.sm}} />
 
 
-<View style={components.outlineButton}>
-
+<Pressable style={components.outlineButton}
+  onPress={()=> setEditingCar(false)}
+>
 <Text
  style={components.outlineButtonText}
- onPress={()=> setEditingCar(false)}
 >
-
  Cancel
-
 </Text>
-
-</View>
-
+</Pressable>
 </View>
 
 )}
@@ -687,38 +678,29 @@ function changeCar(){
 {/* PASSENGER ACTIONS */}
 {!isDriver && !joined && !rideStarted && !ride.completed && (
 
-<View style={components.button}>
-
+<Pressable style={components.button}  onPress={reserveSeat}>
 <Text
  style={components.buttonText}
- onPress={reserveSeat}
 >
 
  Reserve seat
 
 </Text>
 
-</View>
+</Pressable>
 
 )}
 
 
 
 {joined && !isDriver && !rideStarted && !ride.completed && (
-
-<View style={components.button}>
-
+<Pressable style={components.button}  onPress={cancelSeat}>
 <Text
  style={components.buttonText}
- onPress={cancelSeat}
 >
-
  Cancel reservation
-
 </Text>
-
-</View>
-
+</Pressable>
 )}
 
 
@@ -726,18 +708,13 @@ function changeCar(){
 {/* DRIVER CONTROLS */}
 {isDriver && !rideStarted && !ride.completed && !editingCar && (
 
-<View style={components.button}>
-
+<Pressable style={components.button}  onPress={cancelRide}>
 <Text
  style={components.buttonText}
- onPress={cancelRide}
 >
-
  Cancel ride
-
 </Text>
-
-</View>
+</Pressable>
 
 )}
 
@@ -745,18 +722,13 @@ function changeCar(){
 
 {canComplete && (
 
-<View style={components.button}>
-
+<Pressable style={components.button}  onPress={completeRide}>
 <Text
  style={components.buttonText}
- onPress={completeRide}
 >
-
  Complete ride
-
 </Text>
-
-</View>
+</Pressable>
 
 )}
 

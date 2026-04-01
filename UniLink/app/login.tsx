@@ -5,7 +5,8 @@ import {
  Text,
  TextInput,
  ScrollView,
- Alert
+ Alert,
+ Pressable
 } from "react-native";
 
 import {
@@ -302,15 +303,16 @@ export default function Login(){
 <View style={{height:spacing.md}} />
 
 
-<View style={components.button} testID="registerButton">
-
-<Text
- style={components.buttonText}
+<Pressable style={components.button} testID="registerButton"
  onPress={
   registerMode
    ? register
    : login
  }
+ >
+
+<Text
+ style={components.buttonText}
 >
 
 {registerMode
@@ -319,30 +321,26 @@ export default function Login(){
 
 </Text>
 
-</View>
+</Pressable>
 
 
 
 <View style={{height:spacing.sm}} />
 
 
-<View style={components.outlineButton}>
-
-<Text
- style={components.outlineButtonText}
+<Pressable style={components.outlineButton}
  onPress={()=>
   setRegisterMode(!registerMode)
  }
 >
-
+<Text
+ style={components.outlineButtonText}
+>
 {registerMode
  ? "Already have account?"
  : "Create account"}
-
 </Text>
-
-</View>
-
+</Pressable>
 
 
 {!registerMode && (
