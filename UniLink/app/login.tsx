@@ -209,7 +209,9 @@ export default function Login(){
 <Text style={[
  layout.title,
  {textAlign:"center"}
-]}>
+ ]}
+ testID="authScreenTitle"
+ >
  UniLink 🌱
 </Text>
 
@@ -230,6 +232,7 @@ export default function Login(){
  value={name}
  onChangeText={setName}
  style={forms.input}
+ testID="registerNameInput"
 />
 
 
@@ -244,6 +247,7 @@ export default function Login(){
  value={university}
  onChangeText={setUniversity}
  style={forms.input}
+ testID="registerUniversityInput"
 />
 
 
@@ -258,6 +262,7 @@ export default function Login(){
  value={course}
  onChangeText={setCourse}
  style={forms.input}
+ testID="registerCourseInput"
 />
 
 
@@ -315,6 +320,7 @@ export default function Login(){
  autoCapitalize="none"
  keyboardType="email-address"
  style={forms.input}
+ testID="loginEmailInput"
 />
 
 
@@ -330,6 +336,7 @@ export default function Login(){
  onChangeText={setPassword}
  secureTextEntry
  style={forms.input}
+ testID="loginPasswordInput"
 />
 
 
@@ -348,6 +355,7 @@ export default function Login(){
  onChangeText={setConfirmPassword}
  secureTextEntry
  style={forms.input}
+ testID="registerConfirmPasswordInput"
 />
 
 </>
@@ -360,7 +368,7 @@ export default function Login(){
 <View style={{height:spacing.md}} />
 
 
-<Pressable style={components.button} testID="registerButton"
+<Pressable style={components.button} testID="authSubmitButton"
  onPress={
   registerMode
    ? register
@@ -387,7 +395,9 @@ export default function Login(){
 <View style={{height:spacing.sm}} />
 
 
-<Pressable style={components.outlineButton}
+<Pressable
+ style={components.outlineButton}
+ testID="authModeToggleButton"
  onPress={()=>
   setRegisterMode(!registerMode)
  }

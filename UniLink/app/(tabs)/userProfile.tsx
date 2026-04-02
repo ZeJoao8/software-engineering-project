@@ -260,6 +260,7 @@ export default function Profile() {
               setUser({ ...activeUser, name: t })
             }
             style={forms.input}
+            testID="profileNameInput"
           />
         ) : (
           <Text>{activeUser.name}</Text>
@@ -301,6 +302,7 @@ export default function Profile() {
               setUser({ ...activeUser, course: t })
             }
             style={forms.input}
+            testID="profileCourseInput"
           />
         ) : (
           <Text>
@@ -313,7 +315,11 @@ export default function Profile() {
 
         {!editing ? (
 
-          <Pressable style={components.outlineButton} onPress={startEdit}>
+          <Pressable
+            style={components.outlineButton}
+            testID="editProfileButton"
+            onPress={startEdit}
+          >
             <Text
               style={components.outlineButtonText}
             >
@@ -324,7 +330,11 @@ export default function Profile() {
         ) : (
 
           <>
-            <Pressable style={components.button} onPress={saveProfile}>
+            <Pressable
+              style={components.button}
+              testID="saveProfileButton"
+              onPress={saveProfile}
+            >
               <Text
                 style={components.buttonText}
               >
@@ -334,7 +344,11 @@ export default function Profile() {
 
             <View style={{ height: spacing.sm }} />
 
-            <Pressable style={components.outlineButton} onPress={cancelEdit}>
+            <Pressable
+              style={components.outlineButton}
+              testID="cancelProfileEditButton"
+              onPress={cancelEdit}
+            >
               <Text
                 style={components.outlineButtonText}
               >
@@ -406,7 +420,11 @@ export default function Profile() {
 
           <View style={{ marginTop: spacing.sm }}>
 
-            <Pressable style={components.outlineButton} onPress={() => setShowCarForm(!showCarForm)}>
+            <Pressable
+              style={components.outlineButton}
+              testID="toggleAddCarButton"
+              onPress={() => setShowCarForm(!showCarForm)}
+            >
               <Text
                 style={components.outlineButtonText}
               >
@@ -439,6 +457,7 @@ export default function Profile() {
             value={model}
             onChangeText={setModel}
             style={forms.input}
+            testID="carModelInput"
           />
 
 
@@ -452,6 +471,7 @@ export default function Profile() {
             value={color}
             onChangeText={setColor}
             style={forms.input}
+            testID="carColorInput"
           />
 
 
@@ -466,6 +486,7 @@ export default function Profile() {
             onChangeText={setPlate}
             autoCapitalize="characters"
             style={forms.input}
+            testID="carPlateInput"
           />
 
 
@@ -480,12 +501,17 @@ export default function Profile() {
             onChangeText={setSeats}
             keyboardType="numeric"
             style={forms.input}
+            testID="carSeatsInput"
           />
 
 
           <View style={{ marginTop: spacing.md }}>
 
-            <Pressable style={components.button} onPress={() => void addNewCar()}>
+            <Pressable
+              style={components.button}
+              testID="saveCarButton"
+              onPress={() => void addNewCar()}
+            >
               <Text
                 style={components.buttonText}
               >
@@ -509,7 +535,9 @@ export default function Profile() {
         </Text>
 
 
-        <Pressable style={components.button}
+        <Pressable
+          style={components.button}
+          testID="logoutButton"
           onPress={() =>
               Alert.alert(
                 "Logout",

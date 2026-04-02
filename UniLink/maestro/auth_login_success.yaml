@@ -1,9 +1,0 @@
-appId: host.exp.Exponent
----
-
-- tapOn: "Email"
-- inputText: "joao@feup.pt"
-- tapOn: "Password"
-- inputText: "1234"
-- tapOn: "Login"
-- assertVisible: "Search Rides"

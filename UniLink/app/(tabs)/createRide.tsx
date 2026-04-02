@@ -235,7 +235,11 @@ export default function CreateRide() {
           <Text style={{ marginBottom: spacing.md }}>
             You need to add a car before creating a ride.
           </Text>
-          <Pressable style={components.button}  onPress={() => router.push("/(tabs)/userProfile")}>
+          <Pressable
+            style={components.button}
+            testID="createRideGoToProfileButton"
+            onPress={() => router.push("/(tabs)/userProfile")}
+          >
             <Text
               style={components.buttonText}
             >
@@ -282,7 +286,7 @@ export default function CreateRide() {
           maxLength={40}
           onChangeText={setOrigin}
           style={forms.input}
-          testID="originInput"
+          testID="createRideOriginInput"
         />
 
         <View style={{ height: 6 }} />
@@ -297,7 +301,7 @@ export default function CreateRide() {
           maxLength={40}
           onChangeText={setDestination}
           style={forms.input}
-          testID="destinationInput"
+          testID="createRideDestinationInput"
         />
 
       </View>
@@ -309,7 +313,11 @@ export default function CreateRide() {
           Date
         </Text>
 
-        <Pressable style={components.outlineButton} onPress={() => setShowDate(true)}>
+        <Pressable
+          style={components.outlineButton}
+          testID="createRideDateButton"
+          onPress={() => setShowDate(true)}
+        >
           <Text
             style={components.outlineButtonText}
           >
@@ -335,7 +343,11 @@ export default function CreateRide() {
           Time
         </Text>
 
-        <Pressable style={components.outlineButton} onPress={() => setShowTime(true)}>
+        <Pressable
+          style={components.outlineButton}
+          testID="createRideTimeButton"
+          onPress={() => setShowTime(true)}
+        >
           <Text
             style={components.outlineButtonText}
           >
@@ -370,6 +382,7 @@ export default function CreateRide() {
           <Picker
             selectedValue={selectedCar}
             onValueChange={setSelectedCar}
+            testID="createRideCarPicker"
             dropdownIconColor={colors.primary}
             style={{ color: colors.primary, fontWeight: "600" }}
           >
@@ -396,6 +409,7 @@ export default function CreateRide() {
           onChangeText={setSeats}
           keyboardType="numeric"
           style={forms.input}
+          testID="createRideSeatsInput"
         />
 
       </View>
@@ -417,6 +431,7 @@ export default function CreateRide() {
             <Switch
               value={womenOnly}
               onValueChange={setWomenOnly}
+              testID="createRideWomenOnlySwitch"
               trackColor={{ false: "#d1d5db", true: "#fbcfe8" }}
               thumbColor={womenOnly ? "#ec4899" : "#f9fafb"}
             />
@@ -424,10 +439,13 @@ export default function CreateRide() {
         </View>
       )}
 
-      <Pressable style={components.button} onPress={() => void createRide()}>
+      <Pressable
+        style={components.button}
+        testID="createRideButton"
+        onPress={() => void createRide()}
+      >
         <Text
           style={components.buttonText}
-          testID="createRideButton"
         >
           CREATE RIDE
         </Text>

@@ -504,7 +504,9 @@ function changeCar(){
 {isDriver && !rideStarted && !ride.completed && !editingCar && driverCars.length > 1 && (
 
 
-<Pressable style={components.outlineButton}  
+<Pressable
+ style={components.outlineButton}
+ testID="changeRideCarButton"
   onPress={()=> setEditingCar(true)}
 >
 <Text
@@ -652,7 +654,11 @@ function changeCar(){
 <View style={{height:spacing.sm}} />
 
 
-<Pressable style={components.button}  onPress={changeCar}>
+<Pressable
+ style={components.button}
+ testID="saveRideCarButton"
+ onPress={changeCar}
+>
 
 <Text
  style={components.buttonText}
@@ -666,7 +672,9 @@ function changeCar(){
 <View style={{height:spacing.sm}} />
 
 
-<Pressable style={components.outlineButton}
+<Pressable
+ style={components.outlineButton}
+ testID="cancelRideCarEditButton"
   onPress={()=> setEditingCar(false)}
 >
 <Text
@@ -684,7 +692,11 @@ function changeCar(){
 {/* PASSENGER ACTIONS */}
 {!isDriver && !joined && !rideStarted && !ride.completed && (
 
-<Pressable style={components.button}  onPress={reserveSeat}>
+<Pressable
+ style={components.button}
+ testID="reserveSeatButton"
+ onPress={reserveSeat}
+>
 <Text
  style={components.buttonText}
 >
@@ -700,7 +712,11 @@ function changeCar(){
 
 
 {joined && !isDriver && !rideStarted && !ride.completed && (
-<Pressable style={components.button}  onPress={cancelSeat}>
+<Pressable
+ style={components.button}
+ testID="cancelReservationButton"
+ onPress={cancelSeat}
+>
 <Text
  style={components.buttonText}
 >
@@ -714,7 +730,11 @@ function changeCar(){
 {/* DRIVER CONTROLS */}
 {isDriver && !rideStarted && !ride.completed && !editingCar && (
 
-<Pressable style={components.button}  onPress={cancelRide}>
+<Pressable
+ style={components.button}
+ testID="cancelRideButton"
+ onPress={cancelRide}
+>
 <Text
  style={components.buttonText}
 >
@@ -728,7 +748,11 @@ function changeCar(){
 
 {canComplete && (
 
-<Pressable style={components.button}  onPress={completeRide}>
+<Pressable
+ style={components.button}
+ testID="completeRideButton"
+ onPress={completeRide}
+>
 <Text
  style={components.buttonText}
 >

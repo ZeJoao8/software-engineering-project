@@ -146,7 +146,7 @@ export default function Home() {
           value={originFilter}
           onChangeText={setOriginFilter}
           style={forms.input}
-          testID="originInput"
+          testID="searchOriginInput"
         />
 
 
@@ -161,7 +161,7 @@ export default function Home() {
           value={destinationFilter}
           onChangeText={setDestinationFilter}
           style={forms.input}
-          testID="destinationInput"
+          testID="searchDestinationInput"
         />
 
 
@@ -176,6 +176,7 @@ export default function Home() {
           value={dateFilter}
           onChangeText={setDateFilter}
           style={forms.input}
+          testID="searchDateInput"
         />
 
 
@@ -191,7 +192,7 @@ export default function Home() {
           keyboardType="numeric"
           onChangeText={setMinSeats}
           style={forms.input}
-          testID="minSeatsInput"
+          testID="searchMinSeatsInput"
         />
 
 
@@ -211,6 +212,7 @@ export default function Home() {
             <Switch
               value={womenOnlyFilter}
               onValueChange={setWomenOnlyFilter}
+              testID="searchWomenOnlySwitch"
 
               trackColor={{
                 false: "#d1d5db",
@@ -238,7 +240,10 @@ export default function Home() {
 
         <View style={components.card}>
 
-          <Text style={{ color: colors.textLight }}>
+          <Text
+            style={{ color: colors.textLight }}
+            testID="searchEmptyState"
+          >
             No rides found
           </Text>
 
