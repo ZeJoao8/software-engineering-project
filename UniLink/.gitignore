@@ -34,6 +34,7 @@ yarn-error.*
 # local env files
 # Keep the shared Expo public config versioned; ignore only machine-specific overrides.
 .env*.local
+.env
 
 # typescript
 *.tsbuildinfo
