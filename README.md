@@ -196,6 +196,8 @@ You can find below information and references related with the project managemen
 
 ### Sprint 0
 
+Link for vertical prototype APK: https://expo.dev/artifacts/eas/oox2WQnwTiu29LCRyGhjN4.apk . 
+
 ### Sprint 1
 
 ### Sprint 2
