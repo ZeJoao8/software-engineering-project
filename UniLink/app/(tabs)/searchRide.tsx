@@ -34,6 +34,7 @@ import { layout } from "../../styles/layout";
 import { components } from "../../styles/components";
 import { colors, spacing } from "../../styles/theme";
 import { forms } from "../../styles/forms";
+import { filterRides, FilterCriteria } from "../../utils/rideFilters";
 
 
 export default function Home() {
@@ -92,37 +93,17 @@ export default function Home() {
 
   if(!user) return null;
 
-  const availableRides = sortByDateAsc(rides.filter(r =>
-    new Date(r.departureDateTime) >= now &&
-    r.availableSeats > 0 &&
-    r.driverId !== user.uid &&
-    r.driverId !== user.email &&
-    !r.passengers.includes(user.uid) &&
-    !r.passengers.includes(user.email) &&
-    r.origin.toLowerCase()
-      .includes(originFilter.toLowerCase()
-      ) &&
-    r.destination.toLowerCase().includes(
-      destinationFilter.toLowerCase()
-    ) &&
-    formatDate(r.departureDateTime)
-      .toLowerCase()
-      .includes(dateFilter.toLowerCase()
-      ) &&
-    (
-      user.gender === "Female" ||
-      !r.womenOnly
-    ) &&
-    (
-      !minSeats ||
-      r.availableSeats >=
-      Number(minSeats)
-    ) &&
-    (
-      !womenOnlyFilter ||
-      r.womenOnly
-    )
-  ));
+  const filters: FilterCriteria = {
+    origin: originFilter,
+    destination: destinationFilter,
+    date: dateFilter,
+    womenOnly: womenOnlyFilter,
+    minSeats: minSeats
+  };
+
+  const availableRides = sortByDateAsc(
+    filterRides(rides, user, filters, now)
+  );
 
 
   return (

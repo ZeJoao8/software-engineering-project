@@ -1,28 +1,46 @@
-test("origin must differ from destination", () => {
+import {
+  isValidEmail,
+  isPasswordStrong,
+  doPasswordsMatch,
+  areRequiredFieldsFilled,
+} from "../utils/validation";
 
- const origin = "FEUP";
- const destination = "Boavista";
+describe("Validation Utilities", () => {
+  test("isValidEmail validates formats correctly", () => {
+    expect(isValidEmail("test@feup.pt")).toBe(true);
+    expect(isValidEmail("test@gmail.com")).toBe(true);
+    expect(isValidEmail("invalid-email")).toBe(false);
+    expect(isValidEmail("test@com")).toBe(false);
+    expect(isValidEmail("")).toBe(false);
+  });
 
- expect(origin !== destination)
-  .toBe(true);
+  test("isPasswordStrong checks minimum length", () => {
+    expect(isPasswordStrong("1234")).toBe(true);
+    expect(isPasswordStrong("abcde")).toBe(true);
+    expect(isPasswordStrong("123")).toBe(false);
+    expect(isPasswordStrong("")).toBe(false);
+  });
 
-});
+  test("doPasswordsMatch checks equality", () => {
+    expect(doPasswordsMatch("pass123", "pass123")).toBe(true);
+    expect(doPasswordsMatch("pass123", "other")).toBe(false);
+  });
 
-test("seats must be integer", () => {
+  test("areRequiredFieldsFilled detects empty values", () => {
+    const validFields = {
+      name: "John",
+      email: "john@test.com",
+      password: "123"
+    };
 
- const seats = "2";
+    const invalidFields = {
+      name: "John",
+      email: "",
+      password: "123"
+    };
 
- expect(
-  Number.isInteger(Number(seats))
- ).toBe(true);
-
-});
-
-test("at least 1 seat", () => {
-
- const seats = 1;
-
- expect(seats >= 1)
-  .toBe(true);
-
+    expect(areRequiredFieldsFilled(validFields)).toBe(true);
+    expect(areRequiredFieldsFilled(invalidFields)).toBe(false);
+    expect(areRequiredFieldsFilled({ name: " " })).toBe(false);
+  });
 });

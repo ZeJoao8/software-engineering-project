@@ -27,6 +27,12 @@ import { layout } from "../styles/layout";
 import { forms } from "../styles/forms";
 import { components } from "../styles/components";
 import { spacing, colors } from "../styles/theme";
+import {
+  areRequiredFieldsFilled,
+  doPasswordsMatch,
+  isPasswordStrong,
+  isValidEmail,
+} from "../utils/validation";
 
 
 export default function Login(){
@@ -108,14 +114,16 @@ export default function Login(){
 
   if(loading) return;
 
-  if(
-   !name.trim() ||
-   !email.trim() ||
-   !password.trim() ||
-   !university.trim() ||
-   !course.trim() ||
-   !confirmPassword.trim()
-  ){
+  const fields = {
+    name,
+    email,
+    password,
+    university,
+    course,
+    confirmPassword
+  };
+
+  if(!areRequiredFieldsFilled(fields)){
    Alert.alert(
     "Error",
     "Fill all fields"
@@ -124,10 +132,7 @@ export default function Login(){
   }
 
 
-  const emailRegex =
-   /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  if(!emailRegex.test(email)){
+  if(!isValidEmail(email)){
 
    Alert.alert(
     "Invalid email",
@@ -138,7 +143,7 @@ export default function Login(){
 
   }
 
-  if(password !== confirmPassword){
+  if(!doPasswordsMatch(password, confirmPassword)){
 
   Alert.alert(
     "Passwords do not match",
@@ -147,7 +152,7 @@ export default function Login(){
   return;
   }
 
-  if(password.length < 4){
+  if(!isPasswordStrong(password)){
 
   Alert.alert(
     "Weak password",
