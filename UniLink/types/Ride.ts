@@ -14,8 +14,12 @@ export interface Ride {
 
   availableSeats: number;
 
+  totalSeats: number;
+
   womenOnly: boolean;
 
   passengers: string[];
+
+  completed: boolean;
 
 }

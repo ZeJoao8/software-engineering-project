@@ -1,0 +1,149 @@
+appId: host.exp.exponent
+
+---
+
+- launchApp
+
+- openLink: exp://192.168.1.136:8081
+
+- waitForAnimationToEnd
+
+#################################
+# GARANTIR LOGOUT INICIAL
+#################################
+
+- runFlow:
+    when:
+      visible:
+        id: profileTab
+    commands:
+
+      - tapOn:
+          id: profileTab
+
+      - swipe:
+          direction: UP
+
+      - tapOn:
+          id: logoutButton
+
+      - tapOn: "Logout"
+
+#################################
+# LOGIN ERRADO
+#################################
+
+- tapOn:
+    id: loginEmailInput
+- inputText: "ana@feup.pt"
+- pressKey: Enter
+
+- tapOn:
+    id: loginPasswordInput
+- inputText: "wrongpass"
+- pressKey: Enter
+- tapOn:
+    id: authSubmitButton
+- tapOn: "OK"
+
+- assertVisible:
+    id: authScreenTitle
+
+#################################
+# LOGIN CERTO
+#################################
+
+- tapOn:
+    id: loginPasswordInput
+- eraseText
+- inputText: "123456"
+- pressKey: Enter
+
+- tapOn:
+    id: authSubmitButton
+
+- assertVisible: "Search rides"
+
+#################################
+# FILTRO WOMEN ONLY
+#################################
+
+- tapOn:
+    id: searchOriginInput
+- inputText: "FEUP"
+- eraseText: 4
+- pressKey: Enter
+
+- tapOn:
+    id: searchDestinationInput
+- inputText: "FEUP"
+- eraseText: 7
+- pressKey: Enter
+
+- tapOn:
+    id: searchWomenOnlySwitch
+
+#################################
+# RESERVAR WOMEN ONLY
+#################################
+
+- tapOn: "Boavista → FEUP"
+
+- tapOn:
+    id: reserveSeatButton
+
+- tapOn: "Yes"
+
+#################################
+# RESERVAR NORMAL
+#################################
+
+- tapOn:
+    id: searchTab
+
+- tapOn: "FEUP → Boavista"
+
+- tapOn:
+    id: reserveSeatButton
+
+- tapOn: "Yes"
+
+#################################
+# CANCELAR RESERVA
+#################################
+
+- tapOn:
+    id: myRidesTab
+
+- tapOn: "FEUP → Boavista"
+
+- tapOn:
+    id: cancelReservationButton
+
+- tapOn: "Yes"
+
+#################################
+# ABRIR RIDE RESTANTE
+#################################
+
+- tapOn: "Boavista → FEUP"
+
+#################################
+# VER PERFIL DO CONDUTOR
+#################################
+
+- tapOn: "Maria Test"
+
+- assertVisible: "Cars"
+
+- tapOn: "← Back"
+
+- tapOn: "← Back"
+
+- tapOn:           
+    id: profileTab
+
+- tapOn:
+    id: logoutButton
+
+- tapOn: "Logout"

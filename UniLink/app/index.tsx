@@ -1,87 +1,67 @@
-import {
-
- View,
- Text,
- Button,
- StyleSheet
-
-} from "react-native";
-
-import { useRouter } from "expo-router";
+import { Redirect } from "expo-router";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, View } from "react-native";
 
 import {
-
- getUsers,
- switchUser
-
+ getCurrentUser,
+ isAuthReady,
+ subscribeToAuthChanges,
+ waitForAuthReady,
 } from "../data/user";
+import { colors } from "../styles/theme";
 
-export default function SelectUser() {
+export default function Index(){
 
- const router = useRouter();
+ const [ready, setReady] =
+  useState(isAuthReady());
 
- const users = getUsers();
+ const [user, setUser] =
+  useState(getCurrentUser());
 
- function chooseUser(id: string) {
+ useEffect(() => {
+  let mounted = true;
 
-  switchUser(id);
+  function syncState() {
+   if (!mounted) return;
+   setReady(isAuthReady());
+   setUser(getCurrentUser());
+  }
 
-  router.replace("/(tabs)");
+  syncState();
 
+  const unsubscribe =
+   subscribeToAuthChanges(syncState);
+
+  void waitForAuthReady().then(syncState);
+
+  return () => {
+   mounted = false;
+   unsubscribe();
+  };
+ }, []);
+
+ if (!ready) {
+  return (
+   <View
+    style={{
+     flex: 1,
+     alignItems: "center",
+     justifyContent: "center",
+    }}
+   >
+    <ActivityIndicator color={colors.primary} />
+   </View>
+  );
  }
 
  return (
-
-  <View style={styles.container}>
-
-   <Text style={styles.title}>
-
-    Select Profile
-
-   </Text>
-
-   {users.map(user => (
-
-    <Button
-
-     key={user.id}
-
-     title={`${user.name} (${user.gender})`}
-
-     onPress={() => chooseUser(user.id)}
-
-    />
-
-   ))}
-
-  </View>
-
+  <Redirect
+   href={
+    user
+     ? "/(tabs)/searchRide"
+     : "/login"
+   }
+  />
  );
 
 }
-
-const styles = StyleSheet.create({
-
- container: {
-
-  flex: 1,
-
-  justifyContent: "center",
-
-  padding: 20,
-
-  gap: 10
-
- },
-
- title: {
-
-  fontSize: 22,
-
-  fontWeight: "bold",
-
-  marginBottom: 20
-
- }
-
-});

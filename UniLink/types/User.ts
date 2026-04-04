@@ -1,6 +1,6 @@
 export interface User {
 
- id: string;
+ uid: string;
 
  name: string;
 
@@ -8,6 +8,8 @@ export interface User {
 
  course: string;
 
- gender: "male" | "female";
+ gender: "Male" | "Female";
+
+ email: string;
 
 }

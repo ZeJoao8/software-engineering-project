@@ -5,6 +5,7 @@ node_modules/
 
 # Expo
 .expo/
+.expo-export-test/
 dist/
 web-build/
 expo-env.d.ts
@@ -31,12 +32,11 @@ yarn-error.*
 *.pem
 
 # local env files
+# Keep the shared Expo public config versioned; ignore only machine-specific overrides.
 .env*.local
 
 # typescript
 *.tsbuildinfo
-
-app-example
 
 # generated native folders
 /ios

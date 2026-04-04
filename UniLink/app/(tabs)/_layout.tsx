@@ -1,33 +1,60 @@
+import { colors } from "../../styles/theme";
 import { Tabs } from "expo-router";
 
 export default function TabsLayout() {
 
- return (
+    return (
 
-  <Tabs>
+        <Tabs
 
-   <Tabs.Screen
-    name="index"
-    options={{ title: "Search" }}
-   />
+            screenOptions={{
 
-   <Tabs.Screen
-    name="createRide"
-    options={{ title: "Create" }}
-   />
+                headerStyle: {
+                    backgroundColor: colors.primary
+                },
 
-   <Tabs.Screen
-    name="myRides"
-    options={{ title: "My Rides" }}
-   />
+                headerTitleStyle: {
+                    color: colors.primarySoft,
+                    fontWeight: "600"
+                },
 
-   <Tabs.Screen
-    name="profile"
-    options={{ title: "Profile" }}
-   />
+                headerTintColor: colors.text,
 
-  </Tabs>
+                tabBarStyle: {
+                    backgroundColor: colors.primary,
+                    borderTopColor: "#e5e7eb"
+                },
 
- );
+                tabBarActiveTintColor: colors.primarySoft,
+
+                tabBarInactiveTintColor: colors.primaryDark
+
+            }}
+
+        >
+
+            <Tabs.Screen
+                name="searchRide"
+                options={{ title: "Search", tabBarButtonTestID: "searchTab" }}
+            />
+
+            <Tabs.Screen
+                name="createRide"
+                options={{ title: "Create", tabBarButtonTestID: "createTab" }}
+            />
+
+            <Tabs.Screen
+                name="myRides"
+                options={{ title: "My Rides", tabBarButtonTestID: "myRidesTab" }}
+            />
+
+            <Tabs.Screen
+                name="userProfile"
+                options={{ title: "Profile", tabBarButtonTestID: "profileTab" }}
+            />
+
+        </Tabs>
+
+    );
 
 }

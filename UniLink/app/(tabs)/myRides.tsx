@@ -1,214 +1,198 @@
 import {
-
  View,
  Text,
- FlatList,
- StyleSheet
-
+ FlatList
 } from "react-native";
 
 import {
-
+ useRouter,
  useFocusEffect
-
 } from "expo-router";
 
 import {
-
  useState,
- useCallback
-
+ useCallback,
+ useEffect
 } from "react";
 
 import {
-
- getRides
-
+ getRides,
+ removeEmptyPastRides,
+ subscribeToRidesChanges
 } from "../../data/rides";
 
 import {
-
  getCurrentUser
-
 } from "../../data/user";
 
- function formatDate(dateString:
-  string) {
+import { sortByDateDesc } from "../../utils/date";  
 
-  const d =
-   new Date(dateString);
+import RideCard from "../../components/rideCard";
+import { components } from "../../styles/components";
+import { layout } from "../../styles/layout";
+import { spacing, colors } from "../../styles/theme";
 
-  return (
-   d.toLocaleDateString()
-   +
-   " "
-   +
-   d.toLocaleTimeString()
-  );
+export default function MyRides(){
 
- }
+ const router = useRouter();
 
-export default function MyRides() {
-
- const [rides, setRides] =
+ const [rides,setRides] =
   useState(getRides());
 
- const [user, setUser] =
+ const [user,setUser] =
   useState(getCurrentUser());
 
- useFocusEffect(
+  useFocusEffect(
+  useCallback(()=>{
+    removeEmptyPastRides();
+    setRides([...getRides()]);
+    setUser(getCurrentUser());
+  },[])
+  );
 
-  useCallback(() => {
-
+useEffect(()=>{
+ const unsubscribe =
+  subscribeToRidesChanges(()=>{
    setRides([...getRides()]);
+  });
 
-   setUser(getCurrentUser());
+ const interval =
+  setInterval(()=>{
+   removeEmptyPastRides();
+   setRides([...getRides()]);
+  },10000);
 
-  }, [])
+ return () => {
+  unsubscribe();
+  clearInterval(interval);
+ };
+},[]);
 
- );
+ if(!user) return null;
 
- const driverRides =
-  rides.filter(
+ const driverRides = sortByDateDesc(
+   rides.filter(
+   r =>
+    r.driverId === user.uid ||
+    r.driverId === user.email
+  ));
 
-   r => r.driverId === user.id
+ const passengerRides = sortByDateDesc(
+   rides.filter(
+   r =>
+    r.passengers.includes(user.uid) ||
+    r.passengers.includes(user.email)
+  ));
 
-  );
+return(
 
- const passengerRides =
-  rides.filter(
+<View style={layout.screen}>
 
-   r => r.passengers.includes(user.id)
+<Text style={layout.title}>
+ My rides
+</Text>
 
-  );
 
- return (
+{/* DRIVER */}
+<View style={components.card}>
 
-  <View style={styles.container}>
+<Text style={layout.subtitle}>
+ Driver
+</Text>
 
-   <Text style={styles.title}>
-    Driver
-   </Text>
+{driverRides.length === 0 ? (
 
-   {driverRides.length === 0 && (
+<Text style={{color:colors.textLight}}>
+ No rides created
+</Text>
 
-    <Text>
-     No rides created yet
-    </Text>
+) : (
 
-   )}
+<FlatList
 
-   <FlatList
+ data={driverRides}
 
-    data={driverRides}
+ keyExtractor={i=>i.id}
 
-    keyExtractor={(item) => item.id}
+ scrollEnabled={false}
 
-    renderItem={({ item }) => (
+ renderItem={({item}) => (
 
-     <View style={styles.card}>
+<View style={{marginTop:spacing.sm}}>
 
-      <Text style={styles.route}>
-       {item.origin} → {item.destination}
-      </Text>
+<RideCard
 
-      <Text>
-        {formatDate(
+ ride={item}
 
-        item.departureDateTime
+ showOccupancyLabel
 
-       )}
-      </Text>
-
-      <Text>
-       Seats left:
-       {" "}
-       {item.availableSeats}
-      </Text>
-
-     </View>
-
-    )}
-
-   />
-
-   <Text style={styles.title}>
-    Passenger
-   </Text>
-
-   {passengerRides.length === 0 && (
-
-    <Text>
-     No reservations yet
-    </Text>
-
-   )}
-
-   <FlatList
-
-    data={passengerRides}
-
-    keyExtractor={(item) => item.id}
-
-    renderItem={({ item }) => (
-
-     <View style={styles.card}>
-
-      <Text style={styles.route}>
-       {item.origin} → {item.destination}
-      </Text>
-
-      <Text>
-        {formatDate(
-
-        item.departureDateTime
-
-       )}
-      </Text>
-
-     </View>
-
-    )}
-
-   />
-
-  </View>
-
- );
-
-}
-
-const styles = StyleSheet.create({
-
- container: {
-
-  flex: 1,
-  padding: 20,
-  gap: 10
-
- },
-
- title: {
-
-  fontSize: 20,
-  fontWeight: "bold",
-  marginTop: 15
-
- },
-
- card: {
-
-  borderWidth: 1,
-  padding: 10,
-  marginVertical: 5,
-  borderRadius: 8
-
- },
-
- route: {
-
-  fontWeight: "bold"
-
+ onPress={() =>
+  router.push(`/ride/${item.id}`)
  }
 
-});
+/>
+
+</View>
+
+ )}
+
+ />
+
+)}
+
+</View>
+
+
+
+{/* PASSENGER */}
+<View style={components.card}>
+
+<Text style={layout.subtitle}>
+ Passenger
+</Text>
+
+{passengerRides.length === 0 ? (
+
+<Text style={{color:colors.textLight}}>
+ No reservations
+</Text>
+
+) : (
+
+<FlatList
+
+ data={passengerRides}
+
+ keyExtractor={i=>i.id}
+
+ scrollEnabled={false}
+
+ renderItem={({item}) => (
+
+<View style={{marginBottom:spacing.sm}}>
+
+<RideCard
+
+ ride={item}
+
+ onPress={() =>
+  router.push(`/ride/${item.id}`)
+ }
+
+/>
+
+</View>
+
+ )}
+
+ />
+
+)}
+
+</View>
+
+
+</View>
+
+);
+}
