@@ -1,12 +1,9 @@
-<!-- Template file for README.md for LEIC-ES-2023-24 -->
-
-> [!NOTE] In this file, you’ll find the structure you should follow to document your mobile app in the README.md file for LEIC-ES-2024-25. It’s a single file with guidelines. You can add more sections, but for assessment normalisation and automation, include all sections of this template. Your professors will clarify about specificities of your app.
 
 # UniLink Development Report
 
-Welcome to the documentation pages of _[your product name]_!
+Welcome to the documentation pages of UniLink!
 
-This Software Development Report, tailored for LEIC-ES-2024-25, provides comprehensive details about _[your product name]_, from high-level vision to low-level implementation decisions. It’s organised by the following activities. 
+This Software Development Report, tailored for LEIC-ES-2025-26, provides comprehensive details about UniLink, from high-level vision to low-level implementation decisions. It’s organised by the following activities. 
 
 * [Business modeling](#Business-Modelling) 
   * [Product Vision](#Product-Vision)
@@ -34,12 +31,11 @@ Please contact us!
 
 Thank you!
 
-* Gonçalo Queirós up202407377@up.pt
-* Diogo Caleiro up202407548@up.pt
-* José Silva up202406359@up.pt
-* José Lopes up202406360@up.pt
 * António Machado up202404630@up.pt
-
+* Diogo Caleiro up202407548@up.pt
+* Gonçalo Queirós up202407377@up.pt
+* José Lopes up202406360@up.pt
+* José Silva up202406359@up.pt
 
 ---
 ## Business Modelling
@@ -48,30 +44,27 @@ Business modeling in software development involves defining the product's vision
 
 ### Product Vision
 
-For university students who need flexible and reliable transportation,
-UniLink is a university-exclusive carpooling platform that enables students to share rides for free within their academic community.
-Unlike traditional ride-sharing services, UniLink focuses on trust, safety, and sustainability by restricting access to verified university users and encouraging collaborative, cost-free mobility.
-By removing transportation costs and promoting eco-friendly behavior, UniLink strengthens connections and fosters a supportive student network.
-
+UniLink connects university students through safe, free and trusted ride-sharing, making academic mobility simpler, smarter and more social.
 
 ### Features and Assumptions
-- Pedir/Dar boleia com identificação de carro através de matrícula e modelo do carro
-- Utilizador que pede boleia pode dar grojeta
-- LeaderBoard 
-- Apenas universitários se podem registar, registro apenas com email associado a universidades
-- Perfil com universidade, curso e ano
-- Rating Médio and Review
-- Medalhas (conquistas ao longo do percurso, como passageiro/condutor)
-- Integração de Mapa GoogleMaps
-- Streaks semanais
-- Horários de autocarros caso não hajam boleias suficientes
-- Condutores têm o nº de boleias dadas no perfil
-- Agendar boleias
-- Reservar boleias
-- Nº de lugares livres
-- Opção "Só Mulher"
-- Mensagens entre condutor/passageiro
-- Denuncias
+
+- Request and offer rides with vehicle identification (license plate and car model)
+- Passengers can tip drivers
+- Leaderboard system
+- Only university students can register, using a university-associated email
+- User profile including university, course, and academic year
+- Average rating and reviews
+- Badges (achievements earned as a passenger/driver)
+- Google Maps integration
+- Weekly streaks
+- Bus schedules available when there are not enough rides
+- Drivers display the number of rides given on their profile
+- Schedule rides in advance
+- Book/reserve rides
+- Number of available seats
+- "Women-only" ride option
+- Messaging between driver and passenger
+- Reporting system (user/ride reports)
 
 ### Elevator Pitch
 <!-- 
@@ -116,52 +109,64 @@ At the end, it is good to add a rough indication of the value of the user story 
 
 ### Domain model
 
-<!-- 
-To better understand the context of the software system, it is useful to have a simple UML class diagram with all and only the key concepts (names, attributes) and relationships involved of the problem domain addressed by your app. 
-Also provide a short textual description of each concept (domain class). 
-
-Example:
  <p align="center" justify="center">
-  <img src="https://github.com/FEUP-LEIC-ES-2022-23/templates/blob/main/images/DomainModel.png"/>
+  <img src="UMLDomMod.png"/>
 </p>
--->
+
+- **University**: Academic institution associated with users and responsible for validating restricted registration.
+- **User**: Registered student who may act as driver, passenger or both.
+- **Car**: Vehicle registered by a driver for ride sharing.
+- **Ride**: Transportation offer created by a driver.
+- **Booking**: Reservation made by a passenger for a specific ride.
+- **Review**: Evaluation submitted after a completed ride.
+- **Chat**: Communication exchanged between users in the context of a booking.
+- **Badge**: Achievement that may be earned through platform activity.
+- **UserBadge**: Association between a user and a badge earned.
+- **Report**: Complaint submitted by a user regarding another user or a ride.
 
 
 ## Architecture and Design
-<!--
-The architecture of a software system encompasses the set of key decisions about its organization. 
 
-A well written architecture document is brief and reduces the amount of time it takes new programmers to a project to understand the code to feel able to make modifications and enhancements.
+The **UniLink** system is organized into distinct components to ensure that the user interface, the business logic, and the data storage are well-separated. This organization makes the system easier to develop, test, and maintain as the project grows.
 
-To document the architecture requires describing the decomposition of the system in their parts (high-level components) and the key behaviors and collaborations between them. 
+To document our architecture, we decomposed the system into three main parts:
 
-In this section you should start by briefly describing the components of the project and their interrelations. You should describe how you solved typical problems you may have encountered, pointing to well-known architectural and design patterns, if applicable.
--->
+* **The Frontend:** A mobile application that handles all user interactions and displays information.
+* **The Backend:** A central server that processes all the rules of the carpooling system, such as managing rides and user accounts.
+* **The Persistence Layer:** Responsible for safely storing all the information generated by the users.
+
+In the following sections, we describe how these components interrelate and the specific technologies used to implement each part of the system.
 
 
 ### Logical architecture
-<!--
-The purpose of this subsection is to document the high-level logical structure of the code (Logical View), using a UML diagram with logical packages, without the worry of allocating to components, processes or machines.
 
-It can be beneficial to present the system in a horizontal decomposition, defining layers and implementation concepts, such as the user interface, business logic and concepts.
-
-Example of _UML package diagram_ showing a _logical view_ of the Eletronic Ticketing System (to be accompanied by a short description of each package):
-
-![LogicalView](https://user-images.githubusercontent.com/9655877/160585416-b1278ad7-18d7-463c-b8c6-afa4f7ac7639.png)
--->
+<p align="center" justify="center">
+  <img src="UMLlogical.png"/>
+</p>
 
 
-### Physical architecture
-<!--
-The goal of this subsection is to document the high-level physical structure of the software system (machines, connections, software components installed, and their dependencies) using UML deployment diagrams (Deployment View) or component diagrams (Implementation View), separate or integrated, showing the physical structure of the system.
+### Physical Architecture
 
-It should describe also the technologies considered and justify the selections made. Examples of technologies relevant for ESOF are, for example, frameworks for mobile applications (such as Flutter).
+<p align="center" justify="center">
+  <img src="UMLphysical.png"/>
+</p>
 
-Example of _UML deployment diagram_ showing a _deployment view_ of the Eletronic Ticketing System (please notice that, instead of software components, one should represent their physical/executable manifestations for deployment, called artifacts in UML; the diagram should be accompanied by a short description of each node and artifact):
 
-![DeploymentView](https://user-images.githubusercontent.com/9655877/160592491-20e85af9-0758-4e1e-a704-0db1be3ee65d.png)
--->
+The physical structure of the UniLink system is organized into three main hardware nodes:
 
+* **Mobile Device (Node):** Represents the user's smartphone.
+    * **UniLink App (Artifact):** The mobile application client developed with React Native/Expo.
+* **Application Server (Node):** The central server responsible for the backend logic and data.
+    * **UniLink Backend (Artifact):** The server-side application running on Node.js.
+    * **Internal Services:** Logical modules for Ride, User, and Gamification management.
+    * **MySQL (Database):** The relational database used for persistent data storage (Schema: UniLink_DB).
+* **External Services Server (Node):** Third-party servers that provide additional functionality.
+    * **Google Maps API:** Used for geolocation and route visualization.
+    * **Bus Schedule Service:** Integration with external public transport data.
+
+**Connections:**
+* **Mobile Device <-> Application Server:** Standard internet connection for data exchange.
+* **Application Server <-> External Services:** Data exchange through external APIs.
 
 ### Vertical prototype
 <!--
@@ -196,7 +201,7 @@ You can find below information and references related with the project managemen
 
 ### Sprint 0
 
-Link for vertical prototype APK: https://expo.dev/artifacts/eas/oox2WQnwTiu29LCRyGhjN4.apk . 
+Link for Sprint 0 vertical prototype APK: https://expo.dev/artifacts/eas/oox2WQnwTiu29LCRyGhjN4.apk
 
 ### Sprint 1
 
