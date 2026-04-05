@@ -334,8 +334,8 @@ What went well:
 
 What could be improved:
 
-• configuring GitHub Actions workflow earlier
-• refine backlog continuously
+- configuring GitHub Actions workflow earlier
+- refine backlog continuously
 
 Next improvements:
 
