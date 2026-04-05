@@ -168,14 +168,27 @@ The physical structure of the UniLink system is organized into three main hardwa
 * **Mobile Device <-> Application Server:** Standard internet connection for data exchange.
 * **Application Server <-> External Services:** Data exchange through external APIs.
 
-### Vertical prototype
-<!--
-To help on validating all the architectural, design and technological decisions made, we usually implement a vertical prototype, a thin vertical slice of the system integrating as much technologies we can.
+## Vertical prototype
 
-In this subsection please describe which feature, or part of it, you have implemented, and how, together with a snapshot of the user interface, if applicable.
+The vertical prototype implements the core functionality of UniLink, focusing on the main differentiating feature of the application: safe university ride-sharing with the option for women-only rides.
 
-At this phase, instead of a complete user story, you can simply implement a small part of a feature that demonstrates thay you can use the technology, for example, show a screen with the app credits (name and authors).
--->
+Implemented features:
+
+• user registration restricted to university context  
+• profile management  
+• vehicle registration  
+• ride creation with origin, destination, date and seats  
+• women-only ride option  
+• ride search with filters  
+• seat reservation and cancellation  
+• view created and reserved rides  
+
+This prototype demonstrates the main value of UniLink:
+allowing students to coordinate transportation easily and safely within their academic community.
+
+The women-only ride option represents an important safety feature requested during requirements validation.
+
+A functional APK was generated and released for testing purposes. Link for Sprint 0 vertical prototype APK: https://expo.dev/artifacts/eas/oox2WQnwTiu29LCRyGhjN4.apk
 
 ## Project management
 <!--
