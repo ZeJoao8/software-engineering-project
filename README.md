@@ -79,33 +79,86 @@ Take a look at the following links to learn some techniques:
 ## Requirements
 
 ### User Stories
-<!-- 
-In this section, you should describe all kinds of requirements for your module: functional and non-functional requirements.
 
-For LEIC-ES-2024-25, the requirements will be gathered and documented as user stories. 
+🚶 Passengers
 
-Please add in this section a concise summary of all the user stories.
+**1. View Ride Details**
+> *As a passenger, I want to view ride details so that I can evaluate safety.*
 
-**User stories as GitHub Project Items**
-The user stories themselves should be created and described as items in your GitHub Project with the label "user story". 
+**Acceptance Criteria:**
+- Driver information is displayed
+- Car details are visible
+- Available seats are shown
+- Ride route is visible
 
-A user story is a description of a desired functionality told from the perspective of the user or customer. A starting template for the description of a user story is *As a < user role >, I want < goal > so that < reason >.*
+**2. Search Rides**
+> *As a passenger, I want to search rides so that I can find transport.*
 
-Name the item with either the full user story or a shorter name. In the “comments” field, add relevant notes, mockup images, and acceptance test scenarios, linking to the acceptance test in Gherkin when available, and finally estimate value and effort.
+**Acceptance Criteria:**
+- User can search by origin and destination
+- User can filter by date
+- Only rides with available seats are shown
+- Results are displayed in a list
 
-**INVEST in good user stories**. 
-You may add more details after, but the shorter and complete, the better. In order to decide if the user story is good, please follow the [INVEST guidelines](https://xp123.com/articles/invest-in-good-stories-and-smart-tasks/).
+**3. Reserve a Seat**
+> *As a passenger, I want to reserve a seat so that I can join a ride.*
 
-**User interface mockups**.
-After the user story text, you should add a draft of the corresponding user interfaces, a simple mockup or draft, if applicable.
+**Acceptance Criteria:**
+- User can select a ride
+- User can reserve a seat
+- Available seats decrease after reservation
+- Cannot reserve if ride is full
+- Confirmation message is displayed
 
-**Acceptance tests**.
-For each user story you should write also the acceptance tests (textually in [Gherkin](https://cucumber.io/docs/gherkin/reference/)), i.e., a description of scenarios (situations) that will help to confirm that the system satisfies the requirements addressed by the user story.
+🚗 Drivers
 
-**Value and effort**.
-At the end, it is good to add a rough indication of the value of the user story to the customers (e.g. [MoSCoW](https://en.wikipedia.org/wiki/MoSCoW_method) method) and the team should add an estimation of the effort to implement it, for example, using points in a kind-of-a Fibonnacci scale (1,2,3,5,8,13,20,40, no idea).
+**4. Create a Ride**
+> *As a driver, I want to create a ride so that I can offer transportation.*
 
--->
+**Acceptance Criteria:**
+- User can input origin and destination
+- User can select date and time
+- User can define number of seats
+- System validates seats > 0
+- Ride is created successfully
+- Ride appears in search results
+
+**5. Add Car Details**
+> *As a driver, I want to add car details so that passengers can identify my vehicle.*
+
+**Acceptance Criteria:**
+- User can input license plate
+- User can input car model
+- Both fields are required
+- Car is linked to user profile
+
+**6. Manage Rides**
+> *As a driver, I want to manage my rides so that I can edit or cancel them.*
+
+**Acceptance Criteria:**
+- Driver can edit ride details
+- Driver can cancel a ride
+- Changes are saved correctly
+- Cancelled rides are no longer visible
+
+👤 General Profile & Safety
+
+**7. Create and Edit Profile**
+> *As a user, I want to create and edit my profile so that others can trust me.*
+
+**Acceptance Criteria:**
+- User can edit university, course and year
+- Profile data is saved successfully
+- Profile is visible to other users
+
+**8. Women-Only Rides**
+> *As a female user, I want women-only rides so that I feel safer.*
+
+**Acceptance Criteria:**
+- Female driver can enable women-only option
+- Only female users can reserve
+- System enforces restriction
+
 
 ### Domain model
 
