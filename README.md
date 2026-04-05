@@ -267,7 +267,7 @@ You can find below information and references related with the project managemen
 
 ### Sprint 0
 
-### Sprint goal
+#### Sprint goal
 Define the foundations of the UniLink project and implement an initial vertical prototype demonstrating the core functionality of the system.
 
 #### Sprint planning
