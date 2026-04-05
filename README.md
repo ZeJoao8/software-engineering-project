@@ -214,6 +214,84 @@ You can find below information and references related with the project managemen
 
 ### Sprint 0
 
+### Sprint goal
+Define the foundations of the UniLink project and implement an initial vertical prototype demonstrating the core functionality of the system.
+
+#### Sprint planning
+
+During Sprint 0, the team identified the main problem to address: improving student mobility through a trusted ride-sharing platform restricted to university communities.
+
+The initial product backlog was created and organised into epics and user stories using GitHub Projects. The team prioritised features that represent the core value of the application, such as ride creation, ride search and reservation functionality.
+
+Tasks were divided among team members and estimated in order to ensure balanced workload and incremental progress.
+
+#### Backlog management
+
+The backlog was refined collaboratively to ensure that Product Backlog Items:
+
+• are clearly described  
+• provide user value  
+• are small enough to be implemented in a short time  
+• include acceptance criteria  
+• follow INVEST principles  
+
+The backlog includes epics related to:
+
+• ride management  
+• user profiles  
+• safety features  
+• messaging  
+• gamification  
+
+#### Development
+
+The team implemented a vertical prototype focusing on the main functionality of the application:
+
+• register and authenticate users  
+• create and manage vehicles  
+• create rides  
+• search rides with filters  
+• reserve and cancel seats  
+• women-only ride option  
+
+#### Testing
+
+Unit tests were created for utility functions and filtering logic.
+
+Acceptance tests were implemented using Maestro to simulate real user interaction scenarios such as:
+
+• registering a new user  
+• creating rides  
+• filtering rides  
+• reserving seats  
+• cancelling reservations  
+
+#### Continuous Integration
+
+A GitHub Actions workflow was configured to automatically run tests whenever new commits are pushed, ensuring that new changes do not break existing functionality.
+
+#### Sprint retrospective
+
+What went well:
+
+• good team collaboration
+• clear division of tasks
+• successful implementation of core functionality
+• early validation of requirements through survey
+
+What could be improved:
+
+• improve estimation accuracy
+• configuring GitHub Actions workflow earlier
+• refine backlog continuously
+
+Next improvements:
+
+• implement messaging system
+• add rating and review functionality
+• integrate maps API
+• improve UI consistency
+
 Link for Sprint 0 vertical prototype APK: https://expo.dev/artifacts/eas/oox2WQnwTiu29LCRyGhjN4.apk
 
 ### Sprint 1
