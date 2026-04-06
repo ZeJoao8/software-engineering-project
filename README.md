@@ -294,7 +294,16 @@ The backlog includes epics related to:
 - user profiles  
 - safety features  
 - messaging  
-- gamification  
+- gamification
+
+#### User Survey
+
+A questionnaire was conducted among university students to analyse their mobility habits and evaluate the interest in a ride-sharing platform restricted to the academic community.
+
+The results indicate that students frequently rely on transportation and face limitations in current options. There is a strong interest in a dedicated solution, particularly due to the increased sense of trust within a university environment. Safety, reliability, and ease of use were identified as key factors influencing adoption.
+
+The questionnaire is available at:  
+https://docs.google.com/forms/d/1npzmGCK6FxChAs8VoJYxwFdkaKeYml8X504ZGI52Eds
 
 #### Development
 
