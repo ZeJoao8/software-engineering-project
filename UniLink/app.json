@@ -8,9 +8,11 @@
     "scheme": "unilink",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+
     "ios": {
       "supportsTablet": true
     },
+
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
@@ -22,10 +24,12 @@
       "predictiveBackGestureEnabled": false,
       "package": "com.zinho23.UniLink"
     },
+
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
+
     "plugins": [
       "expo-router",
       [
@@ -42,15 +46,14 @@
       ],
       "@react-native-community/datetimepicker"
     ],
+
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
     },
+
     "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "bf4612e6-b0e3-4cd1-87d0-c4214d088749"
-      }
+      "router": {}
     }
   }
 }
