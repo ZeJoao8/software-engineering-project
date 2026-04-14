@@ -66,7 +66,7 @@ export default function LowRatingReport() {
   const targetUser =
     targetUserId
       ? getUserById(targetUserId)
-      : undefined;
+      : null;
 
   const [reason, setReason] =
     useState("");
@@ -74,19 +74,26 @@ export default function LowRatingReport() {
   const [submitting, setSubmitting] =
     useState(false);
 
-  if (!ride || !activeUser || !targetUser) {
-    return null;
-  }
-
   const joined =
-    ride.passengers.includes(activeUser.uid) ||
-    ride.passengers.includes(activeUser.email);
+    ride && activeUser
+      ? (
+          ride.passengers.includes(activeUser.uid) ||
+          ride.passengers.includes(activeUser.email)
+        )
+      : false;
 
   const isDriver =
-    ride.driverId === activeUser.uid ||
-    ride.driverId === activeUser.email;
+    ride && activeUser
+      ? (
+          ride.driverId === activeUser.uid ||
+          ride.driverId === activeUser.email
+        )
+      : false;
 
   const canAccess =
+    !!ride &&
+    !!activeUser &&
+    !!targetUser &&
     joined &&
     !isDriver &&
     ride.completed &&
@@ -97,18 +104,31 @@ export default function LowRatingReport() {
     reason.trim();
 
   useEffect(() => {
-    if (!canAccess) {
+    if (
+      ride &&
+      activeUser &&
+      targetUser &&
+      !canAccess
+    ) {
       Alert.alert(
         "Not allowed",
         "You cannot report this ride."
       );
       router.replace("/(tabs)/myRides");
     }
-  }, [canAccess, router]);
+  }, [canAccess, ride, activeUser, targetUser, router]);
+
+  if (!ride || !activeUser || !targetUser) {
+    return null;
+  }
 
   if (!canAccess) {
     return null;
   }
+
+  const currentRide = ride;
+  const reviewerUser = activeUser;
+  const reviewedUser = targetUser;
 
   async function submitLowRating() {
 
@@ -118,11 +138,11 @@ export default function LowRatingReport() {
 
     if (
       hasReviewForRide(
-        ride.id,
-        activeUser.uid,
-        targetUser.uid,
-        activeUser.email,
-        targetUser.email
+        currentRide.id,
+        reviewerUser.uid,
+        reviewedUser.uid,
+        reviewerUser.email,
+        reviewedUser.email
       )
     ) {
       Alert.alert(
@@ -148,9 +168,9 @@ export default function LowRatingReport() {
 
     await addReview({
       id: reviewId,
-      rideId: ride.id,
-      reviewerId: activeUser.uid,
-      revieweeId: targetUser.uid,
+      rideId: currentRide.id,
+      reviewerId: reviewerUser.uid,
+      revieweeId: reviewedUser.uid,
       rating,
       comment: trimmedReason,
       createdAt: new Date().toISOString()
@@ -158,13 +178,14 @@ export default function LowRatingReport() {
 
     await addReport({
       id: `${reviewId}-report`,
-      rideId: ride.id,
+      rideId: currentRide.id,
       reviewId,
-      reporterId: activeUser.uid,
-      reportedUserId: targetUser.uid,
+      reporterId: reviewerUser.uid,
+      reportedUserId: reviewedUser.uid,
       reason: trimmedReason,
       createdAt: new Date().toISOString(),
-      status: "pending"
+      status: "pending",
+      type: "low_rating"
     });
 
     setSubmitting(false);
@@ -202,7 +223,7 @@ export default function LowRatingReport() {
       </Text>
 
       <Text style={{ marginBottom: spacing.sm }}>
-        You rated {targetUser.name} with {rating} star{rating > 1 ? "s" : ""}.
+        You rated {reviewedUser.name} with {rating} star{rating > 1 ? "s" : ""}.
       </Text>
 
       <Text

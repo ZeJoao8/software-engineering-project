@@ -31,6 +31,10 @@ import {
  hasReviewForRide
 } from "../../data/reviews";
 
+import {
+  hasReportForRide
+} from "../../data/reports";
+
 import { formatDate } from "../../utils/date";
 
 import { Picker } from "@react-native-picker/picker";
@@ -616,27 +620,35 @@ export default function RideDetails() {
 
     )}
 
-    {isDriver && r.completed && (
+    {isDriver &&
+      r.completed &&
+      !hasReportForRide(
+        r.id,
+        activeUser.uid,
+        p!.uid,
+        activeUser.email,
+        p!.email
+      ) && (
 
-    <Text
-      style={{
-      color: colors.primary,
-      fontWeight: "600"
-      }}
-      onPress={() =>
-      router.push({
-        pathname: "/reportPassenger/[id]",
-        params: {
-        id: r.id,
-        targetUserId: p!.uid
-        }
-      })
-      }
-    >
-      Add comment
-    </Text>
+        <Text
+          style={{
+            color: colors.primary,
+            fontWeight: "600"
+          }}
+          onPress={() =>
+            router.push({
+              pathname: "/reportPassenger/[id]",
+              params: {
+                id: r.id,
+                targetUserId: p!.uid
+              }
+            })
+          }
+        >
+          Add comment
+        </Text>
 
-    )}
+      )}
      </View>
 
     ))}

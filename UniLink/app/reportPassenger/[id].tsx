@@ -57,7 +57,7 @@ export default function ReportPassenger() {
   const targetUser =
     targetUserId
       ? getUserById(targetUserId)
-      : undefined;
+      : null;
 
   const [reason, setReason] =
     useState("");
@@ -65,19 +65,26 @@ export default function ReportPassenger() {
   const [submitting, setSubmitting] =
     useState(false);
 
-  if (!ride || !activeUser || !targetUser) {
-    return null;
-  }
-
   const isDriver =
-    ride.driverId === activeUser.uid ||
-    ride.driverId === activeUser.email;
+    ride && activeUser
+      ? (
+          ride.driverId === activeUser.uid ||
+          ride.driverId === activeUser.email
+        )
+      : false;
 
   const passengerWasInRide =
-    ride.passengers.includes(targetUser.uid) ||
-    ride.passengers.includes(targetUser.email);
+    ride && targetUser
+      ? (
+          ride.passengers.includes(targetUser.uid) ||
+          ride.passengers.includes(targetUser.email)
+        )
+      : false;
 
   const canAccess =
+    !!ride &&
+    !!activeUser &&
+    !!targetUser &&
     isDriver &&
     passengerWasInRide &&
     ride.completed;
@@ -86,18 +93,31 @@ export default function ReportPassenger() {
     reason.trim();
 
   useEffect(() => {
-    if (!canAccess) {
+    if (
+      ride &&
+      activeUser &&
+      targetUser &&
+      !canAccess
+    ) {
       Alert.alert(
         "Not allowed",
         "You cannot comment on this passenger."
       );
       router.replace("/(tabs)/myRides");
     }
-  }, [canAccess, router]);
+  }, [canAccess, ride, activeUser, targetUser, router]);
+
+  if (!ride || !activeUser || !targetUser) {
+    return null;
+  }
 
   if (!canAccess) {
     return null;
   }
+
+  const currentRide = ride;
+  const reporterUser = activeUser;
+  const reportedUser = targetUser;
 
   async function submitDriverComment() {
 
@@ -115,18 +135,18 @@ export default function ReportPassenger() {
 
     if (
       hasReportForRide(
-        ride.id,
-        activeUser.uid,
-        targetUser.uid,
-        activeUser.email,
-        targetUser.email
+        currentRide.id,
+        reporterUser.uid,
+        reportedUser.uid,
+        reporterUser.email,
+        reportedUser.email
       )
     ) {
       Alert.alert(
         "Already submitted",
         "You have already submitted a comment for this passenger on this ride."
       );
-      router.replace(`/ride/${ride.id}`);
+      router.replace(`/ride/${currentRide.id}`);
       return;
     }
 
@@ -134,9 +154,9 @@ export default function ReportPassenger() {
 
     await addReport({
       id: Date.now().toString(),
-      rideId: ride.id,
-      reporterId: activeUser.uid,
-      reportedUserId: targetUser.uid,
+      rideId: currentRide.id,
+      reporterId: reporterUser.uid,
+      reportedUserId: reportedUser.uid,
       reason: trimmedReason,
       createdAt: new Date().toISOString(),
       status: "pending",
@@ -152,7 +172,7 @@ export default function ReportPassenger() {
         {
           text: "OK",
           onPress: () =>
-            router.replace(`/ride/${ride.id}`)
+            router.replace(`/ride/${currentRide.id}`)
         }
       ]
     );
@@ -178,7 +198,7 @@ export default function ReportPassenger() {
       </Text>
 
       <Text style={{ marginBottom: spacing.sm }}>
-        Passenger: {targetUser.name}
+        Passenger: {reportedUser.name}
       </Text>
 
       <Text
