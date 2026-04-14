@@ -37,6 +37,11 @@ import {
   useRouter
 } from "expo-router";
 
+import LocationPickerMap from "../../components/LocationPickerMap";
+import RouteMap from "../../components/RouteMap";
+import AddressAutocomplete from "../../components/AddressAutocomplete";
+import type { Coordinates } from "../../utils/routing";
+
 export default function CreateRide() {
 
   const router = useRouter();
@@ -48,9 +53,9 @@ export default function CreateRide() {
     useState(
       user
         ? getUserCars(
-            user.uid,
-            user.email
-          )
+          user.uid,
+          user.email
+        )
         : []
     );
 
@@ -59,6 +64,18 @@ export default function CreateRide() {
 
   const [destination, setDestination] =
     useState("");
+
+  const [originCoords, setOriginCoords] =
+    useState<Coordinates | null>(null);
+
+  const [destinationCoords, setDestinationCoords] =
+    useState<Coordinates | null>(null);
+
+  const [showOriginPicker, setShowOriginPicker] =
+    useState(false);
+
+  const [showDestinationPicker, setShowDestinationPicker] =
+    useState(false);
 
   const [selectedCar, setSelectedCar] =
     useState<string | undefined>(
@@ -97,9 +114,9 @@ export default function CreateRide() {
       const userCars =
         current
           ? getUserCars(
-              current.uid,
-              current.email
-            )
+            current.uid,
+            current.email
+          )
           : [];
       setUser(current);
       setCars(userCars);
@@ -109,6 +126,8 @@ export default function CreateRide() {
 
       setOrigin("");
       setDestination("");
+      setOriginCoords(null);
+      setDestinationCoords(null);
       setSeats("");
       setWomenOnly(false);
 
@@ -122,9 +141,9 @@ export default function CreateRide() {
       const nextCars =
         current
           ? getUserCars(
-              current.uid,
-              current.email
-            )
+            current.uid,
+            current.email
+          )
           : [];
 
       setCars(nextCars);
@@ -158,6 +177,11 @@ export default function CreateRide() {
       !car
     ) {
       alert("Fill all fields");
+      return;
+    }
+
+    if (!originCoords || !destinationCoords) {
+      alert("Please select a real location.");
       return;
     }
 
@@ -211,7 +235,9 @@ export default function CreateRide() {
       totalSeats: seatsNumber,
       womenOnly,
       passengers: [],
-      completed: false
+      completed: false,
+      ...(originCoords && { originCoords }),
+      ...(destinationCoords && { destinationCoords }),
     });
 
     alert("Ride created");
@@ -274,37 +300,118 @@ export default function CreateRide() {
         Create Ride
       </Text>
 
-      <View style={components.card}>
+      <View style={[components.card, { zIndex: 20 }]}>
 
         <Text style={layout.subtitle}>
           Origin
         </Text>
 
-        <TextInput
-          placeholder="Origin"
+        <AddressAutocomplete
+          placeholder="Procurar origem..."
           value={origin}
-          maxLength={40}
-          onChangeText={setOrigin}
-          style={forms.input}
+          onChangeText={(text) => {
+            setOrigin(text);
+            setOriginCoords(null);
+          }}
+          onSelect={(name, coords) => {
+            setOrigin(name);
+            setOriginCoords(coords);
+          }}
           testID="createRideOriginInput"
         />
 
-        <View style={{ height: 6 }} />
+        <Pressable
+          style={{
+            marginTop: spacing.xs,
+            marginBottom: spacing.sm,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 6,
+          }}
+          onPress={() => setShowOriginPicker(true)}
+          testID="createRideOriginMapButton"
+        >
+          <Text style={{
+            color: colors.primary,
+            fontWeight: "600",
+            fontSize: 14,
+          }}>
+            🗺️ Or choose on map
+          </Text>
+          {originCoords && (
+            <Text style={{
+              color: colors.accent,
+              fontSize: 12,
+              fontWeight: "700",
+            }}>
+              ✓ Location defined
+            </Text>
+          )}
+        </Pressable>
+
 
         <Text style={layout.subtitle}>
           Destination
         </Text>
 
-        <TextInput
-          placeholder="Destination"
+        <AddressAutocomplete
+          placeholder="Search destination..."
           value={destination}
-          maxLength={40}
-          onChangeText={setDestination}
-          style={forms.input}
+          onChangeText={(text) => {
+            setDestination(text);
+            setDestinationCoords(null);
+          }}
+          onSelect={(name, coords) => {
+            setDestination(name);
+            setDestinationCoords(coords);
+          }}
           testID="createRideDestinationInput"
         />
 
+        <Pressable
+          style={{
+            marginTop: spacing.xs,
+            marginBottom: spacing.sm,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 6,
+          }}
+          onPress={() => setShowDestinationPicker(true)}
+          testID="createRideDestinationMapButton"
+        >
+          <Text style={{
+            color: colors.primary,
+            fontWeight: "600",
+            fontSize: 14,
+          }}>
+            🗺️ Or choose on map
+          </Text>
+          {destinationCoords && (
+            <Text style={{
+              color: colors.accent,
+              fontSize: 12,
+              fontWeight: "700",
+            }}>
+              ✓ Location defined
+            </Text>
+          )}
+        </Pressable>
+
       </View>
+
+
+      {/* Route preview */}
+      {originCoords && destinationCoords && (
+        <View style={[components.card, { padding: 0, overflow: "hidden" }]}>
+          <RouteMap
+            origin={originCoords}
+            destination={destinationCoords}
+            originLabel={origin}
+            destinationLabel={destination}
+            height={200}
+          />
+        </View>
+      )}
 
 
       <View style={components.card}>
@@ -450,6 +557,31 @@ export default function CreateRide() {
           CREATE RIDE
         </Text>
       </Pressable>
+
+
+      {/* Location picker modals */}
+      <LocationPickerMap
+        visible={showOriginPicker}
+        onClose={() => setShowOriginPicker(false)}
+        title="Select origin"
+        onConfirm={(coords, name) => {
+          setOriginCoords(coords);
+          setOrigin(name);
+          setShowOriginPicker(false);
+        }}
+      />
+
+      <LocationPickerMap
+        visible={showDestinationPicker}
+        onClose={() => setShowDestinationPicker(false)}
+        title="Select destination"
+        onConfirm={(coords, name) => {
+          setDestinationCoords(coords);
+          setDestination(name);
+          setShowDestinationPicker(false);
+        }}
+      />
+
     </ScrollView>
 
   );

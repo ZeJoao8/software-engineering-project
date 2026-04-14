@@ -39,6 +39,11 @@ export default function TabsLayout() {
             />
 
             <Tabs.Screen
+                name="mapView"
+                options={{ title: "Map", tabBarButtonTestID: "mapTab" }}
+            />
+
+            <Tabs.Screen
                 name="createRide"
                 options={{ title: "Create", tabBarButtonTestID: "createTab" }}
             />

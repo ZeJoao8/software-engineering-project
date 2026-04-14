@@ -37,6 +37,8 @@ import { components } from "../../styles/components";
 import { layout } from "../../styles/layout";
 import { colors, spacing } from "../../styles/theme";
 
+import RouteMap from "../../components/RouteMap";
+
 export default function RideDetails(){
 
  const router = useRouter();
@@ -447,6 +449,22 @@ function changeCar(){
 </View>
 
 </View>
+
+
+
+{/* ROUTE MAP */}
+{ride.originCoords && ride.destinationCoords && (
+<View style={[components.card, { padding: 0, overflow: "hidden" }]}>
+ <RouteMap
+  origin={ride.originCoords}
+  destination={ride.destinationCoords}
+  originLabel={ride.origin}
+  destinationLabel={ride.destination}
+  height={220}
+  interactive
+ />
+</View>
+)}
 
 
 
