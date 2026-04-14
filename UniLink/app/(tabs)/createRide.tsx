@@ -211,7 +211,8 @@ export default function CreateRide() {
       totalSeats: seatsNumber,
       womenOnly,
       passengers: [],
-      completed: false
+      completed: false,
+      ratings: []
     });
 
     alert("Ride created");

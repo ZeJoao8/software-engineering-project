@@ -52,9 +52,18 @@ function syncRidesWithAuth() {
  unsubscribeRidesSnapshot = onSnapshot(
   collection(db, "rides"),
   snapshot => {
-   rides = snapshot.docs.map(document =>
-    document.data() as Ride
-   );
+   rides = snapshot.docs.map(document => {
+    const data = document.data() as Ride;
+    return {
+     ...data,
+     passengers: Array.isArray(data.passengers)
+      ? data.passengers
+      : [],
+     ratings: Array.isArray(data.ratings)
+      ? data.ratings
+      : []
+    };
+   });
    notifyListeners();
   },
   error => {

@@ -3,6 +3,16 @@ import {
  Text
 } from "react-native";
 
+import {
+ useEffect,
+ useState
+} from "react";
+
+import {
+ getRides,
+ subscribeToRidesChanges
+} from "../../data/rides";
+
 import { SafeAreaView }
  from "react-native-safe-area-context";
 
@@ -24,6 +34,10 @@ import { forms } from "../../styles/forms";
 import { layout } from "../../styles/layout";
 import { colors, spacing } from "../../styles/theme";
 
+import {
+ getReceivedRatingStats
+} from "../../utils/ratings";
+
 export default function PublicProfile(){
 
  const router = useRouter();
@@ -41,11 +55,26 @@ export default function PublicProfile(){
    ? getUserById(id)
    : undefined;
 
+ const [, setRidesTick] =
+  useState(0);
+
+ useEffect(() => {
+  return subscribeToRidesChanges(() => {
+   setRidesTick(value => value + 1);
+  });
+ }, []);
+
  if(!user) return null;
 
  const cars =
   getUserCars(user.uid, user.email);
 
+ const stats =
+  getReceivedRatingStats(
+   getRides(),
+   user.uid,
+   user.email
+  );
 
 return(
 
@@ -70,7 +99,11 @@ return(
  {user.name}
 </Text>
 
-
+<Text style={{ marginBottom: spacing.md, color: colors.textLight }}>
+ {stats
+   ? `⭐ ${stats.average.toFixed(1)} (${stats.count} rating${stats.count === 1 ? "" : "s"})`
+   : "No ratings yet"}
+</Text>
 
 {/* INFO */}
 <View style={components.card}>

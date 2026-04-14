@@ -36,6 +36,10 @@ import { forms } from "../../styles/forms";
 import { layout } from "../../styles/layout";
 import { colors, spacing } from "../../styles/theme";
 
+import {
+ getReceivedRatingStats
+} from "../../utils/ratings";
+
 export default function Profile() {
 
   const router = useRouter();
@@ -86,6 +90,13 @@ export default function Profile() {
   }
 
   const activeUser = user;
+
+  const ratingStats =
+    getReceivedRatingStats(
+      getRides(),
+      activeUser.uid,
+      activeUser.email
+    );
 
   const userCars =
     getUserCars(
@@ -265,6 +276,19 @@ export default function Profile() {
         ) : (
           <Text>{activeUser.name}</Text>
         )}
+
+
+        <View style={{ height: spacing.sm }} />
+
+        <Text style={forms.label}>
+          Rating
+        </Text>
+
+        <Text>
+          {ratingStats
+            ? `⭐ ${ratingStats.average.toFixed(1)} (${ratingStats.count} rating${ratingStats.count === 1 ? "" : "s"})`
+            : "No ratings yet"}
+        </Text>
 
 
         <View style={{ height: spacing.sm }} />

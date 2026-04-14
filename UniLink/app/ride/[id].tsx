@@ -15,7 +15,8 @@ import {
 import {
  getRides,
  updateRide,
- deleteRide
+ deleteRide,
+ subscribeToRidesChanges
 } from "../../data/rides";
 
 import {
@@ -36,6 +37,17 @@ import { useEffect, useState } from "react";
 import { components } from "../../styles/components";
 import { layout } from "../../styles/layout";
 import { colors, spacing } from "../../styles/theme";
+
+import {
+ canDriverRatePassenger,
+ canPassengerRateDriver,
+ findMyRatingToUser,
+ isSelfRating,
+ normalizeStars,
+ ratingAlreadySubmitted
+} from "../../utils/ratings";
+
+import { StarRatingPicker } from "../../components/StarRatingPicker";
 
 export default function RideDetails(){
 
@@ -63,9 +75,20 @@ export default function RideDetails(){
   setSelectedCarId(ride?.carId);
  }, [ride?.carId]);
 
+ const [, setRidesTick] =
+  useState(0);
+
+ useEffect(() => {
+  return subscribeToRidesChanges(() => {
+   setRidesTick(value => value + 1);
+  });
+ }, []);
+
  if(!ride) return null;
 
  const r=ride;
+
+ const ratings = r.ratings || [];
 
  const user = getCurrentUser();
 
@@ -107,17 +130,117 @@ export default function RideDetails(){
  const rideStarted =
   rideDate < now;
 
- const canComplete =
+ const driverCanCompleteRide =
   isDriver &&
-  rideStarted &&
   !r.completed;
 
-const driverCars =
+ const driverCars =
  cars.filter(
   c =>
    c.ownerId === activeUser.uid ||
    c.ownerId === activeUser.email
  );
+
+async function rateUser(
+  toUserId: string,
+  stars: number
+) {
+
+  const latest =
+   id
+    ? getRides().find(
+       rideItem =>
+        rideItem.id === id
+      )
+    : undefined;
+
+  if (!latest) {
+   return;
+  }
+
+  const list =
+   latest.ratings ?? [];
+
+  if (!latest.completed) {
+    Alert.alert(
+      "Cannot rate",
+      "Ride not completed"
+    );
+    return;
+  }
+
+  if (
+   isSelfRating(
+    toUserId,
+    activeUser.uid,
+    activeUser.email
+   )
+  ) {
+    Alert.alert(
+      "You cannot rate yourself"
+    );
+    return;
+  }
+
+  if (
+   ratingAlreadySubmitted(
+    list,
+    activeUser.uid,
+    activeUser.email,
+    toUserId
+   )
+  ) {
+    Alert.alert(
+      "Already rated",
+      "You already rated this person for this ride."
+    );
+    return;
+  }
+
+  const passengerRatesDriver =
+   toUserId === latest.driverId &&
+   canPassengerRateDriver(
+    latest,
+    activeUser.uid,
+    activeUser.email
+   );
+
+  const driverRatesPassenger =
+   canDriverRatePassenger(
+    latest,
+    toUserId,
+    activeUser.uid,
+    activeUser.email
+   );
+
+  if (
+   !passengerRatesDriver &&
+   !driverRatesPassenger
+  ) {
+    Alert.alert(
+      "Cannot rate",
+      "You can only rate people you shared this ride with."
+    );
+    return;
+  }
+
+  const normalized =
+   normalizeStars(stars);
+
+  await updateRide({
+    ...latest,
+    ratings: [
+      ...list,
+      {
+        fromUserId: activeUser.uid,
+        toUserId,
+        stars: normalized
+      }
+    ]
+  });
+
+  Alert.alert("Rating submitted");
+}
 
 function reserveSeat(){
  if(r.completed){
@@ -245,10 +368,17 @@ function cancelRide(){
 }
 
 function completeRide(){
- if(!canComplete){
+ if(!isDriver){
   Alert.alert(
    "Cannot complete",
-   "Ride cannot be completed yet."
+   "Only the driver can mark this ride as completed."
+  );
+  return;
+ }
+ if(r.completed){
+  Alert.alert(
+   "Already completed",
+   "This ride is already marked as completed."
   );
   return;
  }
@@ -267,7 +397,7 @@ function completeRide(){
       ...r,
       completed:true
      });
-     router.replace("/(tabs)/myRides");
+     router.replace(`/ride/${r.id}`);
     }
    }
   ]
@@ -454,26 +584,81 @@ function changeCar(){
 <View style={components.card}>
 
 <Text style={layout.subtitle}>
- Driver
+  Driver
 </Text>
 
 <Text
  style={{color:colors.primary,fontWeight:"600"}}
-
  onPress={()=>{
-
   if(driver?.uid === activeUser.uid)
-
-   router.push("/(tabs)/userProfile");
-
+    router.push("/(tabs)/userProfile");
   else
-
-   router.push(`/user/${driver?.uid}`);
-
+    router.push(`/user/${driver?.uid}`);
  }}
 >
  {driver?.name}
 </Text>
+
+{canPassengerRateDriver(
+  r,
+  activeUser.uid,
+  activeUser.email
+) &&
+ !ratingAlreadySubmitted(
+  ratings,
+  activeUser.uid,
+  activeUser.email,
+  r.driverId
+) && (
+
+  <View style={{ marginTop: spacing.sm }}>
+
+    <Text style={layout.subtitle}>
+      Rate driver
+    </Text>
+
+    <StarRatingPicker
+      onPick={star =>
+       void rateUser(
+        r.driverId,
+        star
+       )
+      }
+    />
+
+  </View>
+
+)}
+
+{canPassengerRateDriver(
+  r,
+  activeUser.uid,
+  activeUser.email
+) &&
+ ratingAlreadySubmitted(
+  ratings,
+  activeUser.uid,
+  activeUser.email,
+  r.driverId
+) && (
+
+  <Text
+   style={{
+    marginTop: spacing.sm,
+    color: colors.textLight
+   }}
+  >
+   You rated this driver:{" "}
+   {findMyRatingToUser(
+    r,
+    activeUser.uid,
+    activeUser.email,
+    r.driverId
+   )}
+   /5
+  </Text>
+
+)}
 
 </View>
 
@@ -554,7 +739,6 @@ function changeCar(){
 
 <View
  key={p!.uid}
-
  style={{
   flexDirection:"row",
   justifyContent:"space-between",
@@ -563,28 +747,98 @@ function changeCar(){
  }}
 >
 
+<View style={{ flex: 1 }}>
+
 <Text
  style={{color:colors.primary, fontWeight:"500"}}
-
  onPress={()=>{
-
   if(p!.uid === activeUser.uid)
-
-   router.push("/(tabs)/userProfile");
-
+    router.push("/(tabs)/userProfile");
   else
-
-   router.push(`/user/${p!.uid}`);
-
+    router.push(`/user/${p!.uid}`);
  }}
 >
-
  {p!.name}
-
 </Text>
 
+{/* Rating: driver → passenger */}
+{isDriver &&
+ r.completed &&
+ canDriverRatePassenger(
+  r,
+  p!.uid,
+  activeUser.uid,
+  activeUser.email
+) &&
+ !ratingAlreadySubmitted(
+  ratings,
+  activeUser.uid,
+  activeUser.email,
+  p!.uid
+) && (
 
+  <View style={{ marginTop: 4 }}>
 
+    <Text
+     style={{
+      fontSize: 12,
+      color: colors.textLight,
+      marginBottom: 2
+     }}
+    >
+     Rate passenger
+    </Text>
+
+    <StarRatingPicker
+      onPick={star =>
+       void rateUser(
+        p!.uid,
+        star
+       )
+      }
+    />
+
+  </View>
+
+)}
+
+{isDriver &&
+ r.completed &&
+ canDriverRatePassenger(
+  r,
+  p!.uid,
+  activeUser.uid,
+  activeUser.email
+) &&
+ ratingAlreadySubmitted(
+  ratings,
+  activeUser.uid,
+  activeUser.email,
+  p!.uid
+) && (
+
+  <Text
+   style={{
+    marginTop: 4,
+    fontSize: 12,
+    color: colors.textLight
+   }}
+  >
+   You rated:{" "}
+   {findMyRatingToUser(
+    r,
+    activeUser.uid,
+    activeUser.email,
+    p!.uid
+   )}
+   /5
+  </Text>
+
+)}
+
+</View>
+
+{/* ❌ REMOVE BUTTON */}
 {isDriver && !rideStarted && !ride.completed && (
 
 <Text
@@ -592,14 +846,11 @@ function changeCar(){
   color:colors.danger,
   fontWeight:"600"
  }}
-
  onPress={() =>
   removePassenger(p!.uid)
  }
 >
-
  remove
-
 </Text>
 
 )}
@@ -728,25 +979,9 @@ function changeCar(){
 
 
 {/* DRIVER CONTROLS */}
-{isDriver && !rideStarted && !ride.completed && !editingCar && (
+{driverCanCompleteRide && !editingCar && (
 
-<Pressable
- style={components.button}
- testID="cancelRideButton"
- onPress={cancelRide}
->
-<Text
- style={components.buttonText}
->
- Cancel ride
-</Text>
-</Pressable>
-
-)}
-
-
-
-{canComplete && (
+<View style={{ gap: spacing.sm }}>
 
 <Pressable
  style={components.button}
@@ -759,6 +994,24 @@ function changeCar(){
  Complete ride
 </Text>
 </Pressable>
+
+{!rideStarted && (
+
+<Pressable
+ style={components.outlineButton}
+ testID="cancelRideButton"
+ onPress={cancelRide}
+>
+<Text
+ style={components.outlineButtonText}
+>
+ Cancel ride
+</Text>
+</Pressable>
+
+)}
+
+</View>
 
 )}
 
