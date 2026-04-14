@@ -1,12 +1,15 @@
 import { Alert } from "react-native";
 
 import {
+ arrayUnion,
  collection,
  deleteDoc,
  doc,
+ increment,
  onSnapshot,
  type Unsubscribe,
  setDoc,
+ updateDoc,
 } from "firebase/firestore";
 
 import { db } from "../lib/firebase";
@@ -119,14 +122,49 @@ export async function updateRide(updatedRide: Ride) {
  notifyListeners();
 
  try {
-  await setDoc(
+  await updateDoc(
    doc(db, "rides", updatedRide.id),
-   updatedRide
+   updatedRide as unknown as Record<string, unknown>
   );
  } catch (error) {
   rides = previousRides;
   notifyListeners();
   console.error("Update ride failed", error);
+  Alert.alert(
+   "Ride update failed",
+   "Could not update the ride in Firestore."
+  );
+ }
+}
+
+export async function addRideRating(
+ rideId: string,
+ rating: Ride["ratings"][number]
+) {
+ try {
+  await updateDoc(doc(db, "rides", rideId), {
+   ratings: arrayUnion(rating),
+  });
+ } catch (error) {
+  console.error("Add rating failed", error);
+  Alert.alert(
+   "Ride update failed",
+   "Could not update the ride in Firestore."
+  );
+ }
+}
+
+export async function reserveSeatInRide(
+ rideId: string,
+ passengerId: string
+) {
+ try {
+  await updateDoc(doc(db, "rides", rideId), {
+   availableSeats: increment(-1),
+   passengers: arrayUnion(passengerId),
+  });
+ } catch (error) {
+  console.error("Reserve seat failed", error);
   Alert.alert(
    "Ride update failed",
    "Could not update the ride in Firestore."

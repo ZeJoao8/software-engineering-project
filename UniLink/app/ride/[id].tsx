@@ -13,7 +13,9 @@ import {
 } from "expo-router";
 
 import {
+ addRideRating,
  getRides,
+ reserveSeatInRide,
  updateRide,
  deleteRide,
  subscribeToRidesChanges
@@ -39,7 +41,6 @@ import { layout } from "../../styles/layout";
 import { colors, spacing } from "../../styles/theme";
 
 import {
- canDriverRatePassenger,
  canPassengerRateDriver,
  findMyRatingToUser,
  isSelfRating,
@@ -141,6 +142,9 @@ export default function RideDetails(){
    c.ownerId === activeUser.email
  );
 
+const [showDriverRatingPicker, setShowDriverRatingPicker] =
+ useState(false);
+
 async function rateUser(
   toUserId: string,
   stars: number
@@ -205,21 +209,10 @@ async function rateUser(
     activeUser.email
    );
 
-  const driverRatesPassenger =
-   canDriverRatePassenger(
-    latest,
-    toUserId,
-    activeUser.uid,
-    activeUser.email
-   );
-
-  if (
-   !passengerRatesDriver &&
-   !driverRatesPassenger
-  ) {
+  if (!passengerRatesDriver) {
     Alert.alert(
       "Cannot rate",
-      "You can only rate people you shared this ride with."
+      "Only passengers can rate the driver."
     );
     return;
   }
@@ -227,18 +220,13 @@ async function rateUser(
   const normalized =
    normalizeStars(stars);
 
-  await updateRide({
-    ...latest,
-    ratings: [
-      ...list,
-      {
-        fromUserId: activeUser.uid,
-        toUserId,
-        stars: normalized
-      }
-    ]
+  await addRideRating(latest.id, {
+   fromUserId: activeUser.uid,
+   toUserId,
+   stars: normalized
   });
 
+  setShowDriverRatingPicker(false);
   Alert.alert("Rating submitted");
 }
 
@@ -284,15 +272,10 @@ function reserveSeat(){
    {
     text:"Yes",
      onPress: async ()=>{
-      await updateRide({
-      ...r,
-      availableSeats:
-       r.availableSeats - 1,
-      passengers:[
-       ...r.passengers,
+      await reserveSeatInRide(
+       r.id,
        activeUser.uid
-      ]
-     });
+      );
      router.replace("/(tabs)/myRides");
     }
    }
@@ -617,14 +600,27 @@ function changeCar(){
       Rate driver
     </Text>
 
-    <StarRatingPicker
-      onPick={star =>
-       void rateUser(
-        r.driverId,
-        star
-       )
-      }
-    />
+    {!showDriverRatingPicker && (
+     <Pressable
+      style={components.outlineButton}
+      onPress={() => setShowDriverRatingPicker(true)}
+     >
+      <Text style={components.outlineButtonText}>
+       Rate driver
+      </Text>
+     </Pressable>
+    )}
+
+    {showDriverRatingPicker && (
+     <StarRatingPicker
+       onPick={star =>
+        void rateUser(
+         r.driverId,
+         star
+        )
+       }
+     />
+    )}
 
   </View>
 
@@ -760,81 +756,6 @@ function changeCar(){
 >
  {p!.name}
 </Text>
-
-{/* Rating: driver → passenger */}
-{isDriver &&
- r.completed &&
- canDriverRatePassenger(
-  r,
-  p!.uid,
-  activeUser.uid,
-  activeUser.email
-) &&
- !ratingAlreadySubmitted(
-  ratings,
-  activeUser.uid,
-  activeUser.email,
-  p!.uid
-) && (
-
-  <View style={{ marginTop: 4 }}>
-
-    <Text
-     style={{
-      fontSize: 12,
-      color: colors.textLight,
-      marginBottom: 2
-     }}
-    >
-     Rate passenger
-    </Text>
-
-    <StarRatingPicker
-      onPick={star =>
-       void rateUser(
-        p!.uid,
-        star
-       )
-      }
-    />
-
-  </View>
-
-)}
-
-{isDriver &&
- r.completed &&
- canDriverRatePassenger(
-  r,
-  p!.uid,
-  activeUser.uid,
-  activeUser.email
-) &&
- ratingAlreadySubmitted(
-  ratings,
-  activeUser.uid,
-  activeUser.email,
-  p!.uid
-) && (
-
-  <Text
-   style={{
-    marginTop: 4,
-    fontSize: 12,
-    color: colors.textLight
-   }}
-  >
-   You rated:{" "}
-   {findMyRatingToUser(
-    r,
-    activeUser.uid,
-    activeUser.email,
-    p!.uid
-   )}
-   /5
-  </Text>
-
-)}
 
 </View>
 
