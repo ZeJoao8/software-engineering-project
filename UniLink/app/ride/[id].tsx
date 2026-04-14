@@ -27,8 +27,11 @@ import {
  getCars
 } from "../../data/cars";
 
-import { formatDate
-} from "../../utils/date";
+import {
+ hasReviewForRide
+} from "../../data/reviews";
+
+import { formatDate } from "../../utils/date";
 
 import { Picker } from "@react-native-picker/picker";
 import { useEffect, useState } from "react";
@@ -37,7 +40,7 @@ import { components } from "../../styles/components";
 import { layout } from "../../styles/layout";
 import { colors, spacing } from "../../styles/theme";
 
-export default function RideDetails(){
+export default function RideDetails() {
 
  const router = useRouter();
 
@@ -53,23 +56,23 @@ export default function RideDetails(){
    ? getRides().find(r => r.id === id)
    : undefined;
 
- const [editingCar,setEditingCar] =
+ const [editingCar, setEditingCar] =
   useState(false);
 
- const [selectedCarId,setSelectedCarId] =
+ const [selectedCarId, setSelectedCarId] =
   useState<string | undefined>(ride?.carId);
 
  useEffect(() => {
   setSelectedCarId(ride?.carId);
  }, [ride?.carId]);
 
- if(!ride) return null;
+ if (!ride) return null;
 
- const r=ride;
+ const r = ride;
 
  const user = getCurrentUser();
 
- if(!user) return null;
+ if (!user) return null;
 
  const activeUser = user;
 
@@ -109,661 +112,691 @@ export default function RideDetails(){
 
  const canComplete =
   isDriver &&
-  rideStarted &&
-  !r.completed;
+  !r.completed &&
+  !editingCar;
 
-const driverCars =
- cars.filter(
-  c =>
-   c.ownerId === activeUser.uid ||
-   c.ownerId === activeUser.email
- );
+ const canRateDriver =
+  joined &&
+  !isDriver &&
+  r.completed &&
+  !hasReviewForRide(
+   r.id,
+   activeUser.uid,
+   driver?.uid ?? r.driverId,
+   activeUser.email,
+   r.driverId
+  );
 
-function reserveSeat(){
- if(r.completed){
-  Alert.alert(
-   "Cannot reserve",
-   "This ride is already completed."
+ const driverCars =
+  cars.filter(
+   c =>
+    c.ownerId === activeUser.uid ||
+    c.ownerId === activeUser.email
   );
-  return;
- }
 
- if(rideStarted){
+ function reserveSeat() {
+  if (r.completed) {
+   Alert.alert(
+    "Cannot reserve",
+    "This ride is already completed."
+   );
+   return;
+  }
+
+  if (rideStarted) {
+   Alert.alert(
+    "Cannot reserve",
+    "This ride has already started."
+   );
+   return;
+  }
+
+  if (r.womenOnly && activeUser.gender !== "Female") {
+   Alert.alert(
+    "Not allowed",
+    "This ride is restricted to women only."
+   );
+   return;
+  }
+
+  if (r.availableSeats <= 0) {
+   Alert.alert(
+    "Ride full",
+    "There are no seats available."
+   );
+   return;
+  }
+
   Alert.alert(
-   "Cannot reserve",
-   "This ride has already started."
-  );
-  return;
- }
- if(r.womenOnly && activeUser.gender !== "Female"
- ){
-  Alert.alert(
-   "Not allowed",
-   "This ride is restricted to women only."
-  );
-  return;
- }
- if(r.availableSeats <= 0){
-  Alert.alert(
-   "Ride full",
-   "There are no seats available."
-  );
-  return;
- }
- Alert.alert(
-  "Reserve seat",
-  "Confirm reservation for this ride?",
-  [
-   {
-    text:"No",
-    style:"cancel"
-   },
-   {
-    text:"Yes",
-     onPress: async ()=>{
+   "Reserve seat",
+   "Confirm reservation for this ride?",
+   [
+    {
+     text: "No",
+     style: "cancel"
+    },
+    {
+     text: "Yes",
+     onPress: async () => {
       await updateRide({
-      ...r,
-      availableSeats:
-       r.availableSeats - 1,
-      passengers:[
-       ...r.passengers,
-       activeUser.uid
-      ]
-     });
-     router.replace("/(tabs)/myRides");
-    }
-   }
-  ]
- );
-}
-
-function cancelSeat(){
- if(rideStarted || r.completed){
-  Alert.alert(
-   "Cannot cancel",
-   "This ride has already started or is completed."
-  );
-  return;
- }
- Alert.alert(
-  "Cancel reservation",
-  "Are you sure you want to cancel your seat?",
-  [
-   {
-    text:"No",
-    style:"cancel"
-   },
-   {
-    text:"Yes",
-    style:"destructive",
-     onPress: async ()=>{
-      const newSeats =
-       Math.min(r.availableSeats + 1,r.totalSeats);
-      await updateRide({
-      ...r,
-      availableSeats:newSeats,
-      passengers:
-       r.passengers.filter(
-         p =>
-          p !== activeUser.uid &&
-          p !== activeUser.email
-       )
-     });
-     router.replace("/(tabs)/myRides");
-    }
-   }
-  ]
- );
-}
-
-function cancelRide(){
- if(rideStarted || r.completed){
-  Alert.alert(
-   "Cannot cancel",
-   "This ride has already started or is completed."
-  );
-  return;
- }
- Alert.alert(
-  "Cancel ride",
-  "Are you sure you want to cancel this ride?",
-  [
-   {
-    text:"No",
-    style:"cancel"
-   },
-   {
-    text:"Yes",
-    style:"destructive",
-     onPress: async ()=>{
-      await deleteRide(r.id);
+       ...r,
+       availableSeats:
+        r.availableSeats - 1,
+       passengers: [
+        ...r.passengers,
+        activeUser.uid
+       ]
+      });
       router.replace("/(tabs)/myRides");
+     }
     }
-   }
-  ]
- );
-}
-
-function completeRide(){
- if(!canComplete){
-  Alert.alert(
-   "Cannot complete",
-   "Ride cannot be completed yet."
+   ]
   );
-  return;
  }
- Alert.alert(
-  "Complete ride",
-  "Mark this ride as completed?",
-  [
-   {
-    text:"No",
-    style:"cancel"
-   },
-   {
-    text:"Yes",
-     onPress: async ()=>{
-      await updateRide({
-      ...r,
-      completed:true
-     });
-     router.replace("/(tabs)/myRides");
-    }
-   }
-  ]
- );
-}
 
-function removePassenger(passengerId:string){
- if(rideStarted || r.completed){
+ function cancelSeat() {
+  if (rideStarted || r.completed) {
+   Alert.alert(
+    "Cannot cancel",
+    "This ride has already started or is completed."
+   );
+   return;
+  }
+
   Alert.alert(
-   "Cannot remove",
-   "Ride already started or completed."
-  );
-  return;
- }
- Alert.alert(
-  "Remove passenger",
-  "Remove this passenger from the ride?",
-  [
-   {
-    text:"No",
-    style:"cancel"
-   },
-   {
-    text:"Yes",
-    style:"destructive",
-     onPress: async ()=>{
-      await updateRide({
-      ...r,
-      passengers:
-       r.passengers.filter(
-        id => id !== passengerId
-       ),
-      availableSeats:
+   "Cancel reservation",
+   "Are you sure you want to cancel your seat?",
+   [
+    {
+     text: "No",
+     style: "cancel"
+    },
+    {
+     text: "Yes",
+     style: "destructive",
+     onPress: async () => {
+      const newSeats =
        Math.min(
         r.availableSeats + 1,
         r.totalSeats
-       )
-     });
-     router.replace(`/ride/${r.id}`);
-    }
-   }
-  ]
- );
-}
+       );
 
-function changeCar(){
- const newCar =
-  driverCars.find(
-   c => c.id === selectedCarId
-  );
- if(!newCar) return;
- const newCarMaxPassengers =
-  newCar.seatCapacity - 1;
- const currentRideLimit =
-  r.totalSeats;
- const newRideLimit =
-  Math.min(
-   currentRideLimit,
-   newCarMaxPassengers
-  );
- if(passengers.length > newRideLimit){
-  Alert.alert(
-   "Car too small",
-   `Current passengers exceed capacity of selected car (max ${newRideLimit}).`
-  );
-  return;
- }
- Alert.alert(
-  "Change car",
-  "Confirm car change?",
-  [
-   {
-    text:"No",
-    style:"cancel"
-   },
-   {
-    text:"Yes",
-     onPress: async ()=>{
       await updateRide({
-      ...r,
-      carId:newCar.id,
-      totalSeats:newRideLimit,
-      availableSeats:
-       newRideLimit -
-       passengers.length
-     });
-     setEditingCar(false);
-     router.replace(`/ride/${r.id}`);
+       ...r,
+       availableSeats: newSeats,
+       passengers:
+        r.passengers.filter(
+         p =>
+          p !== activeUser.uid &&
+          p !== activeUser.email
+        )
+      });
+
+      router.replace("/(tabs)/myRides");
+     }
     }
-   }
-  ]
- );
-}
-
- return(
-
-<SafeAreaView style={layout.screen}>
-
-<Text
- style={{
-  color:colors.primary,
-  marginBottom:spacing.sm,
-  fontWeight:"600"
- }}
-
- onPress={()=> router.back()}
->
- ← Back
-</Text>
-
-
-
-{/* ROUTE */}
-<View style={components.card}>
-
-<Text style={layout.title}>
- {ride.origin} → {ride.destination}
-</Text>
-
-<Text style={{
- marginBottom:spacing.sm
-}}>
- {formatDate(ride.departureDateTime)}
-</Text>
-
-
-<Text style={{fontWeight:"500", color:colors.textLight}}>
-
- {ride.totalSeats - ride.availableSeats}
- {" / "}
- {ride.totalSeats}
- {" seats"}
-
-</Text>
-
-
-<View style={{
- flexDirection:"row",
- gap:8,
- marginTop:spacing.sm
-}}>
-
-
-{ride.womenOnly && (
-
-<Text style={{
- backgroundColor:"#fce7f3",
- color:colors.women,
- paddingHorizontal:8,
- paddingVertical:3,
- borderRadius:6,
- fontSize:12,
- fontWeight:"600"
-}}>
- women only
-</Text>
-
-)}
-
-
-{ride.completed && (
-
-<Text style={{
- backgroundColor:"#dcfce7",
- color:colors.primaryDark,
- paddingHorizontal:8,
- paddingVertical:3,
- borderRadius:6,
- fontSize:12,
- fontWeight:"600"
-}}>
- Completed
-</Text>
-
-)}
-
-</View>
-
-</View>
-
-
-
-{/* DRIVER */}
-<View style={components.card}>
-
-<Text style={layout.subtitle}>
- Driver
-</Text>
-
-<Text
- style={{color:colors.primary,fontWeight:"600"}}
-
- onPress={()=>{
-
-  if(driver?.uid === activeUser.uid)
-
-   router.push("/(tabs)/userProfile");
-
-  else
-
-   router.push(`/user/${driver?.uid}`);
-
- }}
->
- {driver?.name}
-</Text>
-
-</View>
-
-
-
-{/* CAR */}
-<View style={components.card}>
-
-<Text style={layout.subtitle}>
- Car
-</Text>
-
-{car ? (
-
-<>
-
-<Text>
- {car.model}
-</Text>
-
-<Text style={{color:colors.textLight}}>
- {car.color}
-</Text>
-
-<Text style={{fontWeight:"600", paddingBottom:spacing.sm}}>
- {car.licensePlate}
-</Text>
-{isDriver && !rideStarted && !ride.completed && !editingCar && driverCars.length > 1 && (
-
-
-<Pressable
- style={components.outlineButton}
- testID="changeRideCarButton"
-  onPress={()=> setEditingCar(true)}
->
-<Text
- style={components.outlineButtonText}
->
- Change car
-</Text>
-</Pressable>
-
-
-)}
-
-</>
-
-) : (
-
-<Text style={{color:colors.textLight}}>
- Vehicle unavailable
-</Text>
-
-)}
-
-</View>
-
-
-
-{/* PASSENGERS */}
-<View style={components.card}>
-
-<Text style={layout.subtitle}>
- Passengers
-</Text>
-
-
-{passengers.length === 0 && (
-
-<Text style={{color:colors.textLight}}>
- No passengers yet
-</Text>
-
-)}
-
-
-{passengers.map(p => (
-
-<View
- key={p!.uid}
-
- style={{
-  flexDirection:"row",
-  justifyContent:"space-between",
-  alignItems:"center",
-  marginBottom:spacing.sm
- }}
->
-
-<Text
- style={{color:colors.primary, fontWeight:"500"}}
-
- onPress={()=>{
-
-  if(p!.uid === activeUser.uid)
-
-   router.push("/(tabs)/userProfile");
-
-  else
-
-   router.push(`/user/${p!.uid}`);
-
- }}
->
-
- {p!.name}
-
-</Text>
-
-
-
-{isDriver && !rideStarted && !ride.completed && (
-
-<Text
- style={{
-  color:colors.danger,
-  fontWeight:"600"
- }}
-
- onPress={() =>
-  removePassenger(p!.uid)
+   ]
+  );
  }
->
 
- remove
+ function cancelRide() {
+  if (rideStarted || r.completed) {
+   Alert.alert(
+    "Cannot cancel",
+    "This ride has already started or is completed."
+   );
+   return;
+  }
 
-</Text>
+  Alert.alert(
+   "Cancel ride",
+   "Are you sure you want to cancel this ride?",
+   [
+    {
+     text: "No",
+     style: "cancel"
+    },
+    {
+     text: "Yes",
+     style: "destructive",
+     onPress: async () => {
+      await deleteRide(r.id);
+      router.replace("/(tabs)/myRides");
+     }
+    }
+   ]
+  );
+ }
 
-)}
+ function completeRide() {
+  if (!canComplete) {
+   Alert.alert(
+    "Cannot complete",
+    "Ride cannot be completed yet."
+   );
+   return;
+  }
 
-</View>
-
-))}
-
-</View>
-
-
-{/* CHANGE CAR */}
-{editingCar && (
-
-<View style={components.card}>
-
-<Text style={layout.subtitle}>
- Select new car
-</Text>
-
-
-<View style={components.pickerWrapper}>
-
-<Picker
- selectedValue={selectedCarId}
- onValueChange={setSelectedCarId}
-
- dropdownIconColor={colors.primary}
-
- style={{
-  color:colors.primary,
-  fontWeight:"600"
- }}
->
-
-{driverCars.map(c=>(
-
-<Picker.Item
- key={c.id}
- label={`${c.model} (${c.licensePlate})`}
- value={c.id}
- style={{color:"black"}}
-/>
-
-))}
-
-</Picker>
-
-</View>
-
-
-<View style={{height:spacing.sm}} />
-
-
-<Pressable
- style={components.button}
- testID="saveRideCarButton"
- onPress={changeCar}
->
-
-<Text
- style={components.buttonText}
->
- Save car
-</Text>
-
-</Pressable>
+  Alert.alert(
+   "Complete ride",
+   "Mark this ride as completed?",
+   [
+    {
+     text: "No",
+     style: "cancel"
+    },
+    {
+     text: "Yes",
+     onPress: async () => {
+      await updateRide({
+       ...r,
+       completed: true
+      });
+      router.replace("/(tabs)/myRides");
+     }
+    }
+   ]
+  );
+ }
 
 
-<View style={{height:spacing.sm}} />
+ function removePassenger(passengerId: string) {
+  if (rideStarted || r.completed) {
+   Alert.alert(
+    "Cannot remove",
+    "Ride already started or completed."
+   );
+   return;
+  }
 
+  Alert.alert(
+   "Remove passenger",
+   "Remove this passenger from the ride?",
+   [
+    {
+     text: "No",
+     style: "cancel"
+    },
+    {
+     text: "Yes",
+     style: "destructive",
+     onPress: async () => {
+      await updateRide({
+       ...r,
+       passengers:
+        r.passengers.filter(
+         id => id !== passengerId
+        ),
+       availableSeats:
+        Math.min(
+         r.availableSeats + 1,
+         r.totalSeats
+        )
+      });
+      router.replace(`/ride/${r.id}`);
+     }
+    }
+   ]
+  );
+ }
 
-<Pressable
- style={components.outlineButton}
- testID="cancelRideCarEditButton"
-  onPress={()=> setEditingCar(false)}
->
-<Text
- style={components.outlineButtonText}
->
- Cancel
-</Text>
-</Pressable>
-</View>
+ function changeCar() {
+  const newCar =
+   driverCars.find(
+    c => c.id === selectedCarId
+   );
 
-)}
+  if (!newCar) return;
 
+  const newCarMaxPassengers =
+   newCar.seatCapacity - 1;
 
+  const currentRideLimit =
+   r.totalSeats;
 
-{/* PASSENGER ACTIONS */}
-{!isDriver && !joined && !rideStarted && !ride.completed && (
+  const newRideLimit =
+   Math.min(
+    currentRideLimit,
+    newCarMaxPassengers
+   );
 
-<Pressable
- style={components.button}
- testID="reserveSeatButton"
- onPress={reserveSeat}
->
-<Text
- style={components.buttonText}
->
+  if (passengers.length > newRideLimit) {
+   Alert.alert(
+    "Car too small",
+    `Current passengers exceed capacity of selected car (max ${newRideLimit}).`
+   );
+   return;
+  }
 
- Reserve seat
+  Alert.alert(
+   "Change car",
+   "Confirm car change?",
+   [
+    {
+     text: "No",
+     style: "cancel"
+    },
+    {
+     text: "Yes",
+     onPress: async () => {
+      await updateRide({
+       ...r,
+       carId: newCar.id,
+       totalSeats: newRideLimit,
+       availableSeats:
+        newRideLimit -
+        passengers.length
+      });
+      setEditingCar(false);
+      router.replace(`/ride/${r.id}`);
+     }
+    }
+   ]
+  );
+ }
 
-</Text>
+ return (
 
-</Pressable>
+  <SafeAreaView style={layout.screen}>
 
-)}
+   <Text
+    style={{
+     color: colors.primary,
+     marginBottom: spacing.sm,
+     fontWeight: "600"
+    }}
+    onPress={() => router.back()}
+   >
+    ← Back
+   </Text>
 
+   <View style={components.card}>
 
+    <Text style={layout.title}>
+     {ride.origin} → {ride.destination}
+    </Text>
 
-{joined && !isDriver && !rideStarted && !ride.completed && (
-<Pressable
- style={components.button}
- testID="cancelReservationButton"
- onPress={cancelSeat}
->
-<Text
- style={components.buttonText}
->
- Cancel reservation
-</Text>
-</Pressable>
-)}
+    <Text style={{ marginBottom: spacing.sm }}>
+     {formatDate(ride.departureDateTime)}
+    </Text>
 
+    <Text
+     style={{
+      fontWeight: "500",
+      color: colors.textLight
+     }}
+    >
+     {ride.totalSeats - ride.availableSeats}
+     {" / "}
+     {ride.totalSeats}
+     {" seats"}
+    </Text>
 
+    <View
+     style={{
+      flexDirection: "row",
+      gap: 8,
+      marginTop: spacing.sm
+     }}
+    >
+     {ride.womenOnly && (
+      <Text
+       style={{
+        backgroundColor: "#fce7f3",
+        color: colors.women,
+        paddingHorizontal: 8,
+        paddingVertical: 3,
+        borderRadius: 6,
+        fontSize: 12,
+        fontWeight: "600"
+       }}
+      >
+       women only
+      </Text>
+     )}
 
-{/* DRIVER CONTROLS */}
-{isDriver && !rideStarted && !ride.completed && !editingCar && (
+     {ride.completed && (
+      <Text
+       style={{
+        backgroundColor: "#dcfce7",
+        color: colors.primaryDark,
+        paddingHorizontal: 8,
+        paddingVertical: 3,
+        borderRadius: 6,
+        fontSize: 12,
+        fontWeight: "600"
+       }}
+      >
+       Completed
+      </Text>
+     )}
+    </View>
 
-<Pressable
- style={components.button}
- testID="cancelRideButton"
- onPress={cancelRide}
->
-<Text
- style={components.buttonText}
->
- Cancel ride
-</Text>
-</Pressable>
+   </View>
 
-)}
+   <View style={components.card}>
 
+    <Text style={layout.subtitle}>
+     Driver
+    </Text>
 
+    <Text
+     style={{
+      color: colors.primary,
+      fontWeight: "600"
+     }}
+     onPress={() => {
 
-{canComplete && (
+      if (driver?.uid === activeUser.uid)
 
-<Pressable
- style={components.button}
- testID="completeRideButton"
- onPress={completeRide}
->
-<Text
- style={components.buttonText}
->
- Complete ride
-</Text>
-</Pressable>
+       router.push("/(tabs)/userProfile");
 
-)}
+      else
 
+       router.push(`/user/${driver?.uid}`);
 
-</SafeAreaView>
+     }}
+    >
+     {driver?.name}
+    </Text>
 
-);
+   </View>
+
+   <View style={components.card}>
+
+    <Text style={layout.subtitle}>
+     Car
+    </Text>
+
+    {car ? (
+
+     <>
+      <Text>
+       {car.model}
+      </Text>
+
+      <Text style={{ color: colors.textLight }}>
+       {car.color}
+      </Text>
+
+      <Text
+       style={{
+        fontWeight: "600",
+        paddingBottom: spacing.sm
+       }}
+      >
+       {car.licensePlate}
+      </Text>
+
+      {isDriver &&
+       !rideStarted &&
+       !ride.completed &&
+       !editingCar &&
+       driverCars.length > 1 && (
+
+        <Pressable
+         style={components.outlineButton}
+         testID="changeRideCarButton"
+         onPress={() => setEditingCar(true)}
+        >
+         <Text style={components.outlineButtonText}>
+          Change car
+         </Text>
+        </Pressable>
+
+       )}
+     </>
+
+    ) : (
+
+     <Text style={{ color: colors.textLight }}>
+      Vehicle unavailable
+     </Text>
+
+    )}
+
+   </View>
+
+   <View style={components.card}>
+
+    <Text style={layout.subtitle}>
+     Passengers
+    </Text>
+
+    {passengers.length === 0 && (
+     <Text style={{ color: colors.textLight }}>
+      No passengers yet
+     </Text>
+    )}
+
+    {passengers.map(p => (
+
+     <View
+      key={p!.uid}
+      style={{
+       flexDirection: "row",
+       justifyContent: "space-between",
+       alignItems: "center",
+       marginBottom: spacing.sm
+      }}
+     >
+      <Text
+       style={{
+        color: colors.primary,
+        fontWeight: "500"
+       }}
+       onPress={() => {
+
+        if (p!.uid === activeUser.uid)
+
+         router.push("/(tabs)/userProfile");
+
+        else
+
+         router.push(`/user/${p!.uid}`);
+
+       }}
+      >
+       {p!.name}
+      </Text>
+
+    {isDriver && !rideStarted && !ride.completed && (
+
+    <Text
+      style={{
+      color: colors.danger,
+      fontWeight: "600"
+      }}
+      onPress={() =>
+      removePassenger(p!.uid)
+      }
+    >
+      remove
+    </Text>
+
+    )}
+
+    {isDriver && r.completed && (
+
+    <Text
+      style={{
+      color: colors.primary,
+      fontWeight: "600"
+      }}
+      onPress={() =>
+      router.push({
+        pathname: "/reportPassenger/[id]",
+        params: {
+        id: r.id,
+        targetUserId: p!.uid
+        }
+      })
+      }
+    >
+      Add comment
+    </Text>
+
+    )}
+     </View>
+
+    ))}
+
+   </View>
+
+   {editingCar && (
+
+    <View style={components.card}>
+
+     <Text style={layout.subtitle}>
+      Select new car
+     </Text>
+
+     <View style={components.pickerWrapper}>
+
+      <Picker
+       selectedValue={selectedCarId}
+       onValueChange={setSelectedCarId}
+       dropdownIconColor={colors.primary}
+       style={{
+        color: colors.primary,
+        fontWeight: "600"
+       }}
+      >
+       {driverCars.map(c => (
+
+        <Picker.Item
+         key={c.id}
+         label={`${c.model} (${c.licensePlate})`}
+         value={c.id}
+         style={{ color: "black" }}
+        />
+
+       ))}
+      </Picker>
+
+     </View>
+
+     <View style={{ height: spacing.sm }} />
+
+     <Pressable
+      style={components.button}
+      testID="saveRideCarButton"
+      onPress={changeCar}
+     >
+      <Text style={components.buttonText}>
+       Save car
+      </Text>
+     </Pressable>
+
+     <View style={{ height: spacing.sm }} />
+
+     <Pressable
+      style={components.outlineButton}
+      testID="cancelRideCarEditButton"
+      onPress={() => setEditingCar(false)}
+     >
+      <Text style={components.outlineButtonText}>
+       Cancel
+      </Text>
+     </Pressable>
+
+    </View>
+
+   )}
+
+   {!isDriver && !joined && !rideStarted && !ride.completed && (
+
+    <Pressable
+     style={components.button}
+     testID="reserveSeatButton"
+     onPress={reserveSeat}
+    >
+     <Text style={components.buttonText}>
+      Reserve seat
+     </Text>
+    </Pressable>
+
+   )}
+
+   {joined && !isDriver && !rideStarted && !ride.completed && (
+
+    <Pressable
+     style={components.button}
+     testID="cancelReservationButton"
+     onPress={cancelSeat}
+    >
+     <Text style={components.buttonText}>
+      Cancel reservation
+     </Text>
+    </Pressable>
+
+   )}
+
+   {isDriver && !rideStarted && !ride.completed && !editingCar && (
+
+    <Pressable
+     style={[
+      components.button,
+      {
+        backgroundColor: colors.primarySoft,
+        borderWidth: 1,
+        borderColor: colors.primary
+      }
+    ]}
+     testID="cancelRideButton"
+     onPress={cancelRide}
+    >
+     <Text style={[
+        components.buttonText,
+        { color: colors.primary }
+      ]}>
+      Cancel ride
+     </Text>
+    </Pressable>
+
+   )}
+
+   {canComplete && (
+
+    <Pressable
+      style={[
+        components.button,
+        { marginTop: spacing.sm }
+      ]}
+      testID="completeRideButton"
+      onPress={completeRide}
+      >
+      <Text style={components.buttonText}>
+        Complete Ride
+      </Text>
+    </Pressable>
+
+   )}
+
+   {canRateDriver && (
+
+    <Pressable
+     style={components.button}
+     testID="rateDriverButton"
+     onPress={() =>
+      router.push({
+       pathname: "/review/[id]",
+       params: {
+        id: r.id,
+        targetUserId: r.driverId
+       }
+      })
+     }
+    >
+     <Text style={components.buttonText}>
+      Rate driver
+     </Text>
+    </Pressable>
+
+   )}
+
+  </SafeAreaView>
+
+ );
+
 }

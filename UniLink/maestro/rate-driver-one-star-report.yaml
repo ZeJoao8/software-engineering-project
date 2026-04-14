@@ -1,0 +1,167 @@
+appId: host.exp.Exponent
+---
+
+- assertVisible:
+    id: "authScreenTitle"
+
+- tapOn:
+    id: "loginEmailInput"
+- inputText: "joao@feup.pt"
+
+- tapOn:
+    id: "loginPasswordInput"
+- inputText: "123456"
+
+- tapOn:
+    id: "authSubmitButton"
+
+# CRIAR RIDE
+- tapOn:
+    id: "createTab"
+
+- tapOn:
+    id: "createRideOriginInput"
+- inputText: "Porto Maestro"
+
+- tapOn:
+    id: "createRideDestinationInput"
+- inputText: "Gaia Maestro"
+
+- tapOn:
+    id: "createRideSeatsInput"
+- inputText: "1"
+
+- tapOn:
+    id: "createRideButton"
+
+- assertVisible: "Ride created"
+- tapOn: "OK"
+
+# LOGOUT JOAO
+- tapOn:
+    id: "profileTab"
+- tapOn:
+    id: "logoutButton"
+- tapOn: "Logout"
+
+# LOGIN MARIA
+- tapOn:
+    id: "loginEmailInput"
+- inputText: "maria@feup.pt"
+
+- tapOn:
+    id: "loginPasswordInput"
+- inputText: "123456"
+
+- tapOn:
+    id: "authSubmitButton"
+
+# PROCURAR E RESERVAR RIDE
+- tapOn:
+    id: "searchTab"
+
+- tapOn:
+    id: "searchOriginInput"
+- inputText: "Porto Maestro"
+
+- tapOn:
+    id: "searchDestinationInput"
+- inputText: "Gaia Maestro"
+
+- tapOn: "Porto Maestro → Gaia Maestro"
+
+- extendedWaitUntil:
+    visible:
+      id: "reserveSeatButton"
+    timeout: 10000
+
+- tapOn:
+    id: "reserveSeatButton"
+- tapOn: "Yes"
+
+# LOGOUT MARIA
+- tapOn:
+    id: "profileTab"
+- tapOn:
+    id: "logoutButton"
+- tapOn: "Logout"
+
+# LOGIN JOAO
+- tapOn:
+    id: "loginEmailInput"
+- inputText: "joao@feup.pt"
+
+- tapOn:
+    id: "loginPasswordInput"
+- inputText: "123456"
+
+- tapOn:
+    id: "authSubmitButton"
+
+# FORCAR CONCLUSAO
+- tapOn:
+    id: "myRidesTab"
+
+- tapOn: "Porto Maestro → Gaia Maestro"
+
+- extendedWaitUntil:
+    visible:
+      id: "forceCompleteRideButton"
+    timeout: 10000
+
+- tapOn:
+    id: "forceCompleteRideButton"
+- tapOn: "Yes"
+
+# LOGOUT JOAO
+- tapOn:
+    id: "profileTab"
+- tapOn:
+    id: "logoutButton"
+- tapOn: "Logout"
+
+# LOGIN MARIA
+- tapOn:
+    id: "loginEmailInput"
+- inputText: "maria@feup.pt"
+
+- tapOn:
+    id: "loginPasswordInput"
+- inputText: "123456"
+
+- tapOn:
+    id: "authSubmitButton"
+
+# AVALIAR DRIVER
+- tapOn:
+    id: "myRidesTab"
+
+- tapOn: "Porto Maestro → Gaia Maestro"
+
+- extendedWaitUntil:
+    visible:
+      id: "rateDriverButton"
+    timeout: 10000
+
+- tapOn:
+    id: "rateDriverButton"
+
+- tapOn:
+    id: "reviewStar1"
+
+- tapOn:
+    id: "submitRatingButton"
+
+- assertVisible: "Help us understand your rating"
+
+- tapOn:
+    id: "lowRatingReasonInput"
+- inputText: "Atrasou-se bastante e conduziu de forma brusca"
+
+- tapOn:
+    id: "submitLowRatingReportButton"
+
+- assertVisible: "Feedback submitted"
+- tapOn: "OK"
+
+- assertVisible: "My rides"
