@@ -1,4 +1,5 @@
 import {
+ ScrollView,
  View,
  Text,
  FlatList
@@ -86,7 +87,15 @@ useEffect(()=>{
 
 return(
 
-<View style={layout.screen}>
+<ScrollView
+      style={layout.scrollScreen}
+      contentContainerStyle={{
+        flexGrow: 1,
+        padding: spacing.lg,
+        paddingBottom: spacing.xl
+      }}
+      keyboardShouldPersistTaps="handled"
+    >
 
 <Text style={layout.title}>
  My rides
@@ -192,7 +201,7 @@ return(
 </View>
 
 
-</View>
+</ScrollView>
 
 );
 }

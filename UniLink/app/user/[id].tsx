@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 import {
  View,
  Text
@@ -18,6 +20,17 @@ import {
 import {
  getUserCars
 } from "../../data/cars";
+
+import {
+ getRides,
+ subscribeToRidesChanges
+} from "../../data/rides";
+
+import {
+ getAverageRatingForUser,
+ getReviewsForUser,
+ subscribeToReviewsChanges
+} from "../../data/reviews";
 
 import { components } from "../../styles/components";
 import { forms } from "../../styles/forms";
@@ -40,12 +53,54 @@ export default function PublicProfile(){
   id
    ? getUserById(id)
    : undefined;
+  
+  const [, setVersion] =
+   useState(0);
+
+  useEffect(() => {
+    const rerender = () => {
+     setVersion(value => value + 1);
+    };
+
+    const unsubscribeReviews =
+    subscribeToReviewsChanges(rerender);
+
+    const unsubscribeRides =
+    subscribeToRidesChanges(rerender);
+
+    return () => {
+     unsubscribeReviews();
+     unsubscribeRides();
+    };
+  }, []);
 
  if(!user) return null;
 
  const cars =
   getUserCars(user.uid, user.email);
 
+ const hasDrivenRide =
+  getRides().some(
+   ride =>
+    ride.driverId === user.uid ||
+    ride.driverId === user.email
+  );
+
+ const userReviews =
+  getReviewsForUser(
+   user.uid,
+   user.email
+  );
+
+ const averageRating =
+  getAverageRatingForUser(
+   user.uid,
+   user.email
+  );
+
+ const showRating =
+  hasDrivenRide &&
+  userReviews.length > 0;
 
 return(
 
@@ -70,7 +125,17 @@ return(
  {user.name}
 </Text>
 
-
+{showRating && (
+ <Text
+  style={{
+   marginBottom: spacing.md,
+   color: colors.textLight,
+   fontSize: 16
+  }}
+ >
+  ⭐ {averageRating} ({userReviews.length} {userReviews.length === 1 ? "rating" : "ratings"})
+ </Text>
+)}
 
 {/* INFO */}
 <View style={components.card}>

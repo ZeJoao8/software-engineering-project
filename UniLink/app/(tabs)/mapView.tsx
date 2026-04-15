@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -19,7 +19,7 @@ import {
   useFocusEffect,
 } from "expo-router";
 
-import { getRides } from "../../data/rides";
+import { getRides, subscribeToRidesChanges } from "../../data/rides";
 import { getCurrentUser } from "../../data/user";
 import { formatDate } from "../../utils/date";
 
@@ -32,6 +32,9 @@ import {
 import { colors, spacing, radius } from "../../styles/theme";
 
 import type { Ride } from "../../types/Ride";
+
+import { filterRides, FilterCriteria } from "../../utils/rideFilters";
+import { sortByDateAsc } from "../../utils/date";
 
 // FEUP coordinates
 const FEUP_REGION = {
@@ -59,21 +62,32 @@ export default function MapViewScreen() {
   const [loadingRoute, setLoadingRoute] =
     useState(false);
 
+  const [originFilter, setOriginFilter] = useState("");
+  const [destinationFilter, setDestinationFilter] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
+  const [womenOnlyFilter, setWomenOnlyFilter] = useState(false);
+  const [minSeats, setMinSeats] = useState("");
+  const [now, setNow] = useState(new Date());
+
   useFocusEffect(
     useCallback(() => {
       const user = getCurrentUser();
       if (!user) return;
 
-      const allRides = getRides();
-      const now = new Date();
+      const filters: FilterCriteria = {
+        origin: originFilter,
+        destination: destinationFilter,
+        date: dateFilter,
+        womenOnly: womenOnlyFilter,
+        minSeats: minSeats
+      };
 
-      // Only show future rides with coordinates
-      const ridesWithCoords = allRides.filter(
-        r =>
-          r.originCoords &&
-          r.destinationCoords &&
-          !r.completed &&
-          new Date(r.departureDateTime) > now
+      const filtered = sortByDateAsc(
+        filterRides(getRides(), user, filters, now)
+      );
+
+      const ridesWithCoords = filtered.filter(
+        r => r.originCoords && r.destinationCoords
       );
 
       setRides(ridesWithCoords);
@@ -81,6 +95,47 @@ export default function MapViewScreen() {
       setRoute(null);
     }, [])
   );
+
+  useEffect(() => {
+
+  const unsubscribe =
+    subscribeToRidesChanges(() => {
+
+      const user = getCurrentUser();
+      if (!user) return;
+
+      setNow(new Date());
+
+      const filters: FilterCriteria = {
+        origin: originFilter,
+        destination: destinationFilter,
+        date: dateFilter,
+        womenOnly: womenOnlyFilter,
+        minSeats: minSeats
+      };
+
+      const filtered = sortByDateAsc(
+        filterRides(getRides(), user, filters, now)
+      );
+
+      setRides(
+        filtered.filter(
+          r => r.originCoords && r.destinationCoords
+        )
+      );
+
+    });
+
+  return unsubscribe;
+
+}, [
+  originFilter,
+  destinationFilter,
+  dateFilter,
+  womenOnlyFilter,
+  minSeats,
+  now
+]);
 
   async function selectRide(ride: Ride) {
     setSelectedRide(ride);

@@ -40,6 +40,12 @@ export default function RootLayout() {
 
     <Stack.Screen name="ride/[id]" />
 
+    <Stack.Screen name="review/[id]" />
+    
+    <Stack.Screen name="report/[id]" />
+
+    <Stack.Screen name="reportPassenger/[id]" />
+
    </Stack>
 
    <StatusBar style="auto" />

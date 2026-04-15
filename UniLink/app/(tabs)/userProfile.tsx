@@ -28,6 +28,12 @@ import {
   subscribeToRidesChanges
 } from "../../data/rides";
 
+import {
+  getAverageRatingForUser,
+  getReviewsForUser,
+  subscribeToReviewsChanges
+} from "../../data/reviews";
+
 import { useRouter }
   from "expo-router";
 
@@ -75,12 +81,16 @@ export default function Profile() {
     const unsubscribeRides =
       subscribeToRidesChanges(rerender);
 
+    const unsubscribeReviews =
+      subscribeToReviewsChanges(rerender);
+
     return () => {
       unsubscribeCars();
       unsubscribeRides();
+      unsubscribeReviews();
     };
-  }, []);
-
+    }, []);
+    
   if (!user) {
     return null;
   }
@@ -92,6 +102,29 @@ export default function Profile() {
       activeUser.uid,
       activeUser.email
     );
+  
+  const hasDrivenRide =
+    getRides().some(
+      ride =>
+        ride.driverId === activeUser.uid ||
+        ride.driverId === activeUser.email
+    );
+
+  const userReviews =
+    getReviewsForUser(
+      activeUser.uid,
+      activeUser.email
+    );
+
+  const averageRating =
+    getAverageRatingForUser(
+      activeUser.uid,
+      activeUser.email
+    );
+
+  const showRating =
+    hasDrivenRide &&
+    userReviews.length > 0;
 
   function startEdit() {
 
@@ -240,7 +273,18 @@ export default function Profile() {
       <Text style={layout.title}>
         Profile
       </Text>
-
+      
+      {showRating && (
+        <Text
+          style={{
+            marginBottom: spacing.md,
+            color: colors.textLight,
+            fontSize: 16
+          }}
+        >
+          ⭐ {averageRating} ({userReviews.length} {userReviews.length === 1 ? "rating" : "ratings"})
+        </Text>
+      )}
 
       {/* USER INFO */}
       <View style={components.card}>
