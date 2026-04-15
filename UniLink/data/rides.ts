@@ -145,6 +145,36 @@ export async function deleteRide(id: string) {
  }
 }
 
-export function removeEmptyPastRides() {
- return;
+export function removeEmptyPastRides(now = new Date()) {
+
+ const rides = getRides();
+ const user = getCurrentUser();
+
+ rides.forEach(ride => {
+
+  const rideDate =
+   new Date(ride.departureDateTime);
+
+  const isPast =
+   rideDate < now;
+
+  const hasNoPassengers =
+   ride.passengers.length === 0;
+
+  const isDriver =
+   ride.driverId === user.uid ||
+   ride.driverId === user.email;
+
+  if (
+   isPast &&
+   hasNoPassengers &&
+   isDriver
+  ){
+
+   deleteRide(ride.id);
+
+  }
+
+ });
+
 }
