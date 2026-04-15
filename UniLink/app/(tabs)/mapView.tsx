@@ -48,7 +48,7 @@ import {
 import type { Ride } from "../../types/Ride";
 
 
-// default region (FEUP)
+// default region
 const FEUP_REGION = {
   latitude: 41.1780,
   longitude: -8.5980,
@@ -79,7 +79,6 @@ export default function MapViewScreen() {
     useState(new Date());
 
 
-  // SAME FILTER AS SEARCH TAB
   function computeFilteredRides() {
 
     const user = getCurrentUser();
@@ -109,7 +108,6 @@ export default function MapViewScreen() {
   }
 
 
-  // refresh when tab opens
   useFocusEffect(
     useCallback(() => {
 
@@ -124,7 +122,6 @@ export default function MapViewScreen() {
   );
 
 
-  // realtime updates
   useEffect(() => {
 
     const unsubscribe =
@@ -168,7 +165,6 @@ export default function MapViewScreen() {
       setLoadingRoute(false);
 
 
-      // AUTO ZOOM TO ROUTE
       if (mapRef.current) {
 
         mapRef.current.fitToCoordinates(
@@ -197,7 +193,6 @@ export default function MapViewScreen() {
   function clearSelection() {
 
     setSelectedRide(null);
-
     setRoute(null);
 
   }
@@ -221,7 +216,6 @@ export default function MapViewScreen() {
 
           <React.Fragment key={ride.id}>
 
-            {/* origin */}
             <Marker
               coordinate={ride.originCoords!}
 
@@ -244,7 +238,6 @@ export default function MapViewScreen() {
             />
 
 
-            {/* destination */}
             <Marker
               coordinate={ride.destinationCoords!}
 
@@ -271,7 +264,6 @@ export default function MapViewScreen() {
         ))}
 
 
-        {/* route line */}
         {route && selectedRide && (
 
           <Polyline
@@ -292,14 +284,87 @@ export default function MapViewScreen() {
 
 
 
-      {/* ride counter */}
+      {/* ZOOM BUTTONS */}
+
+      <View style={styles.zoomControls}>
+
+        <Pressable
+          style={styles.zoomButton}
+          onPress={() => {
+
+            if (!mapRef.current) return;
+
+            mapRef.current
+              .getCamera()
+              .then(cam => {
+
+                if (!cam) return;
+
+                cam.altitude =
+                  (cam.altitude ?? 10000) / 2;
+
+                if (cam.zoom)
+                  cam.zoom += 1;
+
+                mapRef.current?.animateCamera(cam);
+
+              });
+
+          }}
+        >
+
+          <Text style={styles.zoomButtonText}>
+            +
+          </Text>
+
+        </Pressable>
+
+
+        <View style={styles.zoomDivider} />
+
+
+        <Pressable
+          style={styles.zoomButton}
+          onPress={() => {
+
+            if (!mapRef.current) return;
+
+            mapRef.current
+              .getCamera()
+              .then(cam => {
+
+                if (!cam) return;
+
+                cam.altitude =
+                  (cam.altitude ?? 10000) * 2;
+
+                if (cam.zoom)
+                  cam.zoom -= 1;
+
+                mapRef.current?.animateCamera(cam);
+
+              });
+
+          }}
+        >
+
+          <Text style={styles.zoomButtonText}>
+            −
+          </Text>
+
+        </Pressable>
+
+      </View>
+
+
+
+      {/* rides count */}
+
       <View style={styles.badge}>
 
         <Text style={styles.badgeText}>
 
-          {rides.length}
-          {" "}
-          ride
+          {rides.length} ride
           {rides.length !== 1 && "s"}
 
         </Text>
@@ -308,7 +373,6 @@ export default function MapViewScreen() {
 
 
 
-      {/* ride info card */}
       {selectedRide && (
 
         <View style={styles.rideCard}>
@@ -402,13 +466,12 @@ export default function MapViewScreen() {
                   style={[
                     styles.metaText,
                     {
-                      color:
-                        colors.women
+                      color: colors.women
                     }
                   ]}
                 >
 
-                  Women only
+                  women only
 
                 </Text>
 
@@ -422,9 +485,7 @@ export default function MapViewScreen() {
 
           <Pressable
             style={styles.detailButton}
-
             testID="mapRideDetailButton"
-
             onPress={() =>
               router.push(
                 `/ride/${selectedRide.id}`
@@ -433,9 +494,7 @@ export default function MapViewScreen() {
           >
 
             <Text style={styles.detailButtonText}>
-
               View details
-
             </Text>
 
           </Pressable>
@@ -465,16 +524,13 @@ const styles = StyleSheet.create({
   badge: {
 
     position: "absolute",
-
     top: 12,
-
     alignSelf: "center",
 
     backgroundColor:
       "rgba(255,255,255,0.95)",
 
     paddingHorizontal: 14,
-
     paddingVertical: 6,
 
     borderRadius: 20,
@@ -615,6 +671,65 @@ const styles = StyleSheet.create({
     fontWeight: "700",
 
     fontSize: 15,
+  },
+
+
+  zoomControls: {
+
+    position: "absolute",
+
+    right: 16,
+
+    bottom: "50%",
+
+    backgroundColor:
+      "rgba(255,255,255,0.95)",
+
+    borderRadius: 8,
+
+    elevation: 4,
+
+    borderWidth: StyleSheet.hairlineWidth,
+
+    borderColor: colors.border,
+
+    alignItems: "center",
+
+    justifyContent: "center",
+  },
+
+
+  zoomButton: {
+
+    width: 44,
+
+    height: 44,
+
+    alignItems: "center",
+
+    justifyContent: "center",
+  },
+
+
+  zoomButtonText: {
+
+    fontSize: 24,
+
+    color: colors.primary,
+
+    fontWeight: "400",
+
+    lineHeight: 28,
+  },
+
+
+  zoomDivider: {
+
+    width: 32,
+
+    height: StyleSheet.hairlineWidth,
+
+    backgroundColor: colors.border,
   },
 
 });
