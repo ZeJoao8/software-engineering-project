@@ -20,20 +20,14 @@ export type ReportStatus =
   | "reviewed"
   | "resolved";
 
-export type ReportType =
-  | "low_rating"
-  | "driver_comment";
-
 export type Report = {
   id: string;
   rideId: string;
-  reviewId?: string;
   reporterId: string;
   reportedUserId: string;
   reason: string;
   createdAt: string;
   status: ReportStatus;
-  type: ReportType;
 };
 
 let reports: Report[] = [];
@@ -53,9 +47,7 @@ function stopReportsSync() {
 }
 
 function syncReportsWithAuth() {
-  if (!isAuthReady()) {
-    return;
-  }
+  if (!isAuthReady()) return;
 
   if (!getCurrentUser()) {
     stopReportsSync();
@@ -64,9 +56,7 @@ function syncReportsWithAuth() {
     return;
   }
 
-  if (unsubscribeReportsSnapshot) {
-    return;
-  }
+  if (unsubscribeReportsSnapshot) return;
 
   unsubscribeReportsSnapshot = onSnapshot(
     collection(db, "reports"),
@@ -97,8 +87,18 @@ export function getReportsForUser(
   return reports.filter(
     report =>
       report.reportedUserId === userId ||
-      (!!legacyId &&
-        report.reportedUserId === legacyId)
+      (!!legacyId && report.reportedUserId === legacyId)
+  );
+}
+
+export function getReportsByReporter(
+  reporterId: string,
+  legacyId?: string
+) {
+  return reports.filter(
+    report =>
+      report.reporterId === reporterId ||
+      (!!legacyId && report.reporterId === legacyId)
   );
 }
 
@@ -114,13 +114,11 @@ export function hasReportForRide(
       report.rideId === rideId &&
       (
         report.reporterId === reporterId ||
-        (!!reporterLegacyId &&
-          report.reporterId === reporterLegacyId)
+        (!!reporterLegacyId && report.reporterId === reporterLegacyId)
       ) &&
       (
         report.reportedUserId === reportedUserId ||
-        (!!reportedLegacyId &&
-          report.reportedUserId === reportedLegacyId)
+        (!!reportedLegacyId && report.reportedUserId === reportedLegacyId)
       )
   );
 }
@@ -130,7 +128,6 @@ export function subscribeToReportsChanges(
 ) {
   listeners.add(listener);
   syncReportsWithAuth();
-
   return () => {
     listeners.delete(listener);
   };

@@ -42,9 +42,9 @@ export default function RootLayout() {
 
     <Stack.Screen name="review/[id]" />
     
-    <Stack.Screen name="report/[id]" />
+    <Stack.Screen name="reviewComment/[id]" />
 
-    <Stack.Screen name="reportPassenger/[id]" />
+    <Stack.Screen name="reportUser/[id]" />
 
    </Stack>
 

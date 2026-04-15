@@ -120,7 +120,7 @@ export default function ReviewRide() {
 
     if (rating <= 2) {
       router.push({
-        pathname: "/report/[id]",
+        pathname: "/reviewComment/[id]",
         params: {
           id: ride.id,
           targetUserId: targetUser.uid,

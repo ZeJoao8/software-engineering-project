@@ -16,8 +16,10 @@ export const colors = {
  border:"#d1fae5",
 
  danger:"#ef4444",
+ dangerSoft: "#fca5a5",
 
- women:"#ec4899"
+ women:"#ec4899",
+ womenSoft: "#fbcfe8"
 };
 
 export const spacing = {
