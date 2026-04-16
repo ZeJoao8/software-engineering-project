@@ -175,14 +175,7 @@ export default function PublicProfile() {
               return (
                 <View
                   key={report.id}
-                  style={{
-                    marginTop: spacing.sm,
-                    backgroundColor: "#fef2f2",
-                    borderRadius: 8,
-                    padding: spacing.sm,
-                    borderLeftWidth: 3,
-                    borderLeftColor: colors.danger,
-                  }}
+                  style={components.feedbackCard}
                 >
                   {/* Ride route */}
                   {ride && (

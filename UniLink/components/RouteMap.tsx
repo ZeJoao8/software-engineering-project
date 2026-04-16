@@ -32,8 +32,8 @@ interface RouteMapProps {
 export default function RouteMap({
   origin,
   destination,
-  originLabel = "Origem",
-  destinationLabel = "Destino",
+  originLabel = "Origin",
+  destinationLabel = "Destination",
   height = 250,
   interactive = false,
 }: RouteMapProps) {
@@ -113,7 +113,7 @@ export default function RouteMap({
         <Marker
           coordinate={destination}
           title={destinationLabel}
-          pinColor="#ef4444"
+          pinColor={colors.danger}
         />
 
         {route && (

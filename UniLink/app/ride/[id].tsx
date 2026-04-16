@@ -18,6 +18,7 @@ import { hasReviewForRide, getReviews } from "../../data/reviews";
 import { hasReportForRide, getReports, subscribeToReportsChanges } from "../../data/reports";
 import { subscribeToReviewsChanges } from "../../data/reviews";
 import { formatDate } from "../../utils/date";
+import type { User } from "../../types/User";
 
 import { Picker } from "@react-native-picker/picker";
 
@@ -67,12 +68,12 @@ export default function RideDetails() {
   const cars = getCars();
 
   const driver = getUserById(r.driverId);
-
   const car = cars.find(c => c.id === r.carId);
 
+  // Properly narrowed — no more non-null assertions on passenger items
   const passengers = ride.passengers
     .map(pid => getUserById(pid))
-    .filter(Boolean);
+    .filter((p): p is User => p !== null);
 
   const isDriver =
     r.driverId === activeUser.uid ||
@@ -104,8 +105,8 @@ export default function RideDetails() {
     c => c.ownerId === activeUser.uid || c.ownerId === activeUser.email
   );
 
-  // Low rating comments for this ride
   const allReviews = getReviews();
+
   const lowRatingComments = allReviews.filter(review =>
     review.rideId === r.id &&
     review.comment.trim().length > 0 &&
@@ -116,23 +117,21 @@ export default function RideDetails() {
     )
   );
 
-  // Per-passenger rating lookup (for driver view)
   function getPassengerRatingForThisRide(passengerId: string) {
     return allReviews.find(
       review =>
         review.rideId === r.id &&
-        (review.reviewerId === passengerId)
+        review.reviewerId === passengerId
     );
   }
 
-  // Report warning: check if current user has EVER reported this person (any ride)
   const allReports = getReports();
 
   function hasEverReportedUser(targetId: string) {
     return allReports.some(
       report =>
         (report.reporterId === activeUser.uid || report.reporterId === activeUser.email) &&
-        (report.reportedUserId === targetId)
+        report.reportedUserId === targetId
     );
   }
 
@@ -149,16 +148,6 @@ export default function RideDetails() {
         activeUser.email,
         targetId
       )
-    );
-  }
-
-  function alreadyReportedUserOnThisRide(targetId: string) {
-    return hasReportForRide(
-      r.id,
-      activeUser.uid,
-      targetId,
-      activeUser.email,
-      targetId
     );
   }
 
@@ -358,7 +347,6 @@ export default function RideDetails() {
               >
                 {driver?.name}
               </Text>
-              {/* Persistent report warning: shown if ever reported this driver */}
               {hasEverReportedUser(driver?.uid ?? r.driverId) && (
                 <Text style={{ fontSize: 14 }}>⚠️</Text>
               )}
@@ -366,12 +354,7 @@ export default function RideDetails() {
 
             {canReportUser(driver?.uid ?? r.driverId) && !isDriver && (
               <Pressable
-                style={{
-                  backgroundColor: "#fee2e2",
-                  paddingHorizontal: 10,
-                  paddingVertical: 4,
-                  borderRadius: 6,
-                }}
+                style={components.dangerTag}
                 onPress={() =>
                   router.push({
                     pathname: "/reportUser/[id]",
@@ -425,14 +408,13 @@ export default function RideDetails() {
           )}
 
           {passengers.map(p => {
-            // Driver sees the rating this passenger gave on this ride
             const passengerReview = isDriver
-              ? getPassengerRatingForThisRide(p!.uid)
+              ? getPassengerRatingForThisRide(p.uid)
               : undefined;
 
             return (
               <View
-                key={p!.uid}
+                key={p.uid}
                 style={{
                   flexDirection: "row",
                   justifyContent: "space-between",
@@ -444,28 +426,26 @@ export default function RideDetails() {
                   <Text
                     style={{ color: colors.primary, fontWeight: "500" }}
                     onPress={() => {
-                      if (p!.uid === activeUser.uid)
+                      if (p.uid === activeUser.uid)
                         router.push("/(tabs)/userProfile");
                       else
-                        router.push(`/user/${p!.uid}`);
+                        router.push(`/user/${p.uid}`);
                     }}
                   >
-                    {p!.name}
+                    {p.name}
                   </Text>
 
-                  {/* Persistent report warning */}
-                  {hasEverReportedUser(p!.uid) && (
+                  {hasEverReportedUser(p.uid) && (
                     <Text style={{ fontSize: 14 }}>⚠️</Text>
                   )}
 
-                  {/* Rating badge shown only to driver */}
                   {isDriver && r.completed && (
                     passengerReview ? (
                       <View style={{
                         backgroundColor: passengerReview.rating >= 4
                           ? colors.primaryLight
                           : passengerReview.rating === 3
-                            ? "#fef9c3"
+                            ? colors.warning
                             : colors.dangerSoft,
                         paddingHorizontal: 7,
                         paddingVertical: 2,
@@ -477,7 +457,7 @@ export default function RideDetails() {
                       </View>
                     ) : (
                       <View style={{
-                        backgroundColor: "#f3f4f6",
+                        backgroundColor: colors.neutral,
                         paddingHorizontal: 7,
                         paddingVertical: 2,
                         borderRadius: 5,
@@ -491,18 +471,13 @@ export default function RideDetails() {
                 </View>
 
                 <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
-                  {canReportUser(p!.uid) && (
+                  {canReportUser(p.uid) && (
                     <Pressable
-                      style={{
-                        backgroundColor: "#fee2e2",
-                        paddingHorizontal: 10,
-                        paddingVertical: 4,
-                        borderRadius: 6,
-                      }}
+                      style={components.dangerTag}
                       onPress={() =>
                         router.push({
                           pathname: "/reportUser/[id]",
-                          params: { id: r.id, targetUserId: p!.uid },
+                          params: { id: r.id, targetUserId: p.uid },
                         })
                       }
                     >
@@ -515,7 +490,7 @@ export default function RideDetails() {
                   {isDriver && !rideStarted && !r.completed && (
                     <Text
                       style={{ color: colors.danger, fontWeight: "600" }}
-                      onPress={() => removePassenger(p!.uid)}
+                      onPress={() => removePassenger(p.uid)}
                     >
                       Remove
                     </Text>
@@ -535,17 +510,7 @@ export default function RideDetails() {
             {lowRatingComments.map(review => {
               const reviewer = getUserById(review.reviewerId);
               return (
-                <View
-                  key={review.id}
-                  style={{
-                    backgroundColor: "#fef2f2",
-                    borderRadius: 8,
-                    padding: spacing.sm,
-                    marginBottom: spacing.sm,
-                    borderLeftWidth: 3,
-                    borderLeftColor: colors.danger,
-                  }}
-                >
+                <View key={review.id} style={components.feedbackCard}>
                   {isDriver && (
                     <Text style={{ fontSize: 12, color: colors.textLight, marginBottom: 2 }}>
                       From {reviewer?.name ?? "passenger"}

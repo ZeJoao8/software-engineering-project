@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,8 @@ import MapView, {
   type MapPressEvent,
 } from "react-native-maps";
 
+import * as Location from "expo-location";
+
 import {
   reverseGeocode,
   type Coordinates,
@@ -22,7 +24,7 @@ import {
 
 import { colors, spacing, radius } from "../styles/theme";
 
-// FEUP coordinates as default center
+// FEUP coordinates — fallback when location permission is denied
 const FEUP_REGION = {
   latitude: 41.1780,
   longitude: -8.5980,
@@ -44,7 +46,7 @@ export default function LocationPickerMap({
   visible,
   onClose,
   onConfirm,
-  title = "Selecionar local",
+  title = "Select location",
 }: LocationPickerMapProps) {
 
   const [selected, setSelected] =
@@ -57,6 +59,34 @@ export default function LocationPickerMap({
 
   const [loading, setLoading] =
     useState(false);
+
+  // When modal opens, try to center on user's location; fall back to FEUP
+  useEffect(() => {
+    if (!visible) return;
+
+    void (async () => {
+      try {
+        const { status } =
+          await Location.requestForegroundPermissionsAsync();
+
+        if (status !== "granted") return;
+
+        const location =
+          await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.Balanced,
+          });
+
+        mapRef.current?.animateToRegion({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        });
+      } catch {
+        // Permission denied or unavailable — stay on FEUP_REGION
+      }
+    })();
+  }, [visible]);
 
   async function handleMapPress(
     event: MapPressEvent
@@ -106,7 +136,7 @@ export default function LocationPickerMap({
 
           <Pressable onPress={handleClose}>
             <Text style={styles.cancelText}>
-              Cancelar
+              Cancel
             </Text>
           </Pressable>
 
@@ -205,7 +235,7 @@ export default function LocationPickerMap({
                   testID="confirmLocationButton"
                 >
                   <Text style={styles.confirmText}>
-                    ✓ Confirmar local
+                    ✓ Confirm location
                   </Text>
                 </Pressable>
               </>
@@ -294,7 +324,7 @@ const styles = StyleSheet.create({
 
   confirmButton: {
     backgroundColor: colors.primary,
-    paddingVertical: 12,
+    paddingVertical: spacing.md,
     borderRadius: radius.md,
     alignItems: "center",
     shadowColor: "#000",
@@ -310,33 +340,36 @@ const styles = StyleSheet.create({
   },
 
   zoomControls: {
-    position: 'absolute',
+    position: "absolute",
     right: 16,
-    bottom: "35%", // Position in the lower middle third to avoid going below the selected place card at bottom.
-    backgroundColor: 'rgba(255,255,255,0.95)',
+    bottom: "35%",
+    backgroundColor: "rgba(255,255,255,0.95)",
     borderRadius: 8,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
     elevation: 4,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
+
   zoomButton: {
     width: 44,
     height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
+
   zoomButtonText: {
     fontSize: 24,
     color: colors.primary,
-    fontWeight: '400',
+    fontWeight: "400",
     lineHeight: 28,
   },
+
   zoomDivider: {
     width: 32,
     height: StyleSheet.hairlineWidth,

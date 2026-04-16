@@ -256,16 +256,15 @@ export default function Profile() {
 
   return (
 
-    <View style={{ flex: 1, backgroundColor: colors.primarySoft }}>
-      <ScrollView
-        style={layout.scrollScreen}
-        contentContainerStyle={{
-          flexGrow: 1,
-          padding: spacing.lg,
-          paddingBottom: 80
-        }}
-        keyboardDismissMode="on-drag"
-      >
+    <ScrollView
+      style={layout.scrollScreen}
+      contentContainerStyle={{
+        flexGrow: 1,
+        padding: spacing.lg,
+        paddingBottom: 80,
+      }}
+      keyboardDismissMode="on-drag"
+    >
 
       <Text style={layout.title}>
         Profile
@@ -608,7 +607,6 @@ export default function Profile() {
       </View>
 
     </ScrollView>
-    </View>
 
   );
 }

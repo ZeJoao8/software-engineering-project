@@ -144,7 +144,7 @@ export default function Login(){
 
    Alert.alert(
     "Invalid email",
-    "Enter valid email format"
+    "Email must be from @up.pt (e.g. up123456789@up.pt)"
    );
 
    return;

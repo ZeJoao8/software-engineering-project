@@ -5,13 +5,13 @@ import { formatDate } from "../utils/date";
 import { components } from "../styles/components";
 import { colors, spacing } from "../styles/theme";
 import { getCurrentUser, getUserById } from "../data/user";
-import { hasReportForRide, getReports } from "../data/reports";
-import { hasReviewForRide, getReviewsForUser, getReviews } from "../data/reviews";
+import { getReports } from "../data/reports";
+import { getReviewsForUser, getReviews } from "../data/reviews";
 import type { Ride } from "../types/Ride";
 
 function ratingBackground(rating: number) {
   if (rating >= 4) return colors.primaryLight;
-  if (rating === 3) return "#fef9c3";
+  if (rating === 3) return colors.warning;
   return colors.dangerSoft;
 }
 
@@ -42,7 +42,7 @@ export default function RideCard({
       key: "womenOnly",
       emoji: "♀️",
       description: "Women only ride",
-      bg: colors.womenSoft
+      bg: colors.womenSoft,
     });
   }
 
@@ -51,7 +51,7 @@ export default function RideCard({
       key: "completed",
       emoji: "✅",
       description: "Ride completed",
-      bg: colors.primaryLight
+      bg: colors.primaryLight,
     });
   }
 
@@ -64,7 +64,6 @@ export default function RideCard({
       ride.driverId === user.uid ||
       ride.driverId === user.email;
 
-    // --- DRIVER: average rating tag for this ride ---
     if (isDriver && ride.completed) {
       const rideReviews = getReviews().filter(
         r => r.rideId === ride.id &&
@@ -85,13 +84,12 @@ export default function RideCard({
           key: "driverNoRating",
           emoji: "⭐",
           description: "No ratings received for this ride yet",
-          bg: "#f3f4f6",
+          bg: colors.neutral,
         });
       }
     }
 
-    // --- Report warning: persistent across ALL rides this person is in ---
-    // Check if current user has ever reported anyone who is in this ride
+    // Report warning: check if current user has reported anyone in this ride
     const allReports = getReports();
     const reportedInThisRide =
       [...ride.passengers, ride.driverId].some(targetId => {
@@ -99,7 +97,7 @@ export default function RideCard({
         return allReports.some(
           report =>
             report.reporterId === user.uid &&
-            (report.reportedUserId === targetId)
+            report.reportedUserId === targetId
         );
       });
 
@@ -108,16 +106,15 @@ export default function RideCard({
         key: "reported",
         emoji: "⚠️",
         description: "You have reported someone who is on this ride",
-        bg: colors.dangerSoft
+        bg: colors.dangerSoft,
       });
     }
 
-    // --- PASSENGER: rating tag for completed rides ---
     if (isPassenger && !isDriver && ride.completed) {
       const myReview = getReviewsForUser(ride.driverId).find(
         r =>
           r.rideId === ride.id &&
-          (r.reviewerId === user.uid)
+          r.reviewerId === user.uid
       );
 
       if (myReview) {
@@ -132,7 +129,7 @@ export default function RideCard({
           key: "rate",
           emoji: "⭐",
           description: "You haven't rated this driver yet",
-          bg: "#e5e7eb", // grey instead of yellow
+          bg: colors.neutralLight,
         });
       }
     }
@@ -179,7 +176,7 @@ export default function RideCard({
                 );
               }}
               style={{
-                backgroundColor: tag.bg ?? "#f3f4f6",
+                backgroundColor: tag.bg ?? colors.neutral,
                 paddingHorizontal: 8,
                 paddingVertical: 4,
                 borderRadius: 6,
@@ -196,7 +193,7 @@ export default function RideCard({
       {openTooltip && (
         <View style={{
           marginTop: spacing.sm,
-          backgroundColor: "#1f2937",
+          backgroundColor: colors.text,
           borderRadius: 8,
           paddingHorizontal: 10,
           paddingVertical: 6,

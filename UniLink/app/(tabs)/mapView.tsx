@@ -12,6 +12,8 @@ import MapView, {
   PROVIDER_DEFAULT,
 } from "react-native-maps";
 
+import * as Location from "expo-location";
+
 import {
   useRouter,
   useFocusEffect,
@@ -19,7 +21,7 @@ import {
 
 import {
   getRides,
-  subscribeToRidesChanges
+  subscribeToRidesChanges,
 } from "../../data/rides";
 
 import { getCurrentUser } from "../../data/user";
@@ -31,24 +33,23 @@ import {
 
 import {
   filterRides,
-  FilterCriteria
+  FilterCriteria,
 } from "../../utils/rideFilters";
 
 import {
   sortByDateAsc,
-  formatDate
+  formatDate,
 } from "../../utils/date";
 
 import {
   colors,
   spacing,
-  radius
+  radius,
 } from "../../styles/theme";
 
 import type { Ride } from "../../types/Ride";
 
 
-// default region
 const FEUP_REGION = {
   latitude: 41.1780,
   longitude: -8.5980,
@@ -79,6 +80,33 @@ export default function MapViewScreen() {
     useState(new Date());
 
 
+  // Center map on user location at launch; fall back to FEUP
+  useEffect(() => {
+    void (async () => {
+      try {
+        const { status } =
+          await Location.requestForegroundPermissionsAsync();
+
+        if (status !== "granted") return;
+
+        const location =
+          await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.Balanced,
+          });
+
+        mapRef.current?.animateToRegion({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.08,
+          longitudeDelta: 0.08,
+        });
+      } catch {
+        // Permission denied or unavailable — stay on FEUP_REGION
+      }
+    })();
+  }, []);
+
+
   function computeFilteredRides() {
 
     const user = getCurrentUser();
@@ -89,7 +117,7 @@ export default function MapViewScreen() {
       destination: "",
       date: "",
       womenOnly: false,
-      minSeats: ""
+      minSeats: "",
     };
 
     return sortByDateAsc(
@@ -170,16 +198,16 @@ export default function MapViewScreen() {
         mapRef.current.fitToCoordinates(
           [
             ride.originCoords,
-            ride.destinationCoords
+            ride.destinationCoords,
           ],
           {
             edgePadding: {
               top: 120,
               right: 60,
               bottom: 260,
-              left: 60
+              left: 60,
             },
-            animated: true
+            animated: true,
           }
         );
 
@@ -222,7 +250,7 @@ export default function MapViewScreen() {
               pinColor={
                 selectedRide?.id === ride.id
                   ? colors.primary
-                  : "#22c55e"
+                  : colors.accent
               }
 
               opacity={
@@ -243,8 +271,8 @@ export default function MapViewScreen() {
 
               pinColor={
                 selectedRide?.id === ride.id
-                  ? "#ef4444"
-                  : "#f87171"
+                  ? colors.danger
+                  : colors.dangerSoft
               }
 
               opacity={
@@ -466,12 +494,12 @@ export default function MapViewScreen() {
                   style={[
                     styles.metaText,
                     {
-                      color: colors.women
-                    }
+                      color: colors.women,
+                    },
                   ]}
                 >
 
-                  women only
+                  Women only
 
                 </Text>
 

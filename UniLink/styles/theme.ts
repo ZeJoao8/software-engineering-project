@@ -1,37 +1,43 @@
 export const colors = {
 
- primary:"#16a34a",      
- primarySoft:"#dcfce7",  
+ primary:     "#16a34a",
+ primarySoft: "#dcfce7",
  primaryLight:"#bbf7d0",
  primaryDark: "#15803d",
 
- accent:"#22c55e",
+ accent: "#22c55e",
 
- background:"#f6fbf7",   
- card:"#fafffb",
+ background: "#f6fbf7",
+ card:       "#fafffb",
 
- text:"#1f2937",
- textLight:"#898b90",
+ text:      "#1f2937",
+ textLight: "#898b90",
 
- border:"#d1fae5",
+ border: "#d1fae5",
 
- danger:"#ef4444",
+ danger:     "#ef4444",
  dangerSoft: "#fca5a5",
 
- women:"#ec4899",
- womenSoft: "#fbcfe8"
+ women:     "#ec4899",
+ womenSoft: "#fbcfe8",
+
+ // Rating / feedback states
+ warning:      "#fef9c3", // yellow — rating 3 background
+ warningSoft:  "#fef2f2", // light red — negative feedback / report background
+ neutral:      "#f3f4f6", // grey — "not rated yet" background
+ neutralLight: "#e5e7eb", // slightly darker grey
 };
 
 export const spacing = {
- xs:4,
- sm:8,
- md:12,
- lg:16,
- xl:24
+ xs: 4,
+ sm: 8,
+ md: 12,
+ lg: 16,
+ xl: 24,
 };
 
 export const radius = {
- sm:6,
- md:10,
- lg:16
+ sm: 6,
+ md: 10,
+ lg: 16,
 };

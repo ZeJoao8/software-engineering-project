@@ -448,7 +448,7 @@ export default function CreateRide() {
           />
         )}
 
-        <View style={{ height: 6 }} />
+        <View style={{ height: spacing.xs }} />
 
 
         <Text style={layout.subtitle}>
@@ -482,7 +482,7 @@ export default function CreateRide() {
           />
         )}
 
-        <View style={{ height: 6 }} />
+        <View style={{ height: spacing.xs }} />
 
 
         <Text style={layout.subtitle}>
@@ -523,7 +523,7 @@ export default function CreateRide() {
 
         </View>
 
-        <View style={{ height: 6 }} />
+        <View style={{ height: spacing.xs }} />
 
         <Text style={layout.subtitle}>
           Seats

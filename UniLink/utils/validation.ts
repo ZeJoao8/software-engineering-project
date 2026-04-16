@@ -1,13 +1,13 @@
 /**
- * Email validation regex.
+ * Email validation: only accepts @up.pt addresses.
  */
-export const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const emailRegex = /^[^\s@]+@up\.pt$/i;
 
 /**
- * Validates an email address.
+ * Validates that an email belongs to the @up.pt domain.
  */
 export function isValidEmail(email: string): boolean {
-  return emailRegex.test(email);
+  return emailRegex.test(email.trim());
 }
 
 /**
@@ -27,6 +27,8 @@ export function doPasswordsMatch(p1: string, p2: string): boolean {
 /**
  * Checks if all required fields are filled.
  */
-export function areRequiredFieldsFilled(fields: Record<string, string>): boolean {
+export function areRequiredFieldsFilled(
+  fields: Record<string, string>
+): boolean {
   return Object.values(fields).every(value => value.trim() !== "");
 }
