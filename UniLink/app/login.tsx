@@ -21,7 +21,7 @@ import {
 
 import { useRouter } from "expo-router";
 
-import { Picker } from "@react-native-picker/picker";
+import DropDownPicker from "react-native-dropdown-picker";
 
 import { layout } from "../styles/layout";
 import { forms } from "../styles/forms";
@@ -61,6 +61,14 @@ export default function Login(){
 
  const [ready, setReady] =
   useState(isAuthReady());
+
+  const [genderDropdownOpen, setGenderDropdownOpen] =
+ useState(false);
+
+  const genderItems = [
+  { label: "Male", value: "Male" },
+  { label: "Female", value: "Female" }
+  ];
 
  useEffect(() => {
   let mounted = true;
@@ -281,28 +289,35 @@ export default function Login(){
 
 <View style={components.pickerWrapper}>
 
-<Picker
- selectedValue={gender}
- onValueChange={setGender}
- testID="genderPicker"
- dropdownIconColor={colors.primary}
- style={{
-  color:colors.primary,
-  fontWeight:"600"
- }}
->
+  <DropDownPicker
+  open={genderDropdownOpen}
+  value={gender}
+  items={genderItems}
 
-<Picker.Item
- label="Male"
- value="Male"
-/>
+  setOpen={setGenderDropdownOpen}
+  setValue={setGender}
 
-<Picker.Item
- label="Female"
- value="Female"
-/>
+  placeholder="Select gender"
+  testID="genderPicker"
 
-</Picker>
+  style={components.dropdown}
+
+  dropDownContainerStyle={
+    components.dropdownContainer
+  }
+
+  textStyle={components.dropdownText}
+
+  placeholderStyle={
+    components.dropdownPlaceholder
+  }
+
+  listMode="SCROLLVIEW"
+
+  scrollViewProps={{
+    nestedScrollEnabled: true
+  }}
+  />
 
 </View>
 

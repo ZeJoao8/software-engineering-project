@@ -63,11 +63,35 @@ export const components = StyleSheet.create({
   fontSize:12
  },
 
- pickerWrapper:{
-  borderColor:colors.primary,
-  borderWidth:1,
-  justifyContent:"center",
+pickerWrapper: {
+  borderColor: colors.primary,
+  borderWidth: 1,
   borderRadius: radius.md,
- }
+  backgroundColor: "white",
+  minHeight: 48,
+  justifyContent: "center"
+},
+
+dropdown: {
+  borderWidth: 0,
+  backgroundColor: "transparent",
+  minHeight: 48
+},
+
+dropdownContainer: {
+  borderColor: colors.primary,
+  borderWidth: 1,
+  borderRadius: radius.md,
+  backgroundColor: "white"
+},
+
+dropdownText: {
+  fontWeight: "600",
+  color: colors.primary
+},
+
+dropdownPlaceholder: {
+  color: colors.textLight
+}
 
 });

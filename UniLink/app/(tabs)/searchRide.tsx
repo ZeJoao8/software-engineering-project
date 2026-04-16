@@ -199,7 +199,7 @@ export default function Home() {
               onValueChange={setWomenOnlyFilter}
               testID="searchWomenOnlySwitch"
               trackColor={{
-                false: "#7a7b7e",
+                false: "#bcbdc1",
                 true: "#fbcfe8"
               }}
 

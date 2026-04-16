@@ -14,7 +14,7 @@ import { forms } from "../../styles/forms";
 import { components } from "../../styles/components";
 import { colors, spacing } from "../../styles/theme";
 
-import { Picker } from "@react-native-picker/picker";
+import DropDownPicker from "react-native-dropdown-picker";
 
 import DateTimePicker
   from "@react-native-community/datetimepicker";
@@ -78,9 +78,7 @@ export default function CreateRide() {
     useState(false);
 
   const [selectedCar, setSelectedCar] =
-    useState<string | undefined>(
-      cars[0]?.id
-    );
+    useState<string | null>(cars[0]?.id ?? null);
 
   const [seats, setSeats] =
     useState("");
@@ -104,6 +102,13 @@ export default function CreateRide() {
 
   const [showTime, setShowTime] =
     useState(false);
+
+  const [carDropdownOpen, setCarDropdownOpen] = useState(false);
+
+  const carItems = cars.map(c => ({
+    label: `${c.model} (${c.licensePlate})`,
+    value: c.id
+  }));
 
   useFocusEffect(
 
@@ -486,22 +491,35 @@ export default function CreateRide() {
 
         <View style={components.pickerWrapper}>
 
-          <Picker
-            selectedValue={selectedCar}
-            onValueChange={setSelectedCar}
+          <DropDownPicker
+            open={carDropdownOpen}
+            value={selectedCar}
+            items={carItems}
+
+            setOpen={setCarDropdownOpen}
+            setValue={setSelectedCar}
+
+            placeholder="Select car"
             testID="createRideCarPicker"
-            dropdownIconColor={colors.primary}
-            style={{ color: colors.primary, fontWeight: "600" }}
-          >
-            {cars.map(c => (
-              <Picker.Item
-                key={c.id}
-                label={`${c.model} (${c.licensePlate})`}
-                value={c.id}
-                style={{ color: "black", fontWeight: "600" }}
-              />
-            ))}
-          </Picker>
+
+            style={components.dropdown}
+
+            dropDownContainerStyle={
+              components.dropdownContainer
+            }
+
+            textStyle={components.dropdownText}
+
+            placeholderStyle={
+              components.dropdownPlaceholder
+            }
+
+            listMode="SCROLLVIEW"
+
+            scrollViewProps={{
+              nestedScrollEnabled: true
+            }}
+          />
 
         </View>
 
@@ -540,7 +558,7 @@ export default function CreateRide() {
               value={womenOnly}
               onValueChange={setWomenOnly}
               testID="createRideWomenOnlySwitch"
-              trackColor={{ false: "#7a7b7e", true: "#fbcfe8" }}
+              trackColor={{ false: "#bcbdc1", true: "#fbcfe8" }}
               thumbColor={womenOnly ? colors.women : "#8b8e91"}
             />
           </View>
