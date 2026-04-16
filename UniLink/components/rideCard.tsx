@@ -4,9 +4,9 @@ import { Pressable, Text, View } from "react-native";
 import { formatDate } from "../utils/date";
 import { components } from "../styles/components";
 import { colors, spacing } from "../styles/theme";
-import { getCurrentUser } from "../data/user";
-import { hasReportForRide } from "../data/reports";
-import { hasReviewForRide, getReviewsForUser } from "../data/reviews";
+import { getCurrentUser, getUserById } from "../data/user";
+import { hasReportForRide, getReports } from "../data/reports";
+import { hasReviewForRide, getReviewsForUser, getReviews } from "../data/reviews";
 import type { Ride } from "../types/Ride";
 
 function ratingBackground(rating: number) {
@@ -64,37 +64,60 @@ export default function RideCard({
       ride.driverId === user.uid ||
       ride.driverId === user.email;
 
-    // report warning — reportei alguém nesta ride
-    const reportedSomeone =
-      ride.completed &&
-      [...ride.passengers, ride.driverId].some(
-        targetId =>
-          targetId !== user.uid &&
-          targetId !== user.email &&
-          hasReportForRide(
-            ride.id,
-            user.uid,
-            targetId,
-            user.email,
-            targetId
-          )
+    // --- DRIVER: average rating tag for this ride ---
+    if (isDriver && ride.completed) {
+      const rideReviews = getReviews().filter(
+        r => r.rideId === ride.id &&
+          (r.revieweeId === user.uid || r.revieweeId === user.email)
       );
 
-    if (reportedSomeone) {
+      if (rideReviews.length > 0) {
+        const avg = rideReviews.reduce((sum, r) => sum + r.rating, 0) / rideReviews.length;
+        const avgRounded = Number(avg.toFixed(1));
+        tags.push({
+          key: "driverRating",
+          emoji: `⭐ ${avgRounded}`,
+          description: `Your average rating on this ride (${rideReviews.length} ${rideReviews.length === 1 ? "review" : "reviews"})`,
+          bg: ratingBackground(avgRounded),
+        });
+      } else {
+        tags.push({
+          key: "driverNoRating",
+          emoji: "⭐",
+          description: "No ratings received for this ride yet",
+          bg: "#f3f4f6",
+        });
+      }
+    }
+
+    // --- Report warning: persistent across ALL rides this person is in ---
+    // Check if current user has ever reported anyone who is in this ride
+    const allReports = getReports();
+    const reportedInThisRide =
+      [...ride.passengers, ride.driverId].some(targetId => {
+        if (targetId === user.uid) return false;
+        return allReports.some(
+          report =>
+            report.reporterId === user.uid &&
+            (report.reportedUserId === targetId)
+        );
+      });
+
+    if (reportedInThisRide) {
       tags.push({
         key: "reported",
         emoji: "⚠️",
-        description: "You reported someone on this ride",
+        description: "You have reported someone who is on this ride",
         bg: colors.dangerSoft
       });
     }
 
-    // rating — só para passageiros em rides completadas
+    // --- PASSENGER: rating tag for completed rides ---
     if (isPassenger && !isDriver && ride.completed) {
       const myReview = getReviewsForUser(ride.driverId).find(
         r =>
           r.rideId === ride.id &&
-          (r.reviewerId === user.uid || r.reviewerId === user.email)
+          (r.reviewerId === user.uid)
       );
 
       if (myReview) {
@@ -109,7 +132,7 @@ export default function RideCard({
           key: "rate",
           emoji: "⭐",
           description: "You haven't rated this driver yet",
-          bg: "#fef3c7",
+          bg: "#e5e7eb", // grey instead of yellow
         });
       }
     }

@@ -67,7 +67,7 @@ export default function PublicProfile() {
   const averageRating = getAverageRatingForUser(user.uid, user.email);
   const showRating = hasDrivenRide && userReviews.length > 0;
 
-  // reports que o utilizador atual fez a este user
+  // Reports this user made on the target
   const myReportsOnUser = getReportsByReporter(
     activeUser.uid,
     activeUser.email
@@ -78,6 +78,13 @@ export default function PublicProfile() {
   );
 
   const hasReportedThisUser = myReportsOnUser.length > 0;
+
+  // Get ride info for each report
+  const allRides = getRides();
+
+  function getRideForReport(rideId: string) {
+    return allRides.find(r => r.id === rideId) ?? null;
+  }
 
   return (
     <SafeAreaView style={layout.screen}>
@@ -163,26 +170,46 @@ export default function PublicProfile() {
           </Pressable>
 
           {showReports &&
-            myReportsOnUser.map(report => (
-              <View
-                key={report.id}
-                style={{
-                  marginTop: spacing.sm,
-                  backgroundColor: "#fef2f2",
-                  borderRadius: 8,
-                  padding: spacing.sm,
-                  borderLeftWidth: 3,
-                  borderLeftColor: colors.danger,
-                }}
-              >
-                <Text style={{ fontSize: 12, color: colors.textLight, marginBottom: 4 }}>
-                  {formatDate(report.createdAt)}
-                </Text>
-                <Text style={{ color: colors.text, fontSize: 14 }}>
-                  {report.reason}
-                </Text>
-              </View>
-            ))}
+            myReportsOnUser.map(report => {
+              const ride = getRideForReport(report.rideId);
+              return (
+                <View
+                  key={report.id}
+                  style={{
+                    marginTop: spacing.sm,
+                    backgroundColor: "#fef2f2",
+                    borderRadius: 8,
+                    padding: spacing.sm,
+                    borderLeftWidth: 3,
+                    borderLeftColor: colors.danger,
+                  }}
+                >
+                  {/* Ride route */}
+                  {ride && (
+                    <Text style={{
+                      fontSize: 13,
+                      fontWeight: "700",
+                      color: colors.text,
+                      marginBottom: 2,
+                    }}>
+                      {ride.origin} → {ride.destination}
+                    </Text>
+                  )}
+
+                  {/* Date */}
+                  <Text style={{ fontSize: 12, color: colors.textLight, marginBottom: 4 }}>
+                    {ride
+                      ? formatDate(ride.departureDateTime)
+                      : formatDate(report.createdAt)}
+                  </Text>
+
+                  {/* Reason */}
+                  <Text style={{ color: colors.text, fontSize: 14 }}>
+                    {report.reason}
+                  </Text>
+                </View>
+              );
+            })}
         </View>
       )}
 

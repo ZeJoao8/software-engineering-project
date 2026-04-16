@@ -15,7 +15,7 @@ import { getRides, updateRide, deleteRide } from "../../data/rides";
 import { getCurrentUser, getUserById } from "../../data/user";
 import { getCars } from "../../data/cars";
 import { hasReviewForRide, getReviews } from "../../data/reviews";
-import { hasReportForRide, subscribeToReportsChanges } from "../../data/reports";
+import { hasReportForRide, getReports, subscribeToReportsChanges } from "../../data/reports";
 import { subscribeToReviewsChanges } from "../../data/reviews";
 import { formatDate } from "../../utils/date";
 
@@ -104,19 +104,37 @@ export default function RideDetails() {
     c => c.ownerId === activeUser.uid || c.ownerId === activeUser.email
   );
 
-  // comentários de reviews baixas desta ride
+  // Low rating comments for this ride
   const allReviews = getReviews();
   const lowRatingComments = allReviews.filter(review =>
     review.rideId === r.id &&
     review.comment.trim().length > 0 &&
     review.rating <= 2 &&
     (
-      // driver vê todos os comentários sobre ele
       (isDriver && (review.revieweeId === activeUser.uid || review.revieweeId === activeUser.email)) ||
-      // passageiro vê só o seu próprio comentário
       (joined && (review.reviewerId === activeUser.uid || review.reviewerId === activeUser.email))
     )
   );
+
+  // Per-passenger rating lookup (for driver view)
+  function getPassengerRatingForThisRide(passengerId: string) {
+    return allReviews.find(
+      review =>
+        review.rideId === r.id &&
+        (review.reviewerId === passengerId)
+    );
+  }
+
+  // Report warning: check if current user has EVER reported this person (any ride)
+  const allReports = getReports();
+
+  function hasEverReportedUser(targetId: string) {
+    return allReports.some(
+      report =>
+        (report.reporterId === activeUser.uid || report.reporterId === activeUser.email) &&
+        (report.reportedUserId === targetId)
+    );
+  }
 
   function canReportUser(targetId: string) {
     return (
@@ -134,7 +152,7 @@ export default function RideDetails() {
     );
   }
 
-  function alreadyReportedUser(targetId: string) {
+  function alreadyReportedUserOnThisRide(targetId: string) {
     return hasReportForRide(
       r.id,
       activeUser.uid,
@@ -340,7 +358,8 @@ export default function RideDetails() {
               >
                 {driver?.name}
               </Text>
-              {alreadyReportedUser(driver?.uid ?? r.driverId) && (
+              {/* Persistent report warning: shown if ever reported this driver */}
+              {hasEverReportedUser(driver?.uid ?? r.driverId) && (
                 <Text style={{ fontSize: 14 }}>⚠️</Text>
               )}
             </View>
@@ -405,66 +424,106 @@ export default function RideDetails() {
             <Text style={{ color: colors.textLight }}>No passengers yet</Text>
           )}
 
-          {passengers.map(p => (
-            <View
-              key={p!.uid}
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: spacing.sm,
-              }}
-            >
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                <Text
-                  style={{ color: colors.primary, fontWeight: "500" }}
-                  onPress={() => {
-                    if (p!.uid === activeUser.uid)
-                      router.push("/(tabs)/userProfile");
-                    else
-                      router.push(`/user/${p!.uid}`);
-                  }}
-                >
-                  {p!.name}
-                </Text>
-                {alreadyReportedUser(p!.uid) && (
-                  <Text style={{ fontSize: 14 }}>⚠️</Text>
-                )}
-              </View>
+          {passengers.map(p => {
+            // Driver sees the rating this passenger gave on this ride
+            const passengerReview = isDriver
+              ? getPassengerRatingForThisRide(p!.uid)
+              : undefined;
 
-              <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
-                {canReportUser(p!.uid) && (
-                  <Pressable
-                    style={{
-                      backgroundColor: "#fee2e2",
-                      paddingHorizontal: 10,
-                      paddingVertical: 4,
-                      borderRadius: 6,
-                    }}
-                    onPress={() =>
-                      router.push({
-                        pathname: "/reportUser/[id]",
-                        params: { id: r.id, targetUserId: p!.uid },
-                      })
-                    }
-                  >
-                    <Text style={{ color: colors.danger, fontSize: 12, fontWeight: "600" }}>
-                      Report
-                    </Text>
-                  </Pressable>
-                )}
-
-                {isDriver && !rideStarted && !r.completed && (
+            return (
+              <View
+                key={p!.uid}
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: spacing.sm,
+                }}
+              >
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
                   <Text
-                    style={{ color: colors.danger, fontWeight: "600" }}
-                    onPress={() => removePassenger(p!.uid)}
+                    style={{ color: colors.primary, fontWeight: "500" }}
+                    onPress={() => {
+                      if (p!.uid === activeUser.uid)
+                        router.push("/(tabs)/userProfile");
+                      else
+                        router.push(`/user/${p!.uid}`);
+                    }}
                   >
-                    Remove
+                    {p!.name}
                   </Text>
-                )}
+
+                  {/* Persistent report warning */}
+                  {hasEverReportedUser(p!.uid) && (
+                    <Text style={{ fontSize: 14 }}>⚠️</Text>
+                  )}
+
+                  {/* Rating badge shown only to driver */}
+                  {isDriver && r.completed && (
+                    passengerReview ? (
+                      <View style={{
+                        backgroundColor: passengerReview.rating >= 4
+                          ? colors.primaryLight
+                          : passengerReview.rating === 3
+                            ? "#fef9c3"
+                            : colors.dangerSoft,
+                        paddingHorizontal: 7,
+                        paddingVertical: 2,
+                        borderRadius: 5,
+                      }}>
+                        <Text style={{ fontSize: 12, fontWeight: "600" }}>
+                          ⭐ {passengerReview.rating}/5
+                        </Text>
+                      </View>
+                    ) : (
+                      <View style={{
+                        backgroundColor: "#f3f4f6",
+                        paddingHorizontal: 7,
+                        paddingVertical: 2,
+                        borderRadius: 5,
+                      }}>
+                        <Text style={{ fontSize: 11, color: colors.textLight }}>
+                          not rated yet
+                        </Text>
+                      </View>
+                    )
+                  )}
+                </View>
+
+                <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+                  {canReportUser(p!.uid) && (
+                    <Pressable
+                      style={{
+                        backgroundColor: "#fee2e2",
+                        paddingHorizontal: 10,
+                        paddingVertical: 4,
+                        borderRadius: 6,
+                      }}
+                      onPress={() =>
+                        router.push({
+                          pathname: "/reportUser/[id]",
+                          params: { id: r.id, targetUserId: p!.uid },
+                        })
+                      }
+                    >
+                      <Text style={{ color: colors.danger, fontSize: 12, fontWeight: "600" }}>
+                        Report
+                      </Text>
+                    </Pressable>
+                  )}
+
+                  {isDriver && !rideStarted && !r.completed && (
+                    <Text
+                      style={{ color: colors.danger, fontWeight: "600" }}
+                      onPress={() => removePassenger(p!.uid)}
+                    >
+                      Remove
+                    </Text>
+                  )}
+                </View>
               </View>
-            </View>
-          ))}
+            );
+          })}
         </View>
 
         {/* LOW RATING COMMENTS */}

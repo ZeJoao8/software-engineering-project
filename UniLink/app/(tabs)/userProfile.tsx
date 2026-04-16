@@ -122,16 +122,14 @@ export default function Profile() {
       activeUser.email
     );
 
+  // Show rating if has driven a ride AND has reviews (same logic as public profile)
   const showRating =
     hasDrivenRide &&
     userReviews.length > 0;
 
   function startEdit() {
-
     setEditing(true);
-
   }
-
 
   function cancelEdit() {
     const current =
@@ -148,7 +146,6 @@ export default function Profile() {
     setPlate("");
     setSeats("");
   }
-
 
   async function saveProfile() {
     await updateUser(activeUser);
@@ -273,7 +270,8 @@ export default function Profile() {
       <Text style={layout.title}>
         Profile
       </Text>
-      
+
+      {/* OWN RATING — same display as public profile */}
       {showRating && (
         <Text
           style={{
