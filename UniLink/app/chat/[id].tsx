@@ -50,6 +50,7 @@ export default function RideChat() {
   if (!ride || !activeUser) return null;
 
   async function handleSend() {
+    if (!ride || !activeUser) return;
     const text = inputText.trim();
     if (!text) return;
 
@@ -72,6 +73,7 @@ export default function RideChat() {
   }
 
   const renderMessage = ({ item }: { item: Message }) => {
+    if (!ride || !activeUser) return null;
     const isMe = item.senderId === activeUser.uid || item.senderId === activeUser.email;
     const sender = isMe ? activeUser : getUserById(item.senderId);
     

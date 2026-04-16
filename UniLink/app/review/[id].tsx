@@ -79,6 +79,7 @@ export default function ReviewRide() {
   }
 
   async function submitRating() {
+    if (!ride || !activeUser || !targetUser) return;
     if (submitting) return;
 
     if (rating < 1 || rating > 5) {

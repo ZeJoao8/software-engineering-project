@@ -151,6 +151,7 @@ export function removeEmptyPastRides(now = new Date()) {
 
  const rides = getRides();
  const user = getCurrentUser();
+ if (!user) return;
 
  rides.forEach(ride => {
 

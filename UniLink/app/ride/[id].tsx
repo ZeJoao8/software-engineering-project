@@ -593,7 +593,7 @@ export default function RideDetails() {
         {(isDriver || joined) && (
           <Pressable
             style={[components.button, { marginTop: spacing.md, backgroundColor: colors.accent }]}
-            onPress={() => router.push(`/chat/${r.id}`)}
+            onPress={() => router.push({ pathname: "/chat/[id]", params: { id: r.id } })}
           >
             <Text style={components.buttonText}>Open Group Chat</Text>
           </Pressable>

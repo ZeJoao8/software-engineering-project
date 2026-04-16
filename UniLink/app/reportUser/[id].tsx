@@ -86,6 +86,7 @@ export default function ReportUser() {
   if (!canAccess) return null;
 
   async function submitReport() {
+    if (!ride || !activeUser || !targetUser) return;
     if (submitting) return;
 
     if (alreadyReported) {

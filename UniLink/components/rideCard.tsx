@@ -37,15 +37,6 @@ export default function RideCard({
 
   const tags: Tag[] = [];
 
-  if (ride.completed) {
-    tags.push({
-      key: "completed",
-      emoji: "✅",
-      description: "Ride completed",
-      bg: colors.primaryLight,
-    });
-  }
-
   if (ride.womenOnly) {
     tags.push({
       key: "womenOnly",
@@ -139,6 +130,12 @@ export default function RideCard({
 
   return (
     <Pressable style={components.card} onPress={onPress}>
+      {/* COMPLETED BADGE */}
+      {ride.completed && (
+        <View style={{ alignSelf: "flex-end", backgroundColor: colors.primarySoft, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, marginBottom: 4, borderWidth: 1, borderColor: colors.primaryLight }}>
+          <Text style={{ fontSize: 11, fontWeight: "700", color: colors.primary }}>COMPLETED ✅</Text>
+        </View>
+      )}
 
       {/* ROUTE */}
       <Text style={{ fontSize: 16, fontWeight: "700", marginBottom: 4 }}>
