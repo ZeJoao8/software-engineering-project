@@ -11,7 +11,7 @@ export const colors = {
  card:"#fafffb",
 
  text:"#1f2937",
- textLight:"#6b7280",
+ textLight:"#898b90",
 
  border:"#d1fae5",
 

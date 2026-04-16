@@ -307,7 +307,7 @@ export default function CreateRide() {
         </Text>
 
         <AddressAutocomplete
-          placeholder="Procurar origem..."
+          placeholder="Search origin..."
           value={origin}
           onChangeText={(text) => {
             setOrigin(text);
@@ -512,6 +512,7 @@ export default function CreateRide() {
         </Text>
         <TextInput
           placeholder={`1-${car.seatCapacity - 1} seats`}
+          placeholderTextColor={colors.textLight}
           value={seats}
           onChangeText={setSeats}
           keyboardType="numeric"
@@ -539,8 +540,8 @@ export default function CreateRide() {
               value={womenOnly}
               onValueChange={setWomenOnly}
               testID="createRideWomenOnlySwitch"
-              trackColor={{ false: "#d1d5db", true: "#fbcfe8" }}
-              thumbColor={womenOnly ? "#ec4899" : "#f9fafb"}
+              trackColor={{ false: "#7a7b7e", true: "#fbcfe8" }}
+              thumbColor={womenOnly ? colors.women : "#8b8e91"}
             />
           </View>
         </View>

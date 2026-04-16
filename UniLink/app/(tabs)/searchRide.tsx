@@ -124,6 +124,7 @@ export default function Home() {
 
         <TextInput
           placeholder="Origin"
+          placeholderTextColor={colors.textLight}
           value={originFilter}
           onChangeText={setOriginFilter}
           style={forms.input}
@@ -139,6 +140,7 @@ export default function Home() {
 
         <TextInput
           placeholder="Destination"
+          placeholderTextColor={colors.textLight}
           value={destinationFilter}
           onChangeText={setDestinationFilter}
           style={forms.input}
@@ -154,6 +156,7 @@ export default function Home() {
 
         <TextInput
           placeholder="ex: 30/03 or 30/03 14:00"
+          placeholderTextColor={colors.textLight}
           value={dateFilter}
           onChangeText={setDateFilter}
           style={forms.input}
@@ -169,6 +172,7 @@ export default function Home() {
 
         <TextInput
           placeholder="1"
+          placeholderTextColor={colors.textLight}
           value={minSeats}
           keyboardType="numeric"
           onChangeText={setMinSeats}
@@ -194,16 +198,15 @@ export default function Home() {
               value={womenOnlyFilter}
               onValueChange={setWomenOnlyFilter}
               testID="searchWomenOnlySwitch"
-
               trackColor={{
-                false: "#d1d5db",
+                false: "#7a7b7e",
                 true: "#fbcfe8"
               }}
 
               thumbColor={
                 womenOnlyFilter
                   ? colors.women
-                  : "#f9fafb"
+                  : "#8b8e91"
               }
             />
 

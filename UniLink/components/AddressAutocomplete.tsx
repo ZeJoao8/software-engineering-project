@@ -85,6 +85,7 @@ export default function AddressAutocomplete({
       <View style={styles.inputRow}>
         <TextInput
           placeholder={placeholder}
+          placeholderTextColor={colors.textLight}
           value={value}
           maxLength={80}
           onChangeText={handleTextChange}

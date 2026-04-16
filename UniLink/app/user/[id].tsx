@@ -104,7 +104,7 @@ export default function PublicProfile() {
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: spacing.sm }}>
         <Text style={layout.title}>{user.name}</Text>
         {hasReportedThisUser && (
-          <Text style={{ fontSize: 18 }}>⚠️</Text>
+          <Text style={layout.title}>⚠️</Text>
         )}
       </View>
 
