@@ -37,21 +37,21 @@ export default function RideCard({
 
   const tags: Tag[] = [];
 
-  if (ride.womenOnly) {
-    tags.push({
-      key: "womenOnly",
-      emoji: "♀️",
-      description: "Women only ride",
-      bg: colors.womenSoft,
-    });
-  }
-
   if (ride.completed) {
     tags.push({
       key: "completed",
       emoji: "✅",
       description: "Ride completed",
       bg: colors.primaryLight,
+    });
+  }
+
+  if (ride.womenOnly) {
+    tags.push({
+      key: "womenOnly",
+      emoji: "♀️",
+      description: "Women only ride",
+      bg: colors.womenSoft,
     });
   }
 
@@ -74,11 +74,11 @@ export default function RideCard({
         const avg = rideReviews.reduce((sum, r) => sum + r.rating, 0) / rideReviews.length;
         const avgRounded = Number(avg.toFixed(1));
         const hasComments = rideReviews.some(r => r.comment.trim().length > 0);
-        
+
         tags.push({
           key: "driverRating",
           emoji: `⭐ ${avgRounded}${hasComments ? " 💬" : ""}`,
-          description: `Your average rating on this ride (${rideReviews.length} ${rideReviews.length === 1 ? "review" : "reviews"})`,
+          description: `Your average rating on this ride (${rideReviews.length} ${rideReviews.length === 1 ? "review" : "reviews"})${hasComments ? " — Includes written feedback!" : ""}`,
           bg: ratingBackground(avgRounded),
         });
       } else {
@@ -159,7 +159,7 @@ export default function RideCard({
 
         {/* OCCUPANCY */}
         <Text style={{ fontWeight: "500", color: colors.textLight }}>
-          {showOccupancyLabel && "Occupancy: "}
+          {showOccupancyLabel && "Seats: "}
           {ride.totalSeats - ride.availableSeats}
           {" / "}
           {ride.totalSeats}

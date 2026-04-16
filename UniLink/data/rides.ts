@@ -16,6 +16,7 @@ import {
  isAuthReady,
  subscribeToAuthChanges,
 } from "./user";
+import { deleteMessagesForRide } from "./chat";
 
 let rides: Ride[] = [];
 
@@ -133,6 +134,7 @@ export async function deleteRide(id: string) {
  notifyListeners();
 
  try {
+  await deleteMessagesForRide(id);
   await deleteDoc(doc(db, "rides", id));
  } catch (error) {
   rides = previousRides;
