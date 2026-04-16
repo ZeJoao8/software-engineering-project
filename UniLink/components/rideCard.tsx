@@ -73,9 +73,11 @@ export default function RideCard({
       if (rideReviews.length > 0) {
         const avg = rideReviews.reduce((sum, r) => sum + r.rating, 0) / rideReviews.length;
         const avgRounded = Number(avg.toFixed(1));
+        const hasComments = rideReviews.some(r => r.comment.trim().length > 0);
+        
         tags.push({
           key: "driverRating",
-          emoji: `⭐ ${avgRounded}`,
+          emoji: `⭐ ${avgRounded}${hasComments ? " 💬" : ""}`,
           description: `Your average rating on this ride (${rideReviews.length} ${rideReviews.length === 1 ? "review" : "reviews"})`,
           bg: ratingBackground(avgRounded),
         });

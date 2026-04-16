@@ -107,15 +107,33 @@ export default function RideDetails() {
 
   const allReviews = getReviews();
 
-  const lowRatingComments = allReviews.filter(review =>
+  const allFeedbackComments = allReviews.filter(review =>
     review.rideId === r.id &&
     review.comment.trim().length > 0 &&
-    review.rating <= 2 &&
     (
       (isDriver && (review.revieweeId === activeUser.uid || review.revieweeId === activeUser.email)) ||
       (joined && (review.reviewerId === activeUser.uid || review.reviewerId === activeUser.email))
     )
   );
+
+  function getFeedbackStyle(ratingValue: number) {
+    if (ratingValue >= 4) {
+      return {
+        backgroundColor: colors.primarySoft,
+        borderLeftColor: colors.primaryLight,
+      };
+    }
+    if (ratingValue === 3) {
+      return {
+        backgroundColor: colors.warning,
+        borderLeftColor: "#fde047", // yellow-400
+      };
+    }
+    return {
+      backgroundColor: colors.warningSoft,
+      borderLeftColor: colors.dangerSoft,
+    };
+  }
 
   function getPassengerRatingForThisRide(passengerId: string) {
     return allReviews.find(
@@ -501,18 +519,24 @@ export default function RideDetails() {
           })}
         </View>
 
-        {/* LOW RATING COMMENTS */}
-        {lowRatingComments.length > 0 && (
+        {/* RIDE FEEDBACK */}
+        {allFeedbackComments.length > 0 && (
           <View style={components.card}>
             <Text style={layout.subtitle}>
               {isDriver ? "Feedback received" : "Your feedback"}
             </Text>
-            {lowRatingComments.map(review => {
+            {allFeedbackComments.map(review => {
               const reviewer = getUserById(review.reviewerId);
               return (
-                <View key={review.id} style={components.feedbackCard}>
+                <View 
+                  key={review.id} 
+                  style={[
+                    components.feedbackCard, 
+                    getFeedbackStyle(review.rating)
+                  ]}
+                >
                   {isDriver && (
-                    <Text style={{ fontSize: 12, color: colors.textLight, marginBottom: 2 }}>
+                    <Text style={{ fontSize: 13, color: colors.text, fontWeight: "600", marginBottom: 2 }}>
                       From {reviewer?.name ?? "passenger"}
                     </Text>
                   )}
