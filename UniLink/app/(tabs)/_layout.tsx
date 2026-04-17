@@ -1,5 +1,5 @@
-import { colors } from "../../styles/theme";
 import { Tabs } from "expo-router";
+import { colors } from "../../styles/theme";
 
 export default function TabsLayout() {
 
@@ -57,6 +57,7 @@ export default function TabsLayout() {
                 name="userProfile"
                 options={{ title: "Profile", tabBarButtonTestID: "profileTab" }}
             />
+            
 
         </Tabs>
 
