@@ -76,9 +76,9 @@ export default function RideChat() {
     if (!ride || !activeUser) return null;
     const isMe = item.senderId === activeUser.uid || item.senderId === activeUser.email;
     const sender = isMe ? activeUser : getUserById(item.senderId);
-    
+
     // Check if driver
-    const isSenderDriver = item.senderId === ride.driverId || 
+    const isSenderDriver = item.senderId === ride.driverId ||
       (sender && sender.email === ride.driverId);
 
     return (
@@ -89,7 +89,7 @@ export default function RideChat() {
             {isSenderDriver && <Text style={styles.driverBadge}> • Driver</Text>}
           </View>
         )}
-        
+
         <View style={[styles.bubble, isMe ? styles.myBubble : styles.otherBubble]}>
           <Text style={[styles.messageText, isMe ? styles.myMessageText : styles.otherMessageText]}>
             {item.text}
@@ -104,8 +104,8 @@ export default function RideChat() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView 
-        style={styles.container} 
+      <KeyboardAvoidingView
+        style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
       >
@@ -126,8 +126,7 @@ export default function RideChat() {
           keyExtractor={item => item.id}
           renderItem={renderMessage}
           contentContainerStyle={styles.listContent}
-          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-          onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
+          inverted
         />
 
         <View style={styles.inputContainer}>
@@ -139,7 +138,7 @@ export default function RideChat() {
             multiline
             maxLength={500}
           />
-          <Pressable 
+          <Pressable
             style={[styles.sendButton, !inputText.trim() && styles.sendButtonDisabled]}
             onPress={() => void handleSend()}
             disabled={!inputText.trim()}
@@ -188,8 +187,6 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: spacing.md,
-    flexGrow: 1,
-    justifyContent: "flex-end", // Items appear at bottom if small amount
   },
   messageContainer: {
     marginBottom: spacing.md,

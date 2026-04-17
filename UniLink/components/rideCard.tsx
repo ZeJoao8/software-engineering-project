@@ -48,17 +48,15 @@ export default function RideCard({
 
   if (user) {
     const isPassenger =
-      ride.passengers.includes(user.uid) ||
-      ride.passengers.includes(user.email);
+      ride.passengers.includes(user.uid)
 
     const isDriver =
-      ride.driverId === user.uid ||
-      ride.driverId === user.email;
+      ride.driverId === user.uid
 
     if (isDriver && ride.completed) {
       const rideReviews = getReviews().filter(
         r => r.rideId === ride.id &&
-          (r.revieweeId === user.uid || r.revieweeId === user.email)
+          (r.revieweeId === user.uid)
       );
 
       if (rideReviews.length > 0) {
@@ -69,7 +67,7 @@ export default function RideCard({
         tags.push({
           key: "driverRating",
           emoji: `⭐ ${avgRounded}${hasComments ? " 💬" : ""}`,
-          description: `Your average rating on this ride (${rideReviews.length} ${rideReviews.length === 1 ? "review" : "reviews"})${hasComments ? " — Includes written feedback!" : ""}`,
+          description: `Your average rating on this ride ${hasComments ? "— Passenger left feedback!" : ""}`,
           bg: ratingBackground(avgRounded),
         });
       } else {
@@ -94,6 +92,13 @@ export default function RideCard({
         );
       });
 
+    const myRideReviews = getReviews().filter(
+      r => r.rideId === ride.id &&
+        (r.reviewerId === user.uid)
+    );
+
+    const myComments = myRideReviews.some(r => r.comment.trim().length > 0);
+
     if (reportedInThisRide) {
       tags.push({
         key: "reported",
@@ -113,8 +118,8 @@ export default function RideCard({
       if (myReview) {
         tags.push({
           key: "rating",
-          emoji: `⭐ ${myReview.rating}`,
-          description: `You rated this driver ${myReview.rating}/5`,
+          emoji: `⭐ ${myReview.rating} ${myComments ? ' 💬' : ''}`,
+          description: `You rated this driver ${myReview.rating}/5 ${myComments ? "and gave feedback" : ""}`,
           bg: ratingBackground(myReview.rating),
         });
       } else {
