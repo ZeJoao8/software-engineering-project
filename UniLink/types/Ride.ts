@@ -25,5 +25,5 @@ export interface Ride {
   originCoords?: { latitude: number; longitude: number };
 
   destinationCoords?: { latitude: number; longitude: number };
-
-}
+  distanceKm?: number;
+}

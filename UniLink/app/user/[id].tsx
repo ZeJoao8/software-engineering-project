@@ -115,6 +115,7 @@ export default function PublicProfile() {
         </Text>
       )}
 
+
       {/* INFO */}
       <View style={components.card}>
         <Text style={layout.subtitle}>Info</Text>
@@ -131,6 +132,39 @@ export default function PublicProfile() {
 
         <Text style={forms.label}>Course</Text>
         <Text>{user.course}</Text>
+      </View>
+
+      {/* SUSTAINABILITY IMPACT */}
+      <View style={components.card}>
+        <Text style={layout.subtitle}>Sustainability Impact</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: spacing.xs }}>
+          <Text style={{ fontSize: 32 }}>🌳</Text>
+          <View>
+            <Text style={{ fontSize: 20, fontWeight: "700", color: colors.primary }}>
+              {(() => {
+                const rides = getRides();
+                const CO2_PER_KM = 0.12;
+                let totalCO2 = 0;
+                
+                rides.forEach(r => {
+                  if (!r.completed || !r.distanceKm) return;
+                  
+                  const isDriver = r.driverId === user.uid || r.driverId === user.email;
+                  const isPassenger = r.passengers.includes(user.uid) || r.passengers.includes(user.email);
+                  
+                  if (isDriver && r.passengers.length > 0) {
+                    totalCO2 += (r.distanceKm * CO2_PER_KM) * r.passengers.length;
+                  } else if (isPassenger) {
+                    totalCO2 += (r.distanceKm * CO2_PER_KM);
+                  }
+                });
+                
+                return totalCO2.toFixed(2);
+              })()} kg
+            </Text>
+            <Text style={{ color: colors.textLight, fontSize: 13 }}>Total CO₂ saved</Text>
+          </View>
+        </View>
       </View>
 
       {/* CARS */}

@@ -18,6 +18,7 @@ import { hasReviewForRide, getReviews } from "../../data/reviews";
 import { hasReportForRide, getReports, subscribeToReportsChanges } from "../../data/reports";
 import { subscribeToReviewsChanges } from "../../data/reviews";
 import { formatDate } from "../../utils/date";
+import { getRoute } from "../../utils/routing";
 import type { User } from "../../types/User";
 
 import { Picker } from "@react-native-picker/picker";
@@ -244,7 +245,20 @@ export default function RideDetails() {
       {
         text: "Yes",
         onPress: async () => {
-          await updateRide({ ...r, completed: true });
+          let distanceKm = r.distanceKm;
+
+          if (!distanceKm && r.originCoords && r.destinationCoords) {
+            const route = await getRoute(r.originCoords, r.destinationCoords);
+            if (route) {
+              distanceKm = route.distanceKm;
+            }
+          }
+
+          await updateRide({ 
+            ...r, 
+            completed: true,
+            distanceKm 
+          });
           router.replace("/(tabs)/myRides");
         },
       },

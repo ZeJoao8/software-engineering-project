@@ -54,6 +54,11 @@ export default function TabsLayout() {
             />
 
             <Tabs.Screen
+                name="leaderboard"
+                options={{ title: "Leaderboard", tabBarButtonTestID: "leaderboardTab" }}
+            />
+
+            <Tabs.Screen
                 name="userProfile"
                 options={{ title: "Profile", tabBarButtonTestID: "profileTab" }}
             />

@@ -89,8 +89,8 @@ export default function Profile() {
       unsubscribeRides();
       unsubscribeReviews();
     };
-    }, []);
-    
+  }, []);
+
   if (!user) {
     return null;
   }
@@ -102,7 +102,7 @@ export default function Profile() {
       activeUser.uid,
       activeUser.email
     );
-  
+
   const hasDrivenRide =
     getRides().some(
       ride =>
@@ -402,6 +402,38 @@ export default function Profile() {
 
       </View>
 
+      <View style={components.card}>
+        <Text style={layout.subtitle}>Sustainability Impact</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: spacing.xs }}>
+          <Text style={{ fontSize: 32 }}>🌳</Text>
+          <View>
+            <Text style={{ fontSize: 20, fontWeight: "700", color: colors.primary }}>
+              {(() => {
+                const rides = getRides();
+                const CO2_PER_KM = 0.12;
+                let totalCO2 = 0;
+
+                rides.forEach(r => {
+                  if (!r.completed || !r.distanceKm) return;
+
+                  const isDriver = r.driverId === activeUser.uid || r.driverId === activeUser.email;
+                  const isPassenger = r.passengers.includes(activeUser.uid) || r.passengers.includes(activeUser.email);
+
+                  if (isDriver && r.passengers.length > 0) {
+                    totalCO2 += (r.distanceKm * CO2_PER_KM) * r.passengers.length;
+                  } else if (isPassenger) {
+                    totalCO2 += (r.distanceKm * CO2_PER_KM);
+                  }
+                });
+
+                return totalCO2.toFixed(2);
+              })()} kg
+            </Text>
+            <Text style={{ color: colors.textLight, fontSize: 13 }}>Total CO₂ saved</Text>
+          </View>
+        </View>
+      </View>
+
 
 
       {/* CARS */}
@@ -580,24 +612,24 @@ export default function Profile() {
           style={components.button}
           testID="logoutButton"
           onPress={() =>
-              Alert.alert(
-                "Logout",
-                "Are you sure?",
-                [
-                  { text: "Cancel" },
-                  {
-                    text: "Logout",
-                    style: "destructive",
+            Alert.alert(
+              "Logout",
+              "Are you sure?",
+              [
+                { text: "Cancel" },
+                {
+                  text: "Logout",
+                  style: "destructive",
 
-                    onPress: async () => {
-                      await logoutUser();
-                      router.replace("/login");
-                    }
+                  onPress: async () => {
+                    await logoutUser();
+                    router.replace("/login");
                   }
-                ]
-              )
-            }
-          >
+                }
+              ]
+            )
+          }
+        >
           <Text
             style={components.buttonText}
           >
