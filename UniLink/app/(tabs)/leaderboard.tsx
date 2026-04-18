@@ -82,11 +82,15 @@ export default function Leaderboard() {
   const top10 = ranking.slice(0, 10);
   const userRankIndex = ranking.findIndex(u => u.id === currentUser?.uid || u.id === currentUser?.email);
   const isUserInTop10 = userRankIndex !== -1 && userRankIndex < 10;
-  const userRankEntry = userRankIndex !== -1 ? ranking[userRankIndex] : null;
+  
+  // If user has 0 CO2, they aren't in the ranking. We create a placeholder entry.
+  const userRankEntry = userRankIndex !== -1 
+    ? ranking[userRankIndex] 
+    : currentUser ? { id: currentUser.uid, name: currentUser.name, co2: 0 } : null;
 
   const renderRankItem = (u: UserRankEntry, index: number) => {
     const isCurrentUser = u.id === currentUser?.uid || u.id === currentUser?.email;
-    const isTop3 = index < 3;
+    const isTop3 = index !== -1 && index < 3;
 
     return (
       <Pressable
@@ -103,7 +107,7 @@ export default function Leaderboard() {
       >
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Text style={[styles.rank, isTop3 && styles.topRank]}>
-            #{index + 1}
+            {index === -1 ? "-" : `#${index + 1}`}
           </Text>
 
           <View style={{ flex: 1 }}>
