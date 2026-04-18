@@ -33,8 +33,8 @@ export default function RideChat() {
   useEffect(() => {
     if (!ride || !activeUser) return;
 
-    const joined = ride.passengers.includes(activeUser.uid) || ride.passengers.includes(activeUser.email);
-    const isDriver = ride.driverId === activeUser.uid || ride.driverId === activeUser.email;
+    const joined = ride.passengers.includes(activeUser.uid);
+    const isDriver = ride.driverId === activeUser.uid;
 
     if (!joined && !isDriver) {
       router.replace("/(tabs)/myRides");
@@ -74,12 +74,11 @@ export default function RideChat() {
 
   const renderMessage = ({ item }: { item: Message }) => {
     if (!ride || !activeUser) return null;
-    const isMe = item.senderId === activeUser.uid || item.senderId === activeUser.email;
+    const isMe = item.senderId === activeUser.uid;
     const sender = isMe ? activeUser : getUserById(item.senderId);
 
     // Check if driver
-    const isSenderDriver = item.senderId === ride.driverId ||
-      (sender && sender.email === ride.driverId);
+    const isSenderDriver = item.senderId === ride.driverId;
 
     return (
       <View style={[styles.messageContainer, isMe ? styles.myMessage : styles.otherMessage]}>

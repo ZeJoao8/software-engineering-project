@@ -50,14 +50,7 @@ export default function CreateRide() {
     useState(getCurrentUser());
 
   const [cars, setCars] =
-    useState(
-      user
-        ? getUserCars(
-          user.uid,
-          user.email
-        )
-        : []
-    );
+    useState(user ? getUserCars(user.uid) : []);
 
   const [origin, setOrigin] =
     useState("");
@@ -116,13 +109,7 @@ export default function CreateRide() {
 
       const current = getCurrentUser();
 
-      const userCars =
-        current
-          ? getUserCars(
-            current.uid,
-            current.email
-          )
-          : [];
+      const userCars = current ? getUserCars(current.uid) : [];
       setUser(current);
       setCars(userCars);
       setSelectedCar(
@@ -143,13 +130,7 @@ export default function CreateRide() {
   useEffect(() => {
     return subscribeToCarsChanges(() => {
       const current = getCurrentUser();
-      const nextCars =
-        current
-          ? getUserCars(
-            current.uid,
-            current.email
-          )
-          : [];
+      const nextCars = current ? getUserCars(current.uid) : [];
 
       setCars(nextCars);
       setSelectedCar(currentSelected =>

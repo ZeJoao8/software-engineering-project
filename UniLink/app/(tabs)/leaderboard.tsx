@@ -8,6 +8,7 @@ import { getUsers, getCurrentUser } from "../../data/user";
 import { colors, radius, spacing } from "../../styles/theme";
 import { layout } from "../../styles/layout";
 import { components } from "../../styles/components";
+import { calculateUserCO2Saved } from "../../utils/sustainability";
 
 interface UserRankEntry {
   id: string;
@@ -25,29 +26,11 @@ export default function Leaderboard() {
       const rides = getRides();
       const users = getUsers();
 
-      const CO2_PER_KM = 0.12;
-      const totals: Record<string, number> = {};
-
-      for (const r of rides) {
-        if (!r.completed || !r.distanceKm) continue;
-
-        const co2SavedPerPassenger = r.distanceKm * CO2_PER_KM;
-
-        r.passengers.forEach(p => {
-          totals[p] = (totals[p] || 0) + co2SavedPerPassenger;
-        });
-
-        if (r.passengers.length > 0) {
-          const driverTotalSaved = co2SavedPerPassenger * r.passengers.length;
-          totals[r.driverId] = (totals[r.driverId] || 0) + driverTotalSaved;
-        }
-      }
-
       const result = users
         .map(u => ({
           id: u.uid,
           name: u.name,
-          co2: totals[u.uid] || totals[u.email] || 0
+          co2: calculateUserCO2Saved(rides, u.uid)
         }))
         .filter(u => u.co2 > 0)
         .sort((a, b) => b.co2 - a.co2);
@@ -80,7 +63,7 @@ export default function Leaderboard() {
   }
 
   const top10 = ranking.slice(0, 10);
-  const userRankIndex = ranking.findIndex(u => u.id === currentUser?.uid || u.id === currentUser?.email);
+  const userRankIndex = ranking.findIndex(u => u.id === currentUser?.uid);
   const isUserInTop10 = userRankIndex !== -1 && userRankIndex < 10;
   
   // If user has 0 CO2, they aren't in the ranking. We create a placeholder entry.
@@ -89,7 +72,7 @@ export default function Leaderboard() {
     : currentUser ? { id: currentUser.uid, name: currentUser.name, co2: 0 } : null;
 
   const renderRankItem = (u: UserRankEntry, index: number) => {
-    const isCurrentUser = u.id === currentUser?.uid || u.id === currentUser?.email;
+    const isCurrentUser = u.id === currentUser?.uid;
     const isTop3 = index !== -1 && index < 3;
 
     return (

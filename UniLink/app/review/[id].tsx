@@ -46,22 +46,16 @@ export default function ReviewRide() {
     return null;
   }
 
-  const joined =
-    ride.passengers.includes(activeUser.uid) ||
-    ride.passengers.includes(activeUser.email);
+  const joined = ride.passengers.includes(activeUser.uid);
 
-  const isDriver =
-    ride.driverId === activeUser.uid ||
-    ride.driverId === activeUser.email;
+  const isDriver = ride.driverId === activeUser.uid;
 
   const canAccess = joined && !isDriver && ride.completed;
 
   const alreadyReviewed = hasReviewForRide(
     ride.id,
     activeUser.uid,
-    targetUser.uid,
-    activeUser.email,
-    targetUser.email
+    targetUser.uid
   );
 
   useEffect(() => {
@@ -126,7 +120,7 @@ export default function ReviewRide() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+    <SafeAreaView style={layout.screen}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -199,6 +193,7 @@ export default function ReviewRide() {
               value={comment}
               onChangeText={setComment}
               placeholder="How was the ride? Anything to add?"
+              placeholderTextColor={colors.textLight}
               multiline
               numberOfLines={4}
               maxLength={250}

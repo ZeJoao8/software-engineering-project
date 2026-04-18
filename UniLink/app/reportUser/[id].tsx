@@ -44,21 +44,13 @@ export default function ReportUser() {
 
   if (!ride || !activeUser || !targetUser) return null;
 
-  const isDriver =
-    ride.driverId === activeUser.uid ||
-    ride.driverId === activeUser.email;
+  const isDriver = ride.driverId === activeUser.uid;
 
-  const isPassenger =
-    ride.passengers.includes(activeUser.uid) ||
-    ride.passengers.includes(activeUser.email);
+  const isPassenger = ride.passengers.includes(activeUser.uid);
 
-  const targetIsPassenger =
-    ride.passengers.includes(targetUser.uid) ||
-    ride.passengers.includes(targetUser.email);
+  const targetIsPassenger = ride.passengers.includes(targetUser.uid);
 
-  const targetIsDriver =
-    ride.driverId === targetUser.uid ||
-    ride.driverId === targetUser.email;
+  const targetIsDriver = ride.driverId === targetUser.uid;
 
   const canAccess =
     ride.completed &&
@@ -69,9 +61,7 @@ export default function ReportUser() {
   const alreadyReported = hasReportForRide(
     ride.id,
     activeUser.uid,
-    targetUser.uid,
-    activeUser.email,
-    targetUser.email
+    targetUser.uid
   );
 
   const trimmedReason = reason.trim();

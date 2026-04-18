@@ -6,6 +6,8 @@ import {
   onSnapshot,
   type Unsubscribe,
   setDoc,
+  query,
+  where,
 } from "firebase/firestore";
 
 import { db } from "../lib/firebase";
@@ -58,8 +60,16 @@ function syncReportsWithAuth() {
 
   if (unsubscribeReportsSnapshot) return;
 
-  unsubscribeReportsSnapshot = onSnapshot(
+  const user = getCurrentUser();
+  if (!user) return;
+
+  const q = query(
     collection(db, "reports"),
+    where("reporterId", "==", user.uid)
+  );
+
+  unsubscribeReportsSnapshot = onSnapshot(
+    q,
     snapshot => {
       reports = snapshot.docs.map(document =>
         document.data() as Report
@@ -80,46 +90,24 @@ export function getReports() {
   return reports;
 }
 
-export function getReportsForUser(
-  userId: string,
-  legacyId?: string
-) {
-  return reports.filter(
-    report =>
-      report.reportedUserId === userId ||
-      (!!legacyId && report.reportedUserId === legacyId)
-  );
+export function getReportsForUser(userId: string) {
+  return reports.filter(report => report.reportedUserId === userId);
 }
 
-export function getReportsByReporter(
-  reporterId: string,
-  legacyId?: string
-) {
-  return reports.filter(
-    report =>
-      report.reporterId === reporterId ||
-      (!!legacyId && report.reporterId === legacyId)
-  );
+export function getReportsByReporter(reporterId: string) {
+  return reports.filter(report => report.reporterId === reporterId);
 }
 
 export function hasReportForRide(
   rideId: string,
   reporterId: string,
-  reportedUserId: string,
-  reporterLegacyId?: string,
-  reportedLegacyId?: string
+  reportedUserId: string
 ) {
   return reports.some(
     report =>
       report.rideId === rideId &&
-      (
-        report.reporterId === reporterId ||
-        (!!reporterLegacyId && report.reporterId === reporterLegacyId)
-      ) &&
-      (
-        report.reportedUserId === reportedUserId ||
-        (!!reportedLegacyId && report.reportedUserId === reportedLegacyId)
-      )
+      report.reporterId === reporterId &&
+      report.reportedUserId === reportedUserId
   );
 }
 

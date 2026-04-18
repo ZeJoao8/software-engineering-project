@@ -164,9 +164,7 @@ export function removeEmptyPastRides(now = new Date()) {
   const hasNoPassengers =
    ride.passengers.length === 0;
 
-  const isDriver =
-   ride.driverId === user.uid ||
-   ride.driverId === user.email;
+  const isDriver = ride.driverId === user.uid;
 
   if (
    isPast &&

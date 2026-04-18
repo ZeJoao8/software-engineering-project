@@ -6,6 +6,6 @@ module.exports = {
  ],
 
  transformIgnorePatterns: [
-  "node_modules/(?!react-native|@react-native|expo)"
+  "node_modules/(?!(jest-)?react-native|@react-native|expo|@expo|@react-navigation|firebase|@firebase)"
  ]
 };

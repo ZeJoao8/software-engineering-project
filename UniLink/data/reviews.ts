@@ -79,47 +79,25 @@ export function getReviews() {
   return reviews;
 }
 
-export function getReviewsForUser(
-  userId: string,
-  legacyId?: string
-) {
-  return reviews.filter(
-    review =>
-      review.revieweeId === userId ||
-      (!!legacyId &&
-        review.revieweeId === legacyId)
-  );
+export function getReviewsForUser(userId: string) {
+  return reviews.filter(review => review.revieweeId === userId);
 }
 
 export function hasReviewForRide(
   rideId: string,
   reviewerId: string,
-  revieweeId: string,
-  reviewerLegacyId?: string,
-  revieweeLegacyId?: string
+  revieweeId: string
 ) {
   return reviews.some(
     review =>
       review.rideId === rideId &&
-      (
-        review.reviewerId === reviewerId ||
-        (!!reviewerLegacyId &&
-          review.reviewerId === reviewerLegacyId)
-      ) &&
-      (
-        review.revieweeId === revieweeId ||
-        (!!revieweeLegacyId &&
-          review.revieweeId === revieweeLegacyId)
-      )
+      review.reviewerId === reviewerId &&
+      review.revieweeId === revieweeId
   );
 }
 
-export function getAverageRatingForUser(
-  userId: string,
-  legacyId?: string
-) {
-  const userReviews =
-    getReviewsForUser(userId, legacyId);
+export function getAverageRatingForUser(userId: string) {
+  const userReviews = getReviewsForUser(userId);
 
   if (userReviews.length === 0) {
     return 0;

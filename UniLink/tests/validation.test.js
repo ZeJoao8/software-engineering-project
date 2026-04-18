@@ -7,10 +7,11 @@ import {
 
 describe("Validation Utilities", () => {
   test("isValidEmail validates formats correctly", () => {
-    expect(isValidEmail("test@feup.pt")).toBe(true);
-    expect(isValidEmail("test@gmail.com")).toBe(true);
+    expect(isValidEmail("test@up.pt")).toBe(true);
+    expect(isValidEmail("user.name@up.pt")).toBe(true);
+    expect(isValidEmail("test@gmail.com")).toBe(false);
+    expect(isValidEmail("test@feup.pt")).toBe(false);
     expect(isValidEmail("invalid-email")).toBe(false);
-    expect(isValidEmail("test@com")).toBe(false);
     expect(isValidEmail("")).toBe(false);
   });
 

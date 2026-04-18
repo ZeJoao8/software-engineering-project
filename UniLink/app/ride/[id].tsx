@@ -21,7 +21,7 @@ import { formatDate } from "../../utils/date";
 import { getRoute } from "../../utils/routing";
 import type { User } from "../../types/User";
 
-import { Picker } from "@react-native-picker/picker";
+import DropDownPicker from "react-native-dropdown-picker";
 
 import { components } from "../../styles/components";
 import { layout } from "../../styles/layout";
@@ -40,10 +40,13 @@ export default function RideDetails() {
     id ? getRides().find(r => r.id === id) : undefined;
 
   const [editingCar, setEditingCar] = useState(false);
-  const [selectedCarId, setSelectedCarId] = useState<string | undefined>(
-    ride?.carId
+  const [selectedCarId, setSelectedCarId] = useState<string | null>(
+    ride?.carId ?? null
   );
+  const [carDropdownOpen, setCarDropdownOpen] = useState(false);
   const [, setVersion] = useState(0);
+
+  if (!ride) return null;
 
   useEffect(() => {
     setSelectedCarId(ride?.carId);
@@ -58,8 +61,6 @@ export default function RideDetails() {
       unsubReviews();
     };
   }, []);
-
-  if (!ride) return null;
 
   const r = ride;
   const user = getCurrentUser();
@@ -76,13 +77,9 @@ export default function RideDetails() {
     .map(pid => getUserById(pid))
     .filter((p): p is User => p !== null);
 
-  const isDriver =
-    r.driverId === activeUser.uid ||
-    r.driverId === activeUser.email;
+  const isDriver = r.driverId === activeUser.uid;
 
-  const joined =
-    r.passengers.includes(activeUser.uid) ||
-    r.passengers.includes(activeUser.email);
+  const joined = r.passengers.includes(activeUser.uid);
 
   const rideDate = new Date(r.departureDateTime);
   const now = new Date();
@@ -97,14 +94,10 @@ export default function RideDetails() {
     !hasReviewForRide(
       r.id,
       activeUser.uid,
-      driver?.uid ?? r.driverId,
-      activeUser.email,
-      r.driverId
+      driver?.uid ?? r.driverId
     );
 
-  const driverCars = cars.filter(
-    c => c.ownerId === activeUser.uid || c.ownerId === activeUser.email
-  );
+  const driverCars = cars.filter(c => c.ownerId === activeUser.uid);
 
   const allReviews = getReviews();
 
@@ -112,8 +105,8 @@ export default function RideDetails() {
     review.rideId === r.id &&
     review.comment.trim().length > 0 &&
     (
-      (isDriver && (review.revieweeId === activeUser.uid || review.revieweeId === activeUser.email)) ||
-      (joined && (review.reviewerId === activeUser.uid || review.reviewerId === activeUser.email))
+      (isDriver && review.revieweeId === activeUser.uid) ||
+      (joined && review.reviewerId === activeUser.uid)
     )
   );
 
@@ -149,7 +142,7 @@ export default function RideDetails() {
   function hasEverReportedUser(targetId: string) {
     return allReports.some(
       report =>
-        (report.reporterId === activeUser.uid || report.reporterId === activeUser.email) &&
+        report.reporterId === activeUser.uid &&
         report.reportedUserId === targetId
     );
   }
@@ -159,14 +152,7 @@ export default function RideDetails() {
       r.completed &&
       (isDriver || joined) &&
       targetId !== activeUser.uid &&
-      targetId !== activeUser.email &&
-      !hasReportForRide(
-        r.id,
-        activeUser.uid,
-        targetId,
-        activeUser.email,
-        targetId
-      )
+      !hasReportForRide(r.id, activeUser.uid, targetId)
     );
   }
 
@@ -209,9 +195,7 @@ export default function RideDetails() {
           await updateRide({
             ...r,
             availableSeats: Math.min(r.availableSeats + 1, r.totalSeats),
-            passengers: r.passengers.filter(
-              p => p !== activeUser.uid && p !== activeUser.email
-            ),
+            passengers: r.passengers.filter(p => p !== activeUser.uid),
           });
           router.replace("/(tabs)/myRides");
         },
@@ -406,28 +390,75 @@ export default function RideDetails() {
         </View>
 
         {/* CAR */}
-        <View style={components.card}>
+        <View style={[components.card, { zIndex: editingCar ? 100 : 1 }]}>
           <Text style={layout.subtitle}>Car</Text>
 
-          {car ? (
+          {!editingCar ? (
             <>
-              <Text>{car.model}</Text>
-              <Text style={{ color: colors.textLight }}>{car.color}</Text>
-              <Text style={{ fontWeight: "600", paddingBottom: spacing.sm }}>
-                {car.licensePlate}
-              </Text>
+              {car ? (
+                <>
+                  <Text>{car.model}</Text>
+                  <Text style={{ color: colors.textLight }}>{car.color}</Text>
+                  <Text style={{ fontWeight: "600", paddingBottom: spacing.sm }}>
+                    {car.licensePlate}
+                  </Text>
 
-              {isDriver && !rideStarted && !r.completed && !editingCar && driverCars.length > 1 && (
-                <Pressable
-                  style={components.outlineButton}
-                  onPress={() => setEditingCar(true)}
-                >
-                  <Text style={components.outlineButtonText}>Change car</Text>
-                </Pressable>
+                  {isDriver && !rideStarted && !r.completed && driverCars.length > 1 && (
+                    <Pressable
+                      style={components.outlineButton}
+                      onPress={() => setEditingCar(true)}
+                    >
+                      <Text style={components.outlineButtonText}>Change car</Text>
+                    </Pressable>
+                  )}
+                </>
+              ) : (
+                <Text style={{ color: colors.textLight }}>Vehicle unavailable</Text>
               )}
             </>
           ) : (
-            <Text style={{ color: colors.textLight }}>Vehicle unavailable</Text>
+            <View>
+              <Text style={{ marginBottom: spacing.xs, fontWeight: "500" }}>Select new car</Text>
+              <View style={components.pickerWrapper}>
+                <DropDownPicker
+                  open={carDropdownOpen}
+                  value={selectedCarId}
+                  items={driverCars.map(c => ({
+                    label: `${c.model} (${c.licensePlate})`,
+                    value: c.id
+                  }))}
+                  setOpen={setCarDropdownOpen}
+                  setValue={setSelectedCarId}
+                  placeholder="Select car"
+                  style={components.dropdown}
+                  dropDownContainerStyle={components.dropdownContainer}
+                  textStyle={components.dropdownText}
+                  placeholderStyle={components.dropdownPlaceholder}
+                  listMode="SCROLLVIEW"
+                  scrollViewProps={{ nestedScrollEnabled: true }}
+                />
+              </View>
+
+              <View style={{ height: spacing.md }} />
+
+              <Pressable 
+                style={components.button} 
+                onPress={() => {
+                  if (selectedCarId) changeCar();
+                }}
+              >
+                <Text style={components.buttonText}>Save car</Text>
+              </Pressable>
+
+              <View style={{ height: spacing.xs }} />
+
+              <Pressable
+                style={components.outlineButton}
+                onPress={() => setEditingCar(false)}
+              >
+                <Text style={components.outlineButtonText}>Cancel</Text>
+              </Pressable>
+            </View>
           )}
         </View>
 
@@ -566,42 +597,6 @@ export default function RideDetails() {
           </View>
         )}
 
-        {/* CHANGE CAR */}
-        {editingCar && (
-          <View style={components.card}>
-            <Text style={layout.subtitle}>Select new car</Text>
-
-            <View style={components.pickerWrapper}>
-              <Picker
-                selectedValue={selectedCarId}
-                onValueChange={setSelectedCarId}
-              >
-                {driverCars.map(c => (
-                  <Picker.Item
-                    key={c.id}
-                    label={`${c.model} (${c.licensePlate})`}
-                    value={c.id}
-                  />
-                ))}
-              </Picker>
-            </View>
-
-            <View style={{ height: spacing.sm }} />
-
-            <Pressable style={components.button} onPress={changeCar}>
-              <Text style={components.buttonText}>Save car</Text>
-            </Pressable>
-
-            <View style={{ height: spacing.sm }} />
-
-            <Pressable
-              style={components.outlineButton}
-              onPress={() => setEditingCar(false)}
-            >
-              <Text style={components.outlineButtonText}>Cancel</Text>
-            </Pressable>
-          </View>
-        )}
 
         {/* ACTIONS */}
         {(isDriver || joined) && (

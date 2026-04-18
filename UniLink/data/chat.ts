@@ -55,6 +55,12 @@ export function subscribeToRideChat(
 }
 
 export async function sendMessage(message: Message) {
+  const user = getCurrentUser();
+  if (!user || message.senderId !== user.uid) {
+    console.error("Security violation: Sender ID mismatch");
+    return;
+  }
+
   try {
     await setDoc(doc(db, "chat_messages", message.id), message);
   } catch (error) {

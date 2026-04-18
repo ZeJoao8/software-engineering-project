@@ -71,16 +71,8 @@ export function getCars() {
  return cars;
 }
 
-export function getUserCars(
- userId: string,
- legacyId?: string
-) {
- return cars.filter(
-  car =>
-   car.ownerId === userId ||
-   (!!legacyId &&
-    car.ownerId === legacyId)
- );
+export function getUserCars(userId: string) {
+ return cars.filter(car => car.ownerId === userId);
 }
 
 export function subscribeToCarsChanges(

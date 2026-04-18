@@ -45,13 +45,9 @@ export function filterRides(
 
 
     // 2. user restrictions
-    const isNotDriver =
-      r.driverId !== user.uid &&
-      r.driverId !== user.email;
+    const isNotDriver = r.driverId !== user.uid;
 
-    const isNotPassenger =
-      !r.passengers.includes(user.uid) &&
-      !r.passengers.includes(user.email);
+    const isNotPassenger = !r.passengers.includes(user.uid);
 
 
     if (

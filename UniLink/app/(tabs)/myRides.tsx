@@ -71,19 +71,13 @@ useEffect(()=>{
 
  if(!user) return null;
 
- const driverRides = sortByDateDesc(
-   rides.filter(
-   r =>
-    r.driverId === user.uid ||
-    r.driverId === user.email
-  ));
+  const driverRides = sortByDateDesc(
+    rides.filter(r => r.driverId === user.uid)
+  );
 
- const passengerRides = sortByDateDesc(
-   rides.filter(
-   r =>
-    r.passengers.includes(user.uid) ||
-    r.passengers.includes(user.email)
-  ));
+  const passengerRides = sortByDateDesc(
+    rides.filter(r => r.passengers.includes(user.uid))
+  );
 
 return(
 

@@ -32,7 +32,6 @@ yarn-error.*
 *.pem
 
 # local env files
-# Keep the shared Expo public config versioned; ignore only machine-specific overrides.
 .env*.local
 
 # typescript

@@ -41,6 +41,7 @@ import { components } from "../../styles/components";
 import { forms } from "../../styles/forms";
 import { layout } from "../../styles/layout";
 import { colors, spacing } from "../../styles/theme";
+import { calculateUserCO2Saved } from "../../utils/sustainability";
 
 export default function Profile() {
 
@@ -97,30 +98,16 @@ export default function Profile() {
 
   const activeUser = user;
 
-  const userCars =
-    getUserCars(
-      activeUser.uid,
-      activeUser.email
-    );
+  const userCars = getUserCars(activeUser.uid);
 
   const hasDrivenRide =
     getRides().some(
-      ride =>
-        ride.driverId === activeUser.uid ||
-        ride.driverId === activeUser.email
+    ride => ride.driverId === activeUser.uid
     );
 
-  const userReviews =
-    getReviewsForUser(
-      activeUser.uid,
-      activeUser.email
-    );
+  const userReviews = getReviewsForUser(activeUser.uid);
 
-  const averageRating =
-    getAverageRatingForUser(
-      activeUser.uid,
-      activeUser.email
-    );
+  const averageRating = getAverageRatingForUser(activeUser.uid);
 
   // Show rating if has driven a ride AND has reviews (same logic as public profile)
   const showRating =
@@ -225,11 +212,7 @@ export default function Profile() {
       Alert.alert("Invalid plate format");
       return;
     }
-    const duplicate =
-      getUserCars(
-        activeUser.uid,
-        activeUser.email
-      )
+    const duplicate = getUserCars(activeUser.uid)
         .some(
           c =>
             c.licensePlate ===
@@ -408,26 +391,7 @@ export default function Profile() {
           <Text style={{ fontSize: 32 }}>🌳</Text>
           <View>
             <Text style={{ fontSize: 20, fontWeight: "700", color: colors.primary }}>
-              {(() => {
-                const rides = getRides();
-                const CO2_PER_KM = 0.12;
-                let totalCO2 = 0;
-
-                rides.forEach(r => {
-                  if (!r.completed || !r.distanceKm) return;
-
-                  const isDriver = r.driverId === activeUser.uid || r.driverId === activeUser.email;
-                  const isPassenger = r.passengers.includes(activeUser.uid) || r.passengers.includes(activeUser.email);
-
-                  if (isDriver && r.passengers.length > 0) {
-                    totalCO2 += (r.distanceKm * CO2_PER_KM) * r.passengers.length;
-                  } else if (isPassenger) {
-                    totalCO2 += (r.distanceKm * CO2_PER_KM);
-                  }
-                });
-
-                return totalCO2.toFixed(2);
-              })()} kg
+              {calculateUserCO2Saved(getRides(), activeUser.uid).toFixed(2)} kg
             </Text>
             <Text style={{ color: colors.textLight, fontSize: 13 }}>Total CO₂ saved</Text>
           </View>

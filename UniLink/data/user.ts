@@ -188,11 +188,7 @@ export function getUsers() {
 }
 
 export function getUserById(id: string) {
- return users.find(
-  user =>
-   user.uid === id ||
-   user.email === id
- ) ?? null;
+ return users.find(user => user.uid === id) ?? null;
 }
 
 export function getCurrentUser() {
