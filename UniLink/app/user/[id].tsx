@@ -10,12 +10,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 import { getUserById } from "../../data/user";
-import { getUserCars } from "../../data/cars";
+import { fetchCarById } from "../../data/cars";
+import type { Car } from "../../types/Car";
 import { getRides, subscribeToRidesChanges } from "../../data/rides";
 import {
-  getAverageRatingForUser,
-  getReviewsForUser,
+  fetchReviewsForUser,
   subscribeToReviewsChanges,
+  type Review,
 } from "../../data/reviews";
 import {
   getReportsByReporter,
@@ -42,6 +43,19 @@ export default function PublicProfile() {
 
   const [showReports, setShowReports] = useState(false);
   const [, setVersion] = useState(0);
+  const [userReviews, setUserReviews] = useState<Review[]>([]);
+  const [userCars, setUserCars] = useState<Car[]>([]);
+
+  useEffect(() => {
+    if (!id) return;
+    // Fetch reviews and cars for the target user on-demand
+    fetchReviewsForUser(id).then(setUserReviews);
+    // Cars: fetch only the car IDs we know from their rides
+    const targetRides = getRides().filter(r => r.driverId === id && r.carId);
+    const uniqueCarIds = [...new Set(targetRides.map(r => r.carId))];
+    Promise.all(uniqueCarIds.map(fetchCarById))
+      .then(results => setUserCars(results.filter((c): c is Car => c !== null)));
+  }, [id]);
 
   useEffect(() => {
     const rerender = () => setVersion(v => v + 1);
@@ -57,14 +71,12 @@ export default function PublicProfile() {
 
   if (!user || !activeUser) return null;
 
-  const cars = getUserCars(user.uid);
-
   const hasDrivenRide = getRides().some(
     ride => ride.driverId === user.uid
   );
 
-  const userReviews = getReviewsForUser(user.uid);
-  const averageRating = getAverageRatingForUser(user.uid);
+  const averageRating = userReviews.length === 0 ? 0 :
+    Number((userReviews.reduce((s, r) => s + r.rating, 0) / userReviews.length).toFixed(1));
   const showRating = hasDrivenRide && userReviews.length > 0;
 
   // Reports this user made on the target
@@ -147,10 +159,10 @@ export default function PublicProfile() {
       <View style={components.card}>
         <Text style={layout.subtitle}>Cars</Text>
 
-        {cars.length === 0 ? (
+        {userCars.length === 0 ? (
           <Text style={{ color: colors.textLight }}>No cars</Text>
         ) : (
-          cars.map(c => (
+          userCars.map(c => (
             <View key={c.id} style={{ marginBottom: spacing.sm }}>
               <Text style={{ fontWeight: "500" }}>{c.model}</Text>
               <Text style={{ color: colors.textLight }}>{c.color}</Text>

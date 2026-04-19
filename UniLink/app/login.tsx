@@ -164,7 +164,7 @@ export default function Login(){
 
   Alert.alert(
     "Weak password",
-    "Password must have at least 4 characters"
+    "Password must have at least 8 characters"
   );
 
   return;

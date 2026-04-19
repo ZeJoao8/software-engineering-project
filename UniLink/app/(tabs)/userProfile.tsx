@@ -223,7 +223,7 @@ export default function Profile() {
       return;
     }
     await addCar({
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       model: model.trim(),
       color: color.trim(),
       licensePlate: formattedPlate,

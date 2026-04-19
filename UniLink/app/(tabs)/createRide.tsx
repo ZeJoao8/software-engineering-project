@@ -6,7 +6,8 @@ import {
   Text,
   TextInput,
   Switch,
-  Pressable
+  Pressable,
+  Alert
 } from "react-native";
 
 import { layout } from "../../styles/layout";
@@ -162,36 +163,36 @@ export default function CreateRide() {
       !destination.trim() ||
       !car
     ) {
-      alert("Fill all fields");
+      Alert.alert("Error", "Fill all fields");
       return;
     }
 
     if (!originCoords || !destinationCoords) {
-      alert("Please select a real location.");
+      Alert.alert("Error", "Please select a real location.");
       return;
     }
 
     if (origin.trim().toLowerCase() ===
       destination.trim().toLowerCase()
     ) {
-      alert("Origin and destination must differ");
+      Alert.alert("Error", "Origin and destination must differ");
       return;
     }
 
     const seatsNumber = Number(seats);
 
     if (!Number.isInteger(seatsNumber)) {
-      alert("Seats must be integer");
+      Alert.alert("Error", "Seats must be integer");
       return;
     }
 
     if (seatsNumber < 1) {
-      alert("Must allow at least 1 passenger");
+      Alert.alert("Error", "Must allow at least 1 passenger");
       return;
     }
 
     if (seatsNumber > car.seatCapacity - 1) {
-      alert(`Max passengers ${car.seatCapacity - 1}`);
+      Alert.alert("Error", `Max passengers ${car.seatCapacity - 1}`);
       return;
     }
 
@@ -205,13 +206,13 @@ export default function CreateRide() {
       );
 
     if (departure < new Date()) {
-      alert("Cannot create ride in past");
+      Alert.alert("Error", "Cannot create ride in past");
       return;
     }
 
     await addRide({
 
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       driverId: activeUser.uid,
       carId: car.id,
       origin: origin.trim(),
@@ -226,7 +227,7 @@ export default function CreateRide() {
       ...(destinationCoords && { destinationCoords }),
     });
 
-    alert("Ride created");
+    Alert.alert("Success", "Ride created");
 
     router.replace("/(tabs)/myRides");
 

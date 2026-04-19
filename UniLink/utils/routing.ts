@@ -1,8 +1,22 @@
-/**
- * Routing & Geocoding utilities
- * Uses OSRM (free, no API key) for route calculation
- * Uses Nominatim (free, no API key) for reverse geocoding
- */
+export interface NominatimAddress {
+  amenity?: string;
+  building?: string;
+  road?: string;
+  house_number?: string;
+  suburb?: string;
+  neighbourhood?: string;
+  city?: string;
+  town?: string;
+  [key: string]: string | undefined;
+}
+
+export interface NominatimResponseItem {
+  lat: string;
+  lon: string;
+  display_name?: string;
+  address?: NominatimAddress;
+  error?: string;
+}
 
 export interface Coordinates {
   latitude: number;
@@ -79,11 +93,12 @@ export async function reverseGeocode(
       },
     });
 
-    const data = await response.json();
+    const data = await response.json() as NominatimResponseItem;
 
-    if (data.error) return "Local desconhecido";
+    if (data.error) return "Unknown place";
 
     const addr = data.address;
+    if (!addr) return data.display_name?.split(",").slice(0, 3).join(",") ?? "Unknown place";
 
     // Build a useful short name
     const parts: string[] = [];
@@ -107,10 +122,10 @@ export async function reverseGeocode(
     return parts.length > 0
       ? parts.join(", ")
       : data.display_name?.split(",").slice(0, 3).join(",") ??
-          "Local desconhecido";
+          "Unknown place";
   } catch (error) {
     console.error("Geocode error:", error);
-    return "Local desconhecido";
+    return "Unknown place";
   }
 }
 
@@ -143,11 +158,11 @@ export async function searchPlaces(
       },
     });
 
-    const data = await response.json();
+    const data = await response.json() as NominatimResponseItem[];
 
     if (!Array.isArray(data)) return [];
 
-    return data.map((item: any) => {
+    return data.map((item) => {
       const addr = item.address || {};
 
       const parts: string[] = [];
@@ -209,7 +224,7 @@ export async function forwardGeocode(
       },
     });
 
-    const data = await response.json();
+    const data = await response.json() as NominatimResponseItem[];
 
     if (!data.length) return null;
 

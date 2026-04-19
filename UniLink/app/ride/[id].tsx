@@ -13,7 +13,8 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 
 import { getRides, updateRide, deleteRide } from "../../data/rides";
 import { getCurrentUser, getUserById } from "../../data/user";
-import { getCars } from "../../data/cars";
+import { getCars, fetchCarById } from "../../data/cars";
+import type { Car } from "../../types/Car";
 import { hasReviewForRide, getReviews } from "../../data/reviews";
 import { hasReportForRide, getReports, subscribeToReportsChanges } from "../../data/reports";
 import { subscribeToReviewsChanges } from "../../data/reviews";
@@ -45,11 +46,17 @@ export default function RideDetails() {
   );
   const [carDropdownOpen, setCarDropdownOpen] = useState(false);
   const [, setVersion] = useState(0);
+  const [rideCar, setRideCar] = useState<Car | null>(null);
 
-  if (!ride) return null;
-
+  // Hooks must come before any conditional return (Rules of Hooks)
   useEffect(() => {
-    setSelectedCarId(ride?.carId);
+    setSelectedCarId(ride?.carId ?? null);
+  }, [ride?.carId]);
+
+  // Fetch the ride's car on-demand (the local cache only holds own cars now)
+  useEffect(() => {
+    if (!ride?.carId) return;
+    fetchCarById(ride.carId).then(setRideCar);
   }, [ride?.carId]);
 
   useEffect(() => {
@@ -62,15 +69,19 @@ export default function RideDetails() {
     };
   }, []);
 
+  // Early returns AFTER all hooks
+  if (!ride) return null;
+
   const r = ride;
   const user = getCurrentUser();
   if (!user) return null;
 
   const activeUser = user;
-  const cars = getCars();
+  // getCars() now only contains the current user's own cars (filtered subscription)
+  const driverCars = getCars();
 
   const driver = getUserById(r.driverId);
-  const car = cars.find(c => c.id === r.carId);
+  const car = rideCar; // fetched on-demand via fetchCarById
 
   // Properly narrowed — no more non-null assertions on passenger items
   const passengers = ride.passengers
@@ -97,7 +108,7 @@ export default function RideDetails() {
       driver?.uid ?? r.driverId
     );
 
-  const driverCars = cars.filter(c => c.ownerId === activeUser.uid);
+
 
   const allReviews = getReviews();
 
