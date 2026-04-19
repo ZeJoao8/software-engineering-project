@@ -32,6 +32,7 @@ import {
   doPasswordsMatch,
   isPasswordStrong,
   isValidEmail,
+  isUniversityEmail
 } from "../utils/validation";
 
 
@@ -139,14 +140,19 @@ export default function Login(){
    return;
   }
 
-
   if(!isValidEmail(email)){
+   Alert.alert(
+    "Invalid email",
+    "Incorret email format"
+   );
+   return;
+  }
 
+  if(!isUniversityEmail(email)){
    Alert.alert(
     "Invalid email",
     "Email must be from @up.pt (e.g. up123456789@up.pt)"
    );
-
    return;
 
   }

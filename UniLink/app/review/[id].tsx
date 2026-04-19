@@ -20,6 +20,7 @@ import {
 import { getRides } from "../../data/rides";
 import { getCurrentUser, getUserById } from "../../data/user";
 import { addReview, hasReviewForRide } from "../../data/reviews";
+import { generateId } from "../../lib/firebase";
 
 import { components } from "../../styles/components";
 import { layout } from "../../styles/layout";
@@ -96,7 +97,7 @@ export default function ReviewRide() {
     setSubmitting(true);
 
     await addReview({
-      id: Date.now().toString(),
+      id: generateId("reviews"),
       rideId: ride.id,
       reviewerId: activeUser.uid,
       revieweeId: targetUser.uid,

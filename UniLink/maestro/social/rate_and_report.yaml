@@ -1,0 +1,39 @@
+appId: host.exp.exponent
+---
+- runFlow: ../subflows/launch.yaml
+- runFlow: ../subflows/login.yaml
+
+# Vai à aba de histórico (assumindo que a viagem já foi dada como "Completed")
+- tapOn:
+    id: myRidesTab
+- swipe:
+    direction: DOWN
+
+# O botão de review geralmente só aparece se a viagem estiver completada
+# Vamos assumir que há um botão "Rate Driver" ou que abre a viagem e faz review
+- tapOn: "Maestro Origin → Maestro Destination"
+- waitForAnimationToEnd
+
+# Avaliar
+- runFlow:
+    when:
+      visible: "Rate Driver"
+    commands:
+      - tapOn: "Rate Driver"
+      # Selecionar 5 estrelas (o componente de rating costuma apanhar a tapOn do número)
+      - tapOn:
+          id: star-5
+      - tapOn:
+          id: submitReviewButton
+      - tapOn: "OK"
+
+# Reportar
+- tapOn: "Report Driver"
+- tapOn:
+    id: reportReasonInput
+- inputText: "Maestro automated report test"
+- pressKey: Enter
+- tapOn:
+    id: submitReportButton
+- tapOn: "OK"
+- waitForAnimationToEnd

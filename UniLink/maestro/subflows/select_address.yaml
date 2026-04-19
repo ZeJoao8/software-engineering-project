@@ -1,0 +1,23 @@
+appId: host.exp.exponent
+---
+# Subflow reutilizável para selecionar uma morada usando o AddressAutocomplete.
+# Uso: chamar com os parâmetros corretos via runFlow.
+#
+# Parâmetros esperados (passados pelo runFlow pai):
+#   - FIELD_TEST_ID: testID do TextInput (ex: "createRideOriginInput")
+#   - SEARCH_TEXT: texto a pesquisar (ex: "FEUP, Porto")
+#
+# Usa extendedWaitUntil para aguardar o debounce (500ms) + chamada à API Nominatim.
+
+- tapOn:
+    id: ${FIELD_TEST_ID}
+- inputText: ${SEARCH_TEXT}
+# Aguarda até a primeira sugestão aparecer (debounce + API Nominatim)
+- extendedWaitUntil:
+    visible:
+      id: ${FIELD_TEST_ID}-suggestion-0
+    timeout: 8000
+# Clica na primeira sugestão que aparecer
+- tapOn:
+    id: ${FIELD_TEST_ID}-suggestion-0
+- waitForAnimationToEnd

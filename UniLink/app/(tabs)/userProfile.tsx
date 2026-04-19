@@ -21,6 +21,7 @@ import {
   deleteCar,
   subscribeToCarsChanges
 } from "../../data/cars";
+import { generateId } from "../../lib/firebase";
 
 import {
   getRides,
@@ -200,9 +201,9 @@ export default function Profile() {
     const seatsNumber = Number(seats);
     if (
       !Number.isInteger(seatsNumber) ||
-      seatsNumber <= 0
+      seatsNumber < 2 || seatsNumber > 9
     ) {
-      Alert.alert("Seats must be integer > 0");
+      Alert.alert("Invalid seat number","Seats must be integer between 2 and 9");
       return;
     }
     const formattedPlate =
@@ -223,7 +224,7 @@ export default function Profile() {
       return;
     }
     await addCar({
-      id: crypto.randomUUID(),
+      id: generateId("cars"),
       model: model.trim(),
       color: color.trim(),
       licensePlate: formattedPlate,

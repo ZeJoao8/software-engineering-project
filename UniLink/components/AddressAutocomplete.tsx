@@ -112,6 +112,7 @@ export default function AddressAutocomplete({
           {suggestions.map((item, index) => (
             <Pressable
               key={`${item.coords.latitude}-${item.coords.longitude}-${index}`}
+              testID={testID ? `${testID}-suggestion-${index}` : undefined}
               style={({ pressed }) => [
                 styles.suggestionItem,
                 index < suggestions.length - 1 && styles.suggestionBorder,

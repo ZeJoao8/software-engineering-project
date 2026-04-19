@@ -15,6 +15,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { getRides } from "../../data/rides";
 import { getCurrentUser, getUserById } from "../../data/user";
 import { subscribeToRideChat, sendMessage, type Message } from "../../data/chat";
+import { generateId } from "../../lib/firebase";
 
 import { colors, spacing, radius } from "../../styles/theme";
 
@@ -57,7 +58,7 @@ export default function RideChat() {
     setInputText("");
 
     const newMessage: Message = {
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+      id: generateId("chat_messages"),
       rideId: ride.id,
       senderId: activeUser.uid,
       text,

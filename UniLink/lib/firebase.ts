@@ -7,7 +7,7 @@ import {
  getReactNativePersistence,
  initializeAuth,
 } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, collection, doc } from "firebase/firestore";
 
 const firebaseConfig = {
  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY ?? "",
@@ -52,8 +52,11 @@ const auth =
 
 const db = getFirestore(app);
 
+const generateId = (col: string) => doc(collection(db, col)).id;
+
 export {
  app,
  auth,
  db,
+ generateId,
 };

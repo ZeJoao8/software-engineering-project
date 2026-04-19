@@ -28,6 +28,7 @@ import {
   getUserCars,
   subscribeToCarsChanges
 } from "../../data/cars";
+import { generateId } from "../../lib/firebase";
 
 import {
   getCurrentUser
@@ -212,7 +213,7 @@ export default function CreateRide() {
 
     await addRide({
 
-      id: crypto.randomUUID(),
+      id: generateId("rides"),
       driverId: activeUser.uid,
       carId: car.id,
       origin: origin.trim(),

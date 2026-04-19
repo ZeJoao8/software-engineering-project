@@ -17,6 +17,7 @@ import {
 import { getRides } from "../../data/rides";
 import { getCurrentUser, getUserById } from "../../data/user";
 import { addReport, hasReportForRide } from "../../data/reports";
+import { generateId } from "../../lib/firebase";
 
 import { components } from "../../styles/components";
 import { forms } from "../../styles/forms";
@@ -99,7 +100,7 @@ export default function ReportUser() {
     setSubmitting(true);
 
     await addReport({
-      id: Date.now().toString(),
+      id: generateId("reports"),
       rideId: ride.id,
       reporterId: activeUser.uid,
       reportedUserId: targetUser.uid,
