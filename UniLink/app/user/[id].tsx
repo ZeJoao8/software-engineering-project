@@ -4,6 +4,7 @@ import {
   View,
   Text,
   Pressable,
+  ScrollView,
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -95,8 +96,12 @@ export default function PublicProfile() {
 
   return (
     <SafeAreaView style={layout.screen}>
-
-      <Text
+      <ScrollView
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: spacing.xl }}
+      >
+        <Text
         style={{
           color: colors.primary,
           marginBottom: spacing.sm,
@@ -228,6 +233,7 @@ export default function PublicProfile() {
         </View>
       )}
 
+      </ScrollView>
     </SafeAreaView>
   );
 }
