@@ -6,7 +6,6 @@ import {
  TextInput,
  ScrollView,
  Alert,
- Pressable,
  ActivityIndicator
 } from "react-native";
 
@@ -21,17 +20,19 @@ import {
 
 import { useRouter } from "expo-router";
 
-import { Picker } from "@react-native-picker/picker";
+import DropDownPicker from "react-native-dropdown-picker";
 
 import { layout } from "../styles/layout";
 import { forms } from "../styles/forms";
 import { components } from "../styles/components";
+import { Button } from "../components/Button";
 import { spacing, colors } from "../styles/theme";
 import {
   areRequiredFieldsFilled,
   doPasswordsMatch,
   isPasswordStrong,
   isValidEmail,
+  isUniversityEmail
 } from "../utils/validation";
 
 
@@ -61,6 +62,14 @@ export default function Login(){
 
  const [ready, setReady] =
   useState(isAuthReady());
+
+  const [genderDropdownOpen, setGenderDropdownOpen] =
+ useState(false);
+
+  const genderItems = [
+  { label: "Male", value: "Male" },
+  { label: "Female", value: "Female" }
+  ];
 
  useEffect(() => {
   let mounted = true;
@@ -131,14 +140,19 @@ export default function Login(){
    return;
   }
 
-
   if(!isValidEmail(email)){
-
    Alert.alert(
     "Invalid email",
-    "Enter valid email format"
+    "Incorrect email format"
    );
+   return;
+  }
 
+  if(!isUniversityEmail(email)){
+   Alert.alert(
+    "Invalid email",
+    "Email must be from @up.pt (e.g. up123456789@up.pt)"
+   );
    return;
 
   }
@@ -156,7 +170,7 @@ export default function Login(){
 
   Alert.alert(
     "Weak password",
-    "Password must have at least 4 characters"
+    "Password must have at least 8 characters"
   );
 
   return;
@@ -281,28 +295,35 @@ export default function Login(){
 
 <View style={components.pickerWrapper}>
 
-<Picker
- selectedValue={gender}
- onValueChange={setGender}
- testID="genderPicker"
- dropdownIconColor={colors.primary}
- style={{
-  color:colors.primary,
-  fontWeight:"600"
- }}
->
+  <DropDownPicker
+  open={genderDropdownOpen}
+  value={gender}
+  items={genderItems}
 
-<Picker.Item
- label="Male"
- value="Male"
-/>
+  setOpen={setGenderDropdownOpen}
+  setValue={setGender}
 
-<Picker.Item
- label="Female"
- value="Female"
-/>
+  placeholder="Select gender"
+  testID="genderPicker"
 
-</Picker>
+  style={components.dropdown}
+
+  dropDownContainerStyle={
+    components.dropdownContainer
+  }
+
+  textStyle={components.dropdownText}
+
+  placeholderStyle={
+    components.dropdownPlaceholder
+  }
+
+  listMode="SCROLLVIEW"
+
+  scrollViewProps={{
+    nestedScrollEnabled: true
+  }}
+  />
 
 </View>
 
@@ -373,48 +394,34 @@ export default function Login(){
 <View style={{height:spacing.md}} />
 
 
-<Pressable style={components.button} testID="authSubmitButton"
+<Button testID="authSubmitButton"
  onPress={
   registerMode
    ? register
    : login
  }
- >
-
-<Text
- style={components.buttonText}
->
-
-{loading
- ? "LOADING..."
- : registerMode
-   ? "CREATE ACCOUNT"
-   : "LOGIN"}
-
-</Text>
-
-</Pressable>
+ label={loading
+  ? "LOADING..."
+  : registerMode
+    ? "CREATE ACCOUNT"
+    : "LOGIN"}
+ />
 
 
 
 <View style={{height:spacing.sm}} />
 
 
-<Pressable
- style={components.outlineButton}
+<Button
+ outline
  testID="authModeToggleButton"
  onPress={()=>
   setRegisterMode(!registerMode)
  }
->
-<Text
- style={components.outlineButtonText}
->
-{registerMode
- ? "Already have account?"
- : "Create account"}
-</Text>
-</Pressable>
+ label={registerMode
+  ? "Already have account?"
+  : "Create account"}
+/>
 
 
 {!registerMode && (

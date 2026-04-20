@@ -1,0 +1,21 @@
+appId: host.exp.exponent
+---
+# Subflow reutilizável para fazer login com a conta de teste.
+# Assume que o ecrã de Login está visível quando este flow é chamado.
+
+- tapOn:
+    id: loginEmailInput
+- inputText: "maria@feup.pt"
+- pressKey: Enter
+
+- tapOn:
+    id: loginPasswordInput
+- eraseText: 10
+- inputText: "123456"
+- pressKey: Enter
+
+- tapOn:
+    id: authSubmitButton
+
+- waitForAnimationToEnd
+- assertVisible: "Search rides"

@@ -4,9 +4,12 @@ import {
  collection,
  deleteDoc,
  doc,
+ getDoc,
  onSnapshot,
+ query,
  type Unsubscribe,
  setDoc,
+ where,
 } from "firebase/firestore";
 
 import { db } from "../lib/firebase";
@@ -49,8 +52,13 @@ function syncCarsWithAuth() {
   return;
  }
 
+ const user = getCurrentUser()!;
+
  unsubscribeCarsSnapshot = onSnapshot(
-  collection(db, "cars"),
+  query(
+   collection(db, "cars"),
+   where("ownerId", "==", user.uid)
+  ),
   snapshot => {
    cars = snapshot.docs.map(document =>
     document.data() as Car
@@ -71,16 +79,19 @@ export function getCars() {
  return cars;
 }
 
-export function getUserCars(
- userId: string,
- legacyId?: string
-) {
- return cars.filter(
-  car =>
-   car.ownerId === userId ||
-   (!!legacyId &&
-    car.ownerId === legacyId)
- );
+export function getUserCars(userId: string) {
+ return cars.filter(car => car.ownerId === userId);
+}
+
+/**
+ * Fetches a single car by ID directly from Firestore.
+ * Used to look up another driver's car (e.g. in ride details)
+ * without downloading the entire cars collection.
+ */
+export async function fetchCarById(carId: string): Promise<Car | null> {
+ const snapshot = await getDoc(doc(db, "cars", carId));
+ if (!snapshot.exists()) return null;
+ return snapshot.data() as Car;
 }
 
 export function subscribeToCarsChanges(

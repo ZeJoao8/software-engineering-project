@@ -1,35 +1,45 @@
 export const colors = {
 
- primary:"#16a34a",      
- primarySoft:"#dcfce7",  
- primaryLight:"#bbf7d0",
- primaryDark: "#15803d",
+ primary:     "#10b981", // modern emerald
+ primarySoft: "#ecfdf5", // extremely soft emerald
+ primaryLight:"#d1fae5",
+ primaryDark: "#047857",
 
- accent:"#22c55e",
+ accent: "#059669",
 
- background:"#f6fbf7",   
- card:"#fafffb",
+ background: "#f8fafc", // sleek premium slate-50 background
+ card:       "#ffffff", // pristine white cards
 
- text:"#1f2937",
- textLight:"#6b7280",
+ text:      "#0f172a", // slate-900 (softer than black)
+ textLight: "#64748b", // slate-500
 
- border:"#d1fae5",
+ border: "#e2e8f0", // slate-200
 
- danger:"#ef4444",
+ danger:     "#ef4444",
+ dangerSoft: "#fee2e2",
 
- women:"#ec4899"
+ women:     "#f43f5e", // modern rose
+ womenSoft: "#ffe4e6",
+
+ // Rating / feedback states
+ warning:      "#fef08a",
+ warningSoft:  "#fef2f2",
+ neutral:      "#f1f5f9",
+ neutralLight: "#e2e8f0",
 };
 
 export const spacing = {
- xs:4,
- sm:8,
- md:12,
- lg:16,
- xl:24
+ xs: 4,
+ sm: 8,
+ md: 16,
+ lg: 24,
+ xl: 32,
+ xxl: 48,
 };
 
 export const radius = {
- sm:6,
- md:10,
- lg:16
+ sm: 8,
+ md: 12,
+ lg: 20,
+ xl: 28,
 };

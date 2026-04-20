@@ -14,6 +14,11 @@
     },
 
     "android": {
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDDGp82PUKAPHpLneu2sMpos7gP0Q-_kFQ"
+        }
+      },
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

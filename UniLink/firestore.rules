@@ -1,0 +1,103 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function matchesCurrentUser(value) {
+      return signedIn() && value == request.auth.uid;
+    }
+
+    function isParticipant(rideId) {
+      let ride = get(/databases/$(database)/documents/rides/$(rideId)).data;
+      return ride.driverId == request.auth.uid || request.auth.uid in ride.passengers;
+    }
+
+    function currentUserIsPassenger(data) {
+      return request.auth.uid in data.passengers;
+    }
+
+    function passengerFieldsOnly() {
+      return request.resource.data
+        .diff(resource.data)
+        .affectedKeys()
+        .hasOnly(["passengers", "availableSeats"]);
+    }
+
+    function validSeatCount(data) {
+      return data.availableSeats >= 0 &&
+        data.availableSeats <= data.totalSeats;
+    }
+
+    function canJoinRide() {
+      return passengerFieldsOnly() &&
+        !currentUserIsPassenger(resource.data) &&
+        currentUserIsPassenger(request.resource.data) &&
+        request.resource.data.availableSeats == resource.data.availableSeats - 1 &&
+        request.resource.data.passengers.size() == resource.data.passengers.size() + 1 &&
+        validSeatCount(request.resource.data);
+    }
+
+    function canLeaveRide() {
+      return passengerFieldsOnly() &&
+        currentUserIsPassenger(resource.data) &&
+        !currentUserIsPassenger(request.resource.data) &&
+        request.resource.data.availableSeats == resource.data.availableSeats + 1 &&
+        request.resource.data.passengers.size() + 1 == resource.data.passengers.size() &&
+        validSeatCount(request.resource.data);
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn();
+      allow write: if signedIn() && userId == request.auth.uid;
+    }
+
+    match /cars/{carId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if matchesCurrentUser(resource.data.ownerId);
+    }
+
+    match /rides/{rideId} {
+      allow read: if signedIn();
+      allow create: if signedIn() &&
+        request.resource.data.driverId == request.auth.uid &&
+        validSeatCount(request.resource.data);
+      allow update: if signedIn() && (
+        matchesCurrentUser(resource.data.driverId) ||
+        canJoinRide() ||
+        canLeaveRide()
+      );
+      allow delete: if signedIn() && matchesCurrentUser(resource.data.driverId);
+    }
+
+    match /reviews/{reviewId} {
+      allow read: if signedIn();
+      allow create: if signedIn() &&
+        request.resource.data.reviewerId == request.auth.uid &&
+        isParticipant(request.resource.data.rideId);
+      allow update, delete: if matchesCurrentUser(resource.data.reviewerId);
+    }
+
+    match /reports/{reportId} {
+      allow read: if signedIn() && matchesCurrentUser(resource.data.reporterId);
+      allow create: if signedIn() &&
+        request.resource.data.reporterId == request.auth.uid &&
+        isParticipant(request.resource.data.rideId);
+    }
+
+    match /chat_messages/{messageId} {
+      allow read: if signedIn() && isParticipant(resource.data.rideId);
+      allow create: if signedIn() &&
+        request.resource.data.senderId == request.auth.uid &&
+        isParticipant(request.resource.data.rideId);
+        
+      allow delete: if signedIn() && (
+        matchesCurrentUser(resource.data.senderId) ||
+        request.auth.uid == get(/databases/$(database)/documents/rides/$(resource.data.rideId)).data.driverId
+      );
+    }
+  }
+}

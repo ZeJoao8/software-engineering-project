@@ -1,4 +1,5 @@
 import {
+ ScrollView,
  View,
  Text,
  FlatList
@@ -20,6 +21,9 @@ import {
  removeEmptyPastRides,
  subscribeToRidesChanges
 } from "../../data/rides";
+
+import { subscribeToReviewsChanges } from "../../data/reviews";
+import { subscribeToReportsChanges } from "../../data/reports";
 
 import {
  getCurrentUser
@@ -51,42 +55,49 @@ export default function MyRides(){
   );
 
 useEffect(()=>{
- const unsubscribe =
-  subscribeToRidesChanges(()=>{
-   setRides([...getRides()]);
-  });
+ const triggerRender = () => {
+  setRides([...getRides()]);
+ };
+
+ const unsubRides = subscribeToRidesChanges(triggerRender);
+ const unsubReviews = subscribeToReviewsChanges(triggerRender);
+ const unsubReports = subscribeToReportsChanges(triggerRender);
 
  const interval =
   setInterval(()=>{
    removeEmptyPastRides();
-   setRides([...getRides()]);
+   triggerRender();
   },10000);
 
  return () => {
-  unsubscribe();
+  unsubRides();
+  unsubReviews();
+  unsubReports();
   clearInterval(interval);
  };
 },[]);
 
  if(!user) return null;
 
- const driverRides = sortByDateDesc(
-   rides.filter(
-   r =>
-    r.driverId === user.uid ||
-    r.driverId === user.email
-  ));
+  const driverRides = sortByDateDesc(
+    rides.filter(r => r.driverId === user.uid)
+  );
 
- const passengerRides = sortByDateDesc(
-   rides.filter(
-   r =>
-    r.passengers.includes(user.uid) ||
-    r.passengers.includes(user.email)
-  ));
+  const passengerRides = sortByDateDesc(
+    rides.filter(r => r.passengers.includes(user.uid))
+  );
 
 return(
 
-<View style={layout.screen}>
+<ScrollView
+      style={layout.scrollScreen}
+      contentContainerStyle={{
+        flexGrow: 1,
+        padding: spacing.lg,
+        paddingBottom: spacing.xl
+      }}
+      keyboardShouldPersistTaps="handled"
+    >
 
 <Text style={layout.title}>
  My rides
@@ -94,7 +105,7 @@ return(
 
 
 {/* DRIVER */}
-<View style={components.card}>
+<View style={[components.card, { backgroundColor: colors.primarySoft, borderColor: colors.primaryLight, borderWidth: 1.5 }]}>
 
 <Text style={layout.subtitle}>
  Driver
@@ -145,7 +156,7 @@ return(
 
 
 {/* PASSENGER */}
-<View style={components.card}>
+<View style={[components.card, { backgroundColor: colors.neutral, borderColor: colors.neutralLight, borderWidth: 1.5 }]}>
 
 <Text style={layout.subtitle}>
  Passenger
@@ -192,7 +203,7 @@ return(
 </View>
 
 
-</View>
+</ScrollView>
 
 );
 }

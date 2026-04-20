@@ -1,20 +1,20 @@
 import {
-  View,
-  Text,
   FlatList,
+  Switch,
+  Text,
   TextInput,
-  Switch
+  View
 } from "react-native";
 
 import {
-  useRouter,
-  useFocusEffect
+  useFocusEffect,
+  useRouter
 } from "expo-router";
 
 import {
-  useState,
   useCallback,
-  useEffect
+  useEffect,
+  useState
 } from "react";
 
 import {
@@ -23,18 +23,21 @@ import {
   subscribeToRidesChanges
 } from "../../data/rides";
 
+import { subscribeToReviewsChanges } from "../../data/reviews";
+import { subscribeToReportsChanges } from "../../data/reports";
+
 import {
   getCurrentUser
 } from "../../data/user";
 
 import RideCard from "../../components/rideCard";
 
-import { formatDate, sortByDateAsc } from "../../utils/date";
-import { layout } from "../../styles/layout";
 import { components } from "../../styles/components";
-import { colors, spacing } from "../../styles/theme";
 import { forms } from "../../styles/forms";
-import { filterRides, FilterCriteria } from "../../utils/rideFilters";
+import { layout } from "../../styles/layout";
+import { colors, spacing } from "../../styles/theme";
+import { sortByDateAsc } from "../../utils/date";
+import { FilterCriteria, filterRides } from "../../utils/rideFilters";
 
 
 export default function Home() {
@@ -73,25 +76,29 @@ export default function Home() {
   );
 
   useEffect(() => {
-    const unsubscribe =
-      subscribeToRidesChanges(() => {
-        setNow(new Date());
-        setRides([...getRides()]);
-      });
+    const triggerRender = () => {
+      setNow(new Date());
+      setRides([...getRides()]);
+    };
+
+    const unsubRides = subscribeToRidesChanges(triggerRender);
+    const unsubReviews = subscribeToReviewsChanges(triggerRender);
+    const unsubReports = subscribeToReportsChanges(triggerRender);
 
     const interval =
       setInterval(() => {
         removeEmptyPastRides();
-        setNow(new Date());
-        setRides([...getRides()]);
+        triggerRender();
       }, 10000);
     return () => {
-      unsubscribe();
+      unsubRides();
+      unsubReviews();
+      unsubReports();
       clearInterval(interval);
     };
   }, []);
 
-  if(!user) return null;
+  if (!user) return null;
 
   const filters: FilterCriteria = {
     origin: originFilter,
@@ -116,7 +123,7 @@ export default function Home() {
 
 
       {/* FILTERS */}
-      <View style={components.card}>
+      <View style={[components.card, { backgroundColor: colors.neutral, borderColor: colors.neutralLight, borderWidth: 1.5 }]}>
 
         <Text style={layout.subtitle}>
           Origin
@@ -124,6 +131,7 @@ export default function Home() {
 
         <TextInput
           placeholder="Origin"
+          placeholderTextColor={colors.textLight}
           value={originFilter}
           onChangeText={setOriginFilter}
           style={forms.input}
@@ -139,6 +147,7 @@ export default function Home() {
 
         <TextInput
           placeholder="Destination"
+          placeholderTextColor={colors.textLight}
           value={destinationFilter}
           onChangeText={setDestinationFilter}
           style={forms.input}
@@ -154,6 +163,7 @@ export default function Home() {
 
         <TextInput
           placeholder="ex: 30/03 or 30/03 14:00"
+          placeholderTextColor={colors.textLight}
           value={dateFilter}
           onChangeText={setDateFilter}
           style={forms.input}
@@ -169,6 +179,7 @@ export default function Home() {
 
         <TextInput
           placeholder="1"
+          placeholderTextColor={colors.textLight}
           value={minSeats}
           keyboardType="numeric"
           onChangeText={setMinSeats}
@@ -194,16 +205,15 @@ export default function Home() {
               value={womenOnlyFilter}
               onValueChange={setWomenOnlyFilter}
               testID="searchWomenOnlySwitch"
-
               trackColor={{
-                false: "#d1d5db",
+                false: "#bcbdc1",
                 true: "#fbcfe8"
               }}
 
               thumbColor={
                 womenOnlyFilter
                   ? colors.women
-                  : "#f9fafb"
+                  : "#8b8e91"
               }
             />
 

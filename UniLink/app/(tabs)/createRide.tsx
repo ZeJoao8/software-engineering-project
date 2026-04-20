@@ -6,15 +6,17 @@ import {
   Text,
   TextInput,
   Switch,
-  Pressable
+  Pressable,
+  Alert
 } from "react-native";
 
 import { layout } from "../../styles/layout";
 import { forms } from "../../styles/forms";
+import { Button } from "../../components/Button";
 import { components } from "../../styles/components";
 import { colors, spacing } from "../../styles/theme";
 
-import { Picker } from "@react-native-picker/picker";
+import DropDownPicker from "react-native-dropdown-picker";
 
 import DateTimePicker
   from "@react-native-community/datetimepicker";
@@ -27,6 +29,7 @@ import {
   getUserCars,
   subscribeToCarsChanges
 } from "../../data/cars";
+import { generateId } from "../../lib/firebase";
 
 import {
   getCurrentUser
@@ -37,6 +40,11 @@ import {
   useRouter
 } from "expo-router";
 
+import LocationPickerMap from "../../components/LocationPickerMap";
+import RouteMap from "../../components/RouteMap";
+import AddressAutocomplete from "../../components/AddressAutocomplete";
+import type { Coordinates } from "../../utils/routing";
+
 export default function CreateRide() {
 
   const router = useRouter();
@@ -45,14 +53,7 @@ export default function CreateRide() {
     useState(getCurrentUser());
 
   const [cars, setCars] =
-    useState(
-      user
-        ? getUserCars(
-            user.uid,
-            user.email
-          )
-        : []
-    );
+    useState(user ? getUserCars(user.uid) : []);
 
   const [origin, setOrigin] =
     useState("");
@@ -60,10 +61,20 @@ export default function CreateRide() {
   const [destination, setDestination] =
     useState("");
 
+  const [originCoords, setOriginCoords] =
+    useState<Coordinates | null>(null);
+
+  const [destinationCoords, setDestinationCoords] =
+    useState<Coordinates | null>(null);
+
+  const [showOriginPicker, setShowOriginPicker] =
+    useState(false);
+
+  const [showDestinationPicker, setShowDestinationPicker] =
+    useState(false);
+
   const [selectedCar, setSelectedCar] =
-    useState<string | undefined>(
-      cars[0]?.id
-    );
+    useState<string | null>(cars[0]?.id ?? null);
 
   const [seats, setSeats] =
     useState("");
@@ -88,19 +99,20 @@ export default function CreateRide() {
   const [showTime, setShowTime] =
     useState(false);
 
+  const [carDropdownOpen, setCarDropdownOpen] = useState(false);
+
+  const carItems = cars.map(c => ({
+    label: `${c.model} (${c.licensePlate})`,
+    value: c.id
+  }));
+
   useFocusEffect(
 
     useCallback(() => {
 
       const current = getCurrentUser();
 
-      const userCars =
-        current
-          ? getUserCars(
-              current.uid,
-              current.email
-            )
-          : [];
+      const userCars = current ? getUserCars(current.uid) : [];
       setUser(current);
       setCars(userCars);
       setSelectedCar(
@@ -109,6 +121,8 @@ export default function CreateRide() {
 
       setOrigin("");
       setDestination("");
+      setOriginCoords(null);
+      setDestinationCoords(null);
       setSeats("");
       setWomenOnly(false);
 
@@ -119,13 +133,7 @@ export default function CreateRide() {
   useEffect(() => {
     return subscribeToCarsChanges(() => {
       const current = getCurrentUser();
-      const nextCars =
-        current
-          ? getUserCars(
-              current.uid,
-              current.email
-            )
-          : [];
+      const nextCars = current ? getUserCars(current.uid) : [];
 
       setCars(nextCars);
       setSelectedCar(currentSelected =>
@@ -157,31 +165,36 @@ export default function CreateRide() {
       !destination.trim() ||
       !car
     ) {
-      alert("Fill all fields");
+      Alert.alert("Error", "Fill all fields");
+      return;
+    }
+
+    if (!originCoords || !destinationCoords) {
+      Alert.alert("Error", "Please select a real location.");
       return;
     }
 
     if (origin.trim().toLowerCase() ===
       destination.trim().toLowerCase()
     ) {
-      alert("Origin and destination must differ");
+      Alert.alert("Error", "Origin and destination must differ");
       return;
     }
 
     const seatsNumber = Number(seats);
 
     if (!Number.isInteger(seatsNumber)) {
-      alert("Seats must be integer");
+      Alert.alert("Error", "Seats must be integer");
       return;
     }
 
     if (seatsNumber < 1) {
-      alert("Must allow at least 1 passenger");
+      Alert.alert("Error", "Must allow at least 1 passenger");
       return;
     }
 
     if (seatsNumber > car.seatCapacity - 1) {
-      alert(`Max passengers ${car.seatCapacity - 1}`);
+      Alert.alert("Error", `Max passengers ${car.seatCapacity - 1}`);
       return;
     }
 
@@ -195,13 +208,13 @@ export default function CreateRide() {
       );
 
     if (departure < new Date()) {
-      alert("Cannot create ride in past");
+      Alert.alert("Error", "Cannot create ride in past");
       return;
     }
 
     await addRide({
 
-      id: Date.now().toString(),
+      id: generateId("rides"),
       driverId: activeUser.uid,
       carId: car.id,
       origin: origin.trim(),
@@ -211,10 +224,12 @@ export default function CreateRide() {
       totalSeats: seatsNumber,
       womenOnly,
       passengers: [],
-      completed: false
+      completed: false,
+      ...(originCoords && { originCoords }),
+      ...(destinationCoords && { destinationCoords }),
     });
 
-    alert("Ride created");
+    Alert.alert("Success", "Ride created");
 
     router.replace("/(tabs)/myRides");
 
@@ -235,17 +250,11 @@ export default function CreateRide() {
           <Text style={{ marginBottom: spacing.md }}>
             You need to add a car before creating a ride.
           </Text>
-          <Pressable
-            style={components.button}
+          <Button
             testID="createRideGoToProfileButton"
             onPress={() => router.push("/(tabs)/userProfile")}
-          >
-            <Text
-              style={components.buttonText}
-            >
-              Go to profile
-            </Text>
-          </Pressable>
+            label="Go to profile"
+          />
         </View>
       </View>
     );
@@ -274,37 +283,118 @@ export default function CreateRide() {
         Create Ride
       </Text>
 
-      <View style={components.card}>
+      <View style={[components.card, { zIndex: 20 }]}>
 
         <Text style={layout.subtitle}>
           Origin
         </Text>
 
-        <TextInput
-          placeholder="Origin"
+        <AddressAutocomplete
+          placeholder="Search origin..."
           value={origin}
-          maxLength={40}
-          onChangeText={setOrigin}
-          style={forms.input}
+          onChangeText={(text) => {
+            setOrigin(text);
+            setOriginCoords(null);
+          }}
+          onSelect={(name, coords) => {
+            setOrigin(name);
+            setOriginCoords(coords);
+          }}
           testID="createRideOriginInput"
         />
 
-        <View style={{ height: 6 }} />
+        <Pressable
+          style={{
+            marginTop: spacing.xs,
+            marginBottom: spacing.sm,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 6,
+          }}
+          onPress={() => setShowOriginPicker(true)}
+          testID="createRideOriginMapButton"
+        >
+          <Text style={{
+            color: colors.primary,
+            fontWeight: "600",
+            fontSize: 14,
+          }}>
+            🗺️ Or choose on map
+          </Text>
+          {originCoords && (
+            <Text style={{
+              color: colors.accent,
+              fontSize: 12,
+              fontWeight: "700",
+            }}>
+              ✓ Location defined
+            </Text>
+          )}
+        </Pressable>
+
 
         <Text style={layout.subtitle}>
           Destination
         </Text>
 
-        <TextInput
-          placeholder="Destination"
+        <AddressAutocomplete
+          placeholder="Search destination..."
           value={destination}
-          maxLength={40}
-          onChangeText={setDestination}
-          style={forms.input}
+          onChangeText={(text) => {
+            setDestination(text);
+            setDestinationCoords(null);
+          }}
+          onSelect={(name, coords) => {
+            setDestination(name);
+            setDestinationCoords(coords);
+          }}
           testID="createRideDestinationInput"
         />
 
+        <Pressable
+          style={{
+            marginTop: spacing.xs,
+            marginBottom: spacing.sm,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 6,
+          }}
+          onPress={() => setShowDestinationPicker(true)}
+          testID="createRideDestinationMapButton"
+        >
+          <Text style={{
+            color: colors.primary,
+            fontWeight: "600",
+            fontSize: 14,
+          }}>
+            🗺️ Or choose on map
+          </Text>
+          {destinationCoords && (
+            <Text style={{
+              color: colors.accent,
+              fontSize: 12,
+              fontWeight: "700",
+            }}>
+              ✓ Location defined
+            </Text>
+          )}
+        </Pressable>
+
       </View>
+
+
+      {/* Route preview */}
+      {originCoords && destinationCoords && (
+        <View style={[components.card, { padding: 0, overflow: "hidden" }]}>
+          <RouteMap
+            origin={originCoords}
+            destination={destinationCoords}
+            originLabel={origin}
+            destinationLabel={destination}
+            height={200}
+          />
+        </View>
+      )}
 
 
       <View style={components.card}>
@@ -313,17 +403,12 @@ export default function CreateRide() {
           Date
         </Text>
 
-        <Pressable
-          style={components.outlineButton}
+        <Button
+          outline
           testID="createRideDateButton"
           onPress={() => setShowDate(true)}
-        >
-          <Text
-            style={components.outlineButtonText}
-          >
-            {date.toDateString()}
-          </Text>
-        </Pressable>
+          label={date.toDateString()}
+        />
 
         {showDate && (
           <DateTimePicker
@@ -336,28 +421,19 @@ export default function CreateRide() {
           />
         )}
 
-        <View style={{ height: 6 }} />
+        <View style={{ height: spacing.xs }} />
 
 
         <Text style={layout.subtitle}>
           Time
         </Text>
 
-        <Pressable
-          style={components.outlineButton}
+        <Button
+          outline
           testID="createRideTimeButton"
           onPress={() => setShowTime(true)}
-        >
-          <Text
-            style={components.outlineButtonText}
-          >
-            {time.toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit"
-            })
-            }
-          </Text>
-        </Pressable>
+          label={time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+        />
 
         {showTime && (
           <DateTimePicker
@@ -370,7 +446,7 @@ export default function CreateRide() {
           />
         )}
 
-        <View style={{ height: 6 }} />
+        <View style={{ height: spacing.xs }} />
 
 
         <Text style={layout.subtitle}>
@@ -379,32 +455,46 @@ export default function CreateRide() {
 
         <View style={components.pickerWrapper}>
 
-          <Picker
-            selectedValue={selectedCar}
-            onValueChange={setSelectedCar}
+          <DropDownPicker
+            open={carDropdownOpen}
+            value={selectedCar}
+            items={carItems}
+
+            setOpen={setCarDropdownOpen}
+            setValue={setSelectedCar}
+
+            placeholder="Select car"
             testID="createRideCarPicker"
-            dropdownIconColor={colors.primary}
-            style={{ color: colors.primary, fontWeight: "600" }}
-          >
-            {cars.map(c => (
-              <Picker.Item
-                key={c.id}
-                label={`${c.model} (${c.licensePlate})`}
-                value={c.id}
-                style={{ color: "black", fontWeight: "600" }}
-              />
-            ))}
-          </Picker>
+
+            style={components.dropdown}
+
+            dropDownContainerStyle={
+              components.dropdownContainer
+            }
+
+            textStyle={components.dropdownText}
+
+            placeholderStyle={
+              components.dropdownPlaceholder
+            }
+
+            listMode="SCROLLVIEW"
+
+            scrollViewProps={{
+              nestedScrollEnabled: true
+            }}
+          />
 
         </View>
 
-        <View style={{ height: 6 }} />
+        <View style={{ height: spacing.xs }} />
 
         <Text style={layout.subtitle}>
           Seats
         </Text>
         <TextInput
           placeholder={`1-${car.seatCapacity - 1} seats`}
+          placeholderTextColor={colors.textLight}
           value={seats}
           onChangeText={setSeats}
           keyboardType="numeric"
@@ -432,24 +522,43 @@ export default function CreateRide() {
               value={womenOnly}
               onValueChange={setWomenOnly}
               testID="createRideWomenOnlySwitch"
-              trackColor={{ false: "#d1d5db", true: "#fbcfe8" }}
-              thumbColor={womenOnly ? "#ec4899" : "#f9fafb"}
+              trackColor={{ false: "#bcbdc1", true: "#fbcfe8" }}
+              thumbColor={womenOnly ? colors.women : "#8b8e91"}
             />
           </View>
         </View>
       )}
 
-      <Pressable
-        style={components.button}
+      <Button
         testID="createRideButton"
         onPress={() => void createRide()}
-      >
-        <Text
-          style={components.buttonText}
-        >
-          CREATE RIDE
-        </Text>
-      </Pressable>
+        label="CREATE RIDE"
+      />
+
+
+      {/* Location picker modals */}
+      <LocationPickerMap
+        visible={showOriginPicker}
+        onClose={() => setShowOriginPicker(false)}
+        title="Select origin"
+        onConfirm={(coords, name) => {
+          setOriginCoords(coords);
+          setOrigin(name);
+          setShowOriginPicker(false);
+        }}
+      />
+
+      <LocationPickerMap
+        visible={showDestinationPicker}
+        onClose={() => setShowDestinationPicker(false)}
+        title="Select destination"
+        onConfirm={(coords, name) => {
+          setDestinationCoords(coords);
+          setDestination(name);
+          setShowDestinationPicker(false);
+        }}
+      />
+
     </ScrollView>
 
   );

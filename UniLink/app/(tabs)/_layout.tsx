@@ -1,5 +1,5 @@
-import { colors } from "../../styles/theme";
 import { Tabs } from "expo-router";
+import { colors } from "../../styles/theme";
 
 export default function TabsLayout() {
 
@@ -39,6 +39,11 @@ export default function TabsLayout() {
             />
 
             <Tabs.Screen
+                name="mapView"
+                options={{ title: "Map", tabBarButtonTestID: "mapTab" }}
+            />
+
+            <Tabs.Screen
                 name="createRide"
                 options={{ title: "Create", tabBarButtonTestID: "createTab" }}
             />
@@ -49,9 +54,15 @@ export default function TabsLayout() {
             />
 
             <Tabs.Screen
+                name="leaderboard"
+                options={{ title: "Leaderboard", tabBarButtonTestID: "leaderboardTab" }}
+            />
+
+            <Tabs.Screen
                 name="userProfile"
                 options={{ title: "Profile", tabBarButtonTestID: "profileTab" }}
             />
+            
 
         </Tabs>
 

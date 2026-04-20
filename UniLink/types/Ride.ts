@@ -22,4 +22,8 @@ export interface Ride {
 
   completed: boolean;
 
-}
+  originCoords?: { latitude: number; longitude: number };
+
+  destinationCoords?: { latitude: number; longitude: number };
+  distanceKm?: number;
+}

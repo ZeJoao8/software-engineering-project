@@ -1,0 +1,22 @@
+appId: host.exp.exponent
+env:
+    EXPO_URL: "exp://10.0.2.2:8081" # IP genérico para o Emulador Android (aponta para o localhost do PC)
+---
+- launchApp
+- openLink: ${EXPO_URL}
+- waitForAnimationToEnd
+
+# Se estiver logado noutra conta, faz logout para limpar o estado
+- runFlow:
+    when:
+      visible:
+        id: profileTab
+    commands:
+      - tapOn:
+          id: profileTab
+      - swipe:
+          direction: UP
+      - tapOn:
+          id: logoutButton
+      - tapOn: "Logout"
+      - waitForAnimationToEnd

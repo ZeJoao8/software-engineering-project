@@ -16,6 +16,7 @@ import {
  isAuthReady,
  subscribeToAuthChanges,
 } from "./user";
+import { deleteMessagesForRide } from "./chat";
 
 let rides: Ride[] = [];
 
@@ -133,6 +134,7 @@ export async function deleteRide(id: string) {
  notifyListeners();
 
  try {
+  await deleteMessagesForRide(id);
   await deleteDoc(doc(db, "rides", id));
  } catch (error) {
   rides = previousRides;
@@ -145,6 +147,35 @@ export async function deleteRide(id: string) {
  }
 }
 
-export function removeEmptyPastRides() {
- return;
+export function removeEmptyPastRides(now = new Date()) {
+
+ const rides = getRides();
+ const user = getCurrentUser();
+ if (!user) return;
+
+ rides.forEach(ride => {
+
+  const rideDate =
+   new Date(ride.departureDateTime);
+
+  const isPast =
+   rideDate < now;
+
+  const hasNoPassengers =
+   ride.passengers.length === 0;
+
+  const isDriver = ride.driverId === user.uid;
+
+  if (
+   isPast &&
+   hasNoPassengers &&
+   isDriver
+  ){
+
+   deleteRide(ride.id);
+
+  }
+
+ });
+
 }

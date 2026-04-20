@@ -1,0 +1,53 @@
+appId: host.exp.exponent
+---
+- runFlow: ../subflows/launch.yaml
+- runFlow: ../subflows/login.yaml
+
+# PESQUISA POR TEXTO (filtro simples, sem coordenadas obrigatórias)
+- tapOn:
+    id: searchOriginInput
+- inputText: "FEUP"
+- pressKey: Enter
+
+- tapOn:
+    id: searchDestinationInput
+- inputText: "Boavista"
+- pressKey: Enter
+
+# Aguarda os resultados filtrarem
+- extendedWaitUntil:
+    visible: "FEUP → Boavista"
+    timeout: 5000
+
+# Clica na primeira viagem disponível (texto que corresponde ao que criámos)
+- tapOn: "FEUP → Boavista"
+- waitForAnimationToEnd
+
+# RESERVAR
+- tapOn:
+    id: reserveSeatButton
+- tapOn: "Yes"
+- waitForAnimationToEnd
+
+# VERIFICAR NAS MINHAS VIAGENS
+- tapOn:
+    id: myRidesTab
+- swipe:
+    direction: DOWN
+- assertVisible: "FEUP → Boavista"
+
+# ABRIR VIAGEM E VER PERFIL DO CONDUTOR
+- tapOn: "FEUP → Boavista"
+- waitForAnimationToEnd
+- tapOn: "Maria Test"
+- waitForAnimationToEnd
+- assertVisible: "Cars"
+- tapOn: "← Back"
+- tapOn: "← Back"
+
+# CANCELAR RESERVA (para limpar o estado para o próximo teste)
+- tapOn: "FEUP → Boavista"
+- tapOn:
+    id: cancelReservationButton
+- tapOn: "Yes"
+- waitForAnimationToEnd
