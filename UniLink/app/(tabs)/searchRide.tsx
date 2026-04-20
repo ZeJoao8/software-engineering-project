@@ -1,20 +1,20 @@
 import {
-  View,
-  Text,
   FlatList,
+  Switch,
+  Text,
   TextInput,
-  Switch
+  View
 } from "react-native";
 
 import {
-  useRouter,
-  useFocusEffect
+  useFocusEffect,
+  useRouter
 } from "expo-router";
 
 import {
-  useState,
   useCallback,
-  useEffect
+  useEffect,
+  useState
 } from "react";
 
 import {
@@ -29,12 +29,12 @@ import {
 
 import RideCard from "../../components/rideCard";
 
-import { formatDate, sortByDateAsc } from "../../utils/date";
-import { layout } from "../../styles/layout";
 import { components } from "../../styles/components";
-import { colors, spacing } from "../../styles/theme";
 import { forms } from "../../styles/forms";
-import { filterRides, FilterCriteria } from "../../utils/rideFilters";
+import { layout } from "../../styles/layout";
+import { colors, spacing } from "../../styles/theme";
+import { sortByDateAsc } from "../../utils/date";
+import { FilterCriteria, filterRides } from "../../utils/rideFilters";
 
 
 export default function Home() {
@@ -91,7 +91,7 @@ export default function Home() {
     };
   }, []);
 
-  if(!user) return null;
+  if (!user) return null;
 
   const filters: FilterCriteria = {
     origin: originFilter,
@@ -116,7 +116,7 @@ export default function Home() {
 
 
       {/* FILTERS */}
-      <View style={components.card}>
+      <View style={[components.card, { backgroundColor: colors.neutral, borderColor: colors.neutralLight, borderWidth: 1.5 }]}>
 
         <Text style={layout.subtitle}>
           Origin
