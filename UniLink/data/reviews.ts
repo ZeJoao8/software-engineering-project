@@ -62,8 +62,6 @@ function syncReviewsWithAuth() {
 
   const user = getCurrentUser();
 
-  // Load reviews where the current user is the reviewer OR the reviewee.
-  // Two separate queries are merged because Firestore doesn't support OR across fields.
   let reviewsAsReviewer: Review[] = [];
   let reviewsAsReviewee: Review[] = [];
 
@@ -103,7 +101,6 @@ function syncReviewsWithAuth() {
     error => { stopReviewsSync(); console.error("Reviews sync (reviewee) failed", error); }
   );
 
-  // Wrap both unsubscribes into one
   unsubscribeReviewsSnapshot = () => { unsubA(); unsubB(); };
 }
 
