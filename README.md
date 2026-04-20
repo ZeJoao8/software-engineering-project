@@ -368,6 +368,7 @@ Link for Sprint 0 vertical prototype APK: https://expo.dev/artifacts/eas/oox2WQn
 <p align="center" justify="center">
   <img src="Sprint1Done.png"/>
 </p>
+
 #### Sprint goal
 
 Extend UniLink with social, safety and navigation features: in-app messaging between ride participants, a rating and reporting system, interactive map view, sustainability leaderboard, and multiple quality-of-life improvements.
