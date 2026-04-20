@@ -12,6 +12,7 @@ import {
 
 import { layout } from "../../styles/layout";
 import { forms } from "../../styles/forms";
+import { Button } from "../../components/Button";
 import { components } from "../../styles/components";
 import { colors, spacing } from "../../styles/theme";
 
@@ -249,17 +250,11 @@ export default function CreateRide() {
           <Text style={{ marginBottom: spacing.md }}>
             You need to add a car before creating a ride.
           </Text>
-          <Pressable
-            style={components.button}
+          <Button
             testID="createRideGoToProfileButton"
             onPress={() => router.push("/(tabs)/userProfile")}
-          >
-            <Text
-              style={components.buttonText}
-            >
-              Go to profile
-            </Text>
-          </Pressable>
+            label="Go to profile"
+          />
         </View>
       </View>
     );
@@ -408,17 +403,12 @@ export default function CreateRide() {
           Date
         </Text>
 
-        <Pressable
-          style={components.outlineButton}
+        <Button
+          outline
           testID="createRideDateButton"
           onPress={() => setShowDate(true)}
-        >
-          <Text
-            style={components.outlineButtonText}
-          >
-            {date.toDateString()}
-          </Text>
-        </Pressable>
+          label={date.toDateString()}
+        />
 
         {showDate && (
           <DateTimePicker
@@ -438,21 +428,12 @@ export default function CreateRide() {
           Time
         </Text>
 
-        <Pressable
-          style={components.outlineButton}
+        <Button
+          outline
           testID="createRideTimeButton"
           onPress={() => setShowTime(true)}
-        >
-          <Text
-            style={components.outlineButtonText}
-          >
-            {time.toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit"
-            })
-            }
-          </Text>
-        </Pressable>
+          label={time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+        />
 
         {showTime && (
           <DateTimePicker
@@ -548,17 +529,11 @@ export default function CreateRide() {
         </View>
       )}
 
-      <Pressable
-        style={components.button}
+      <Button
         testID="createRideButton"
         onPress={() => void createRide()}
-      >
-        <Text
-          style={components.buttonText}
-        >
-          CREATE RIDE
-        </Text>
-      </Pressable>
+        label="CREATE RIDE"
+      />
 
 
       {/* Location picker modals */}

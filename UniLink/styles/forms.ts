@@ -1,5 +1,4 @@
-import { StyleSheet }
- from "react-native";
+import { StyleSheet } from "react-native";
 
 import {
  colors,
@@ -7,16 +6,17 @@ import {
  radius
 } from "./theme";
 
-
 export const forms = StyleSheet.create({
 
  input:{
-  borderWidth:1,
-  borderColor: colors.primary,
-  paddingVertical:10,
-  paddingHorizontal:12,
+  borderWidth: 1.5,
+  borderColor: colors.border, // softer border
+  paddingVertical: 14,
+  paddingHorizontal: 16,
   borderRadius: radius.md,
-  backgroundColor:"#f9fafb"
+  backgroundColor: colors.card, // plain white inner background
+  color: colors.text,
+  fontSize: 16,
  },
 
  field:{
@@ -24,10 +24,11 @@ export const forms = StyleSheet.create({
  },
 
  label:{
-  fontSize:13,
-  fontWeight:"500",
-  marginBottom:4,
-  color: colors.textLight
+  fontSize: 14,
+  fontWeight: "600",
+  marginBottom: 6,
+  color: colors.text,
+  letterSpacing: 0.2,
  }
 
 });

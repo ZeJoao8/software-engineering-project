@@ -39,6 +39,7 @@ import { useRouter }
   from "expo-router";
 
 import { components } from "../../styles/components";
+import { Button } from "../../components/Button";
 import { forms } from "../../styles/forms";
 import { layout } from "../../styles/layout";
 import { colors, spacing } from "../../styles/theme";
@@ -340,46 +341,30 @@ export default function Profile() {
 
         {!editing ? (
 
-          <Pressable
-            style={components.outlineButton}
+          <Button
+            outline
             testID="editProfileButton"
             onPress={startEdit}
-          >
-            <Text
-              style={components.outlineButtonText}
-            >
-              Edit profile
-            </Text>
-          </Pressable>
+            label="Edit profile"
+          />
 
         ) : (
 
           <>
-            <Pressable
-              style={components.button}
+            <Button
               testID="saveProfileButton"
               onPress={saveProfile}
-            >
-              <Text
-                style={components.buttonText}
-              >
-                Save profile
-              </Text>
-            </Pressable>
+              label="Save profile"
+            />
 
             <View style={{ height: spacing.sm }} />
 
-            <Pressable
-              style={components.outlineButton}
+            <Button
+              outline
               testID="cancelProfileEditButton"
               onPress={cancelEdit}
-            >
-              <Text
-                style={components.outlineButtonText}
-              >
-                Cancel
-              </Text>
-            </Pressable>
+              label="Cancel"
+            />
           </>
 
         )}
@@ -458,17 +443,12 @@ export default function Profile() {
 
           <View style={{ marginTop: spacing.sm }}>
 
-            <Pressable
-              style={components.outlineButton}
+            <Button
+              outline
               testID="toggleAddCarButton"
               onPress={() => setShowCarForm(!showCarForm)}
-            >
-              <Text
-                style={components.outlineButtonText}
-              >
-                {showCarForm ? "Cancel" : "Add car"}
-              </Text>
-            </Pressable>
+              label={showCarForm ? "Cancel" : "Add car"}
+            />
 
           </View>
 
@@ -545,17 +525,11 @@ export default function Profile() {
 
           <View style={{ marginTop: spacing.md }}>
 
-            <Pressable
-              style={components.button}
+            <Button
               testID="saveCarButton"
               onPress={() => void addNewCar()}
-            >
-              <Text
-                style={components.buttonText}
-              >
-                Save car
-              </Text>
-            </Pressable>
+              label="Save car"
+            />
 
           </View>
 
@@ -573,8 +547,7 @@ export default function Profile() {
         </Text>
 
 
-        <Pressable
-          style={components.button}
+        <Button
           testID="logoutButton"
           onPress={() =>
             Alert.alert(
@@ -594,13 +567,8 @@ export default function Profile() {
               ]
             )
           }
-        >
-          <Text
-            style={components.buttonText}
-          >
-            Logout
-          </Text>
-        </Pressable>
+          label="Logout"
+        />
       </View>
 
     </ScrollView>

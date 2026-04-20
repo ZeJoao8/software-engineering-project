@@ -10,104 +10,120 @@ export const components = StyleSheet.create({
 
  card: {
   backgroundColor: colors.card,
-  paddingVertical: spacing.md,
+  paddingVertical: 20,
   paddingHorizontal: spacing.md,
   borderRadius: radius.lg,
   marginBottom: spacing.md,
-  borderColor: colors.border,
   borderWidth: 1,
-  shadowColor: "#000",
+  borderColor: "rgba(0,0,0,0.03)", // very subtle border instead of harsh green
+  shadowColor: "#0f172a", // sleek slate shadow
+  shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.05,
-  shadowRadius: 8,
-  elevation: 2,
+  shadowRadius: 12,
+  elevation: 3,
  },
 
  button: {
   backgroundColor: colors.primary,
   paddingVertical: spacing.md,
-  borderRadius: radius.md,
+  paddingHorizontal: spacing.lg,
+  borderRadius: radius.xl, // pill-like premium buttons
   alignItems: "center",
-  shadowColor: "#000",
-  shadowOpacity: 0.08,
-  shadowRadius: 4,
-  elevation: 2,
+  shadowColor: colors.primary,
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.2,
+  shadowRadius: 10,
+  elevation: 4,
  },
 
  buttonText: {
   color: "white",
-  fontWeight: "600",
-  letterSpacing: 0.5,
+  fontWeight: "700",
+  fontSize: 16,
+  letterSpacing: 0.3,
+  textTransform: "uppercase", // adds a nice touch for main buttons
  },
 
  outlineButton: {
-  borderWidth: 1,
-  borderColor: colors.primary,
-  paddingVertical: 10,
-  borderRadius: radius.md,
+  borderWidth: 1.5,
+  borderColor: colors.border,
+  paddingVertical: spacing.md,
+  borderRadius: radius.xl,
   alignItems: "center",
+  backgroundColor: "transparent",
  },
 
  outlineButtonText: {
-  color: colors.primary,
+  color: colors.text, // subtler than solid primary green
   fontWeight: "600",
+  fontSize: 16,
  },
 
  tag: {
   backgroundColor: colors.primarySoft,
-  color: colors.primary,
-  paddingHorizontal: spacing.sm,
-  paddingVertical: 3,
-  borderRadius: radius.sm,
+  color: colors.primaryDark,
+  paddingHorizontal: spacing.md,
+  paddingVertical: 6,
+  borderRadius: radius.md,
   fontSize: 12,
+  fontWeight: "600",
+  overflow: "hidden", // for ios border radius on text
  },
 
  /** Small inline button used for destructive actions (e.g. "Report"). */
  dangerTag: {
-  backgroundColor: colors.warningSoft,
-  paddingHorizontal: 10,
-  paddingVertical: 4,
-  borderRadius: radius.sm,
+  backgroundColor: colors.dangerSoft,
+  paddingHorizontal: 12,
+  paddingVertical: 6,
+  borderRadius: radius.md,
  },
 
  /** Card used for negative feedback items (low ratings, reports). */
  feedbackCard: {
   backgroundColor: colors.warningSoft,
-  borderRadius: radius.sm,
-  padding: spacing.sm,
-  marginBottom: spacing.sm,
-  borderLeftWidth: 3,
+  borderRadius: radius.md,
+  padding: spacing.md,
+  marginBottom: spacing.md,
+  borderLeftWidth: 4,
   borderLeftColor: colors.danger,
  },
 
  pickerWrapper: {
-  borderColor: colors.primary,
-  borderWidth: 1,
+  borderColor: colors.border,
+  borderWidth: 1.5,
   borderRadius: radius.md,
-  backgroundColor: "white",
-  minHeight: 48,
+  backgroundColor: "#f8fafc",
+  minHeight: 52,
   justifyContent: "center",
  },
 
  dropdown: {
   borderWidth: 0,
   backgroundColor: "transparent",
-  minHeight: 48,
+  minHeight: 52,
  },
 
  dropdownContainer: {
-  borderColor: colors.primary,
+  borderColor: colors.border,
   borderWidth: 1,
   borderRadius: radius.md,
-  backgroundColor: "white",
+  backgroundColor: colors.card,
+  shadowColor: "#0f172a",
+  shadowOffset: { width: 0, height: 8 },
+  shadowOpacity: 0.08,
+  shadowRadius: 16,
+  elevation: 5,
  },
 
  dropdownText: {
-  fontWeight: "600",
-  color: colors.primary,
+  fontWeight: "500",
+  color: colors.text,
+  fontSize: 15,
  },
 
  dropdownPlaceholder: {
   color: colors.textLight,
+  fontSize: 15,
  },
 
 });

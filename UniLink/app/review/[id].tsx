@@ -23,6 +23,7 @@ import { addReview, hasReviewForRide } from "../../data/reviews";
 import { generateId } from "../../lib/firebase";
 
 import { components } from "../../styles/components";
+import { Button } from "../../components/Button";
 import { layout } from "../../styles/layout";
 import { forms } from "../../styles/forms";
 import { colors, spacing } from "../../styles/theme";
@@ -205,15 +206,11 @@ export default function ReviewRide() {
               testID="reviewCommentInput"
             />
 
-            <Pressable
-              style={components.button}
+            <Button
               testID="submitRatingButton"
               onPress={() => void submitRating()}
-            >
-              <Text style={components.buttonText}>
-                {submitting ? "SUBMITTING..." : "SUBMIT FEEDBACK"}
-              </Text>
-            </Pressable>
+              label={submitting ? "SUBMITTING..." : "SUBMIT FEEDBACK"}
+            />
           </View>
 
         </ScrollView>

@@ -24,6 +24,7 @@ import type { User } from "../../types/User";
 
 import DropDownPicker from "react-native-dropdown-picker";
 
+import { Button } from "../../components/Button";
 import { components } from "../../styles/components";
 import { layout } from "../../styles/layout";
 import { colors, spacing } from "../../styles/theme";
@@ -620,39 +621,19 @@ export default function RideDetails() {
         )}
 
         {!isDriver && !joined && !rideStarted && !r.completed && (
-          <Pressable
-            style={[components.button, { marginTop: spacing.md }]}
-            onPress={reserveSeat}
-          >
-            <Text style={components.buttonText}>Reserve seat</Text>
-          </Pressable>
+          <Button onPress={reserveSeat} style={[components.button, { marginTop: spacing.md }]}  label="Reserve seat" />
         )}
 
         {joined && !isDriver && !rideStarted && !r.completed && (
-          <Pressable
-            style={[components.button, { marginTop: spacing.md }]}
-            onPress={cancelSeat}
-          >
-            <Text style={components.buttonText}>Cancel reservation</Text>
-          </Pressable>
+          <Button onPress={cancelSeat} style={[components.button, { marginTop: spacing.md }]}  label="Cancel reservation" />
         )}
 
         {isDriver && !rideStarted && !r.completed && !editingCar && (
-          <Pressable
-            style={[components.button, { marginTop: spacing.md }]}
-            onPress={cancelRide}
-          >
-            <Text style={components.buttonText}>Cancel ride</Text>
-          </Pressable>
+          <Button onPress={cancelRide} style={[components.button, { marginTop: spacing.md }]}  label="Cancel ride" />
         )}
 
         {canComplete && (
-          <Pressable
-            style={[components.button, { marginTop: spacing.md }]}
-            onPress={completeRide}
-          >
-            <Text style={components.buttonText}>Complete ride</Text>
-          </Pressable>
+          <Button onPress={completeRide} style={[components.button, { marginTop: spacing.md }]}  label="Complete ride" />
         )}
 
         {canRateDriver && (

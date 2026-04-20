@@ -6,7 +6,6 @@ import {
  TextInput,
  ScrollView,
  Alert,
- Pressable,
  ActivityIndicator
 } from "react-native";
 
@@ -26,6 +25,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { layout } from "../styles/layout";
 import { forms } from "../styles/forms";
 import { components } from "../styles/components";
+import { Button } from "../components/Button";
 import { spacing, colors } from "../styles/theme";
 import {
   areRequiredFieldsFilled,
@@ -394,48 +394,34 @@ export default function Login(){
 <View style={{height:spacing.md}} />
 
 
-<Pressable style={components.button} testID="authSubmitButton"
+<Button testID="authSubmitButton"
  onPress={
   registerMode
    ? register
    : login
  }
- >
-
-<Text
- style={components.buttonText}
->
-
-{loading
- ? "LOADING..."
- : registerMode
-   ? "CREATE ACCOUNT"
-   : "LOGIN"}
-
-</Text>
-
-</Pressable>
+ label={loading
+  ? "LOADING..."
+  : registerMode
+    ? "CREATE ACCOUNT"
+    : "LOGIN"}
+ />
 
 
 
 <View style={{height:spacing.sm}} />
 
 
-<Pressable
- style={components.outlineButton}
+<Button
+ outline
  testID="authModeToggleButton"
  onPress={()=>
   setRegisterMode(!registerMode)
  }
->
-<Text
- style={components.outlineButtonText}
->
-{registerMode
- ? "Already have account?"
- : "Create account"}
-</Text>
-</Pressable>
+ label={registerMode
+  ? "Already have account?"
+  : "Create account"}
+/>
 
 
 {!registerMode && (

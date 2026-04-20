@@ -20,6 +20,7 @@ import { addReport, hasReportForRide } from "../../data/reports";
 import { generateId } from "../../lib/firebase";
 
 import { components } from "../../styles/components";
+import { Button } from "../../components/Button";
 import { forms } from "../../styles/forms";
 import { layout } from "../../styles/layout";
 import { colors, spacing } from "../../styles/theme";
@@ -168,15 +169,11 @@ export default function ReportUser() {
         {trimmedReason.length}/15 minimum characters
       </Text>
 
-      <Pressable
-        style={components.button}
+      <Button
         testID="submitReportButton"
         onPress={() => void submitReport()}
-      >
-        <Text style={components.buttonText}>
-          {submitting ? "SUBMITTING..." : "SUBMIT REPORT"}
-        </Text>
-      </Pressable>
+        label={submitting ? "SUBMITTING..." : "SUBMIT REPORT"}
+      />
 
     </SafeAreaView>
   );
