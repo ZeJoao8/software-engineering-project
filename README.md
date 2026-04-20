@@ -357,6 +357,18 @@ Link for Sprint 0 vertical prototype APK: https://expo.dev/artifacts/eas/oox2WQn
 
 ### Sprint 1
 
+### Sprint Backlog
+
+<p align="center" justify="center">
+  <img src="SprintBacklog.png"/>
+</p>
+
+### Done
+
+<p align="center" justify="center">
+  <img src="Sprint1Done.png"/>
+</p>
+
 ### Sprint 2
 
 ### Sprint 3
