@@ -97,7 +97,7 @@ return(
 
 
 {/* DRIVER */}
-<View style={components.card}>
+<View style={[components.card, { backgroundColor: colors.primarySoft, borderColor: colors.primaryLight, borderWidth: 1.5 }]}>
 
 <Text style={layout.subtitle}>
  Driver
@@ -148,7 +148,7 @@ return(
 
 
 {/* PASSENGER */}
-<View style={components.card}>
+<View style={[components.card, { backgroundColor: colors.neutral, borderColor: colors.neutralLight, borderWidth: 1.5 }]}>
 
 <Text style={layout.subtitle}>
  Passenger
