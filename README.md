@@ -357,6 +357,95 @@ Link for Sprint 0 vertical prototype APK: https://expo.dev/artifacts/eas/oox2WQn
 
 ### Sprint 1
 
+#### Sprint goal
+
+Extend UniLink with social, safety and navigation features: in-app messaging between ride participants, a rating and reporting system, interactive map view, sustainability leaderboard, and multiple quality-of-life improvements.
+
+#### Sprint planning
+
+Building on the Sprint 0 vertical prototype, the team identified the highest-value features from the backlog:
+
+- **Messaging** — passengers and drivers need a way to communicate before the ride
+- **Ratings & Reports** — safety and trust are core to the product vision
+- **Map view** — visual discovery of rides improves UX significantly
+- **Leaderboard** — gamification drives engagement and reinforces the sustainability angle
+
+Tasks were distributed across team members and tracked in GitHub Projects.
+
+#### Development
+
+Features implemented this sprint:
+
+**🗺️ Map Integration**
+- Interactive map view showing all available rides as markers
+- Tap a marker to preview route, distance and duration via OSRM
+- Polyline route rendering between origin and destination
+- User location detection with fallback to FEUP region
+
+**⭐ Rating & Reporting System**
+- Passengers can rate drivers after a completed ride
+- Drivers can rate passengers
+- Report system for inappropriate behaviour during rides
+- Only ride participants can submit reviews or reports (enforced in Firestore rules)
+- Visual feedback with star ratings and review cards on user profiles
+
+**💬 In-App Messaging**
+- Group chat per ride accessible to driver and all passengers
+- Chat opens at the most recent message
+
+**🏆 Sustainability Leaderboard**
+- Ranks all users by CO₂ saved through ride-sharing
+- Top 3 highlighted with medals
+- Current user's position always shown even if outside top 10
+- Empty state when no completed rides with distance data exist
+
+**🛠️ Quality improvements**
+- Auto-removal of past rides with no passengers
+- iOS-specific UI fixes for map zoom and ride detail layout
+- Completed rides filtered out of search results
+- General app-wide refactor for consistency
+
+#### Testing
+
+Unit tests were extended to cover:
+
+- `sustainability.test.js` — CO₂ calculation logic
+- `Leaderboard.test.js` — leaderboard ranking and display
+- `RideCard.test.js` — ride card component rendering
+- `dataChat.test.js` — chat data layer functions
+- `dataUser.test.js` — user data operations
+- `dataRides.test.js` — ride data operations
+
+Maestro acceptance tests updated to include:
+
+- `social/rate_and_report.yaml` — rating and reporting flows
+- `rides/search_and_reserve.yaml` — updated search and reserve flow
+- `auth/register_and_setup.yaml` — updated registration flow
+
+#### Continuous Integration
+
+GitHub Actions workflow continued running automatically on every push, ensuring no regressions were introduced.
+
+#### Sprint retrospective
+
+What went well:
+
+- All planned features were implemented and tested
+- Strong collaboration on the messaging and map features
+- iOS compatibility issues were caught early and fixed within the sprint
+
+What could be improved:
+
+- Some features had late UI adjustments that could have been caught earlier with more design upfront
+- Test coverage for UI components could be broader
+
+Next improvements:
+
+- Implement badge/achievement system
+- Add weekly streaks for gamification
+- Integrate bus schedule fallback
+- Improve ride completion flow
+
 ### Sprint 2
 
 ### Sprint 3

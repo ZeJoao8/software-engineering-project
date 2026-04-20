@@ -22,6 +22,9 @@ import {
  subscribeToRidesChanges
 } from "../../data/rides";
 
+import { subscribeToReviewsChanges } from "../../data/reviews";
+import { subscribeToReportsChanges } from "../../data/reports";
+
 import {
  getCurrentUser
 } from "../../data/user";
@@ -52,19 +55,24 @@ export default function MyRides(){
   );
 
 useEffect(()=>{
- const unsubscribe =
-  subscribeToRidesChanges(()=>{
-   setRides([...getRides()]);
-  });
+ const triggerRender = () => {
+  setRides([...getRides()]);
+ };
+
+ const unsubRides = subscribeToRidesChanges(triggerRender);
+ const unsubReviews = subscribeToReviewsChanges(triggerRender);
+ const unsubReports = subscribeToReportsChanges(triggerRender);
 
  const interval =
   setInterval(()=>{
    removeEmptyPastRides();
-   setRides([...getRides()]);
+   triggerRender();
   },10000);
 
  return () => {
-  unsubscribe();
+  unsubRides();
+  unsubReviews();
+  unsubReports();
   clearInterval(interval);
  };
 },[]);

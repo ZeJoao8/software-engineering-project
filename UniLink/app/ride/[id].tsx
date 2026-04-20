@@ -18,6 +18,7 @@ import type { Car } from "../../types/Car";
 import { hasReviewForRide, getReviews } from "../../data/reviews";
 import { hasReportForRide, getReports, subscribeToReportsChanges } from "../../data/reports";
 import { subscribeToReviewsChanges } from "../../data/reviews";
+import { subscribeToRidesChanges } from "../../data/rides";
 import { formatDate } from "../../utils/date";
 import { getRoute } from "../../utils/routing";
 import type { User } from "../../types/User";
@@ -64,9 +65,11 @@ export default function RideDetails() {
     const rerender = () => setVersion(v => v + 1);
     const unsubReports = subscribeToReportsChanges(rerender);
     const unsubReviews = subscribeToReviewsChanges(rerender);
+    const unsubRides = subscribeToRidesChanges(rerender);
     return () => {
       unsubReports();
       unsubReviews();
+      unsubRides();
     };
   }, []);
 

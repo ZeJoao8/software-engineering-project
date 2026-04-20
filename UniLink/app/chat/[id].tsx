@@ -135,6 +135,7 @@ export default function RideChat() {
             value={inputText}
             onChangeText={setInputText}
             placeholder="Type a message..."
+            placeholderTextColor={colors.textLight}
             multiline
             maxLength={500}
           />

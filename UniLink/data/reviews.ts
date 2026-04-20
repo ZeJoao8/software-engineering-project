@@ -60,49 +60,19 @@ function syncReviewsWithAuth() {
     return;
   }
 
-  const user = getCurrentUser();
+  const q = query(collection(db, "reviews"));
 
-  // Load reviews where the current user is the reviewer OR the reviewee.
-  // Two separate queries are merged because Firestore doesn't support OR across fields.
-  let mergedReviews: Review[] = [];
-  let pendingSnapshots = 0;
-
-  function onPartialSnapshot(partial: Review[]) {
-    // Merge the two query results, deduplicating by id
-    const ids = new Set(mergedReviews.map(r => r.id));
-    partial.forEach(r => { if (!ids.has(r.id)) mergedReviews.push(r); });
-    pendingSnapshots--;
-    if (pendingSnapshots === 0) {
-      reviews = [...mergedReviews];
+  unsubscribeReviewsSnapshot = onSnapshot(
+    q,
+    snapshot => {
+      reviews = snapshot.docs.map(d => d.data() as Review);
       notifyListeners();
+    },
+    error => {
+      stopReviewsSync();
+      console.error("Reviews sync failed", error);
     }
-  }
-
-  pendingSnapshots = 2;
-  mergedReviews = [];
-
-  const qAsReviewer = query(
-    collection(db, "reviews"),
-    where("reviewerId", "==", user!.uid)
   );
-  const qAsReviewee = query(
-    collection(db, "reviews"),
-    where("revieweeId", "==", user!.uid)
-  );
-
-  const unsubA = onSnapshot(
-    qAsReviewer,
-    snapshot => onPartialSnapshot(snapshot.docs.map(d => d.data() as Review)),
-    error => { stopReviewsSync(); console.error("Reviews sync (reviewer) failed", error); }
-  );
-  const unsubB = onSnapshot(
-    qAsReviewee,
-    snapshot => onPartialSnapshot(snapshot.docs.map(d => d.data() as Review)),
-    error => { stopReviewsSync(); console.error("Reviews sync (reviewee) failed", error); }
-  );
-
-  // Wrap both unsubscribes into one
-  unsubscribeReviewsSnapshot = () => { unsubA(); unsubB(); };
 }
 
 subscribeToAuthChanges(syncReviewsWithAuth);

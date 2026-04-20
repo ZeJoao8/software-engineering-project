@@ -143,7 +143,7 @@ export default function Login(){
   if(!isValidEmail(email)){
    Alert.alert(
     "Invalid email",
-    "Incorret email format"
+    "Incorrect email format"
    );
    return;
   }
