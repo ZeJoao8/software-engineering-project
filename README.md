@@ -241,8 +241,6 @@ allowing students to coordinate transportation easily and safely within their ac
 
 The women-only ride option represents an important safety feature requested during requirements validation.
 
-A functional APK was generated and released for testing purposes. Link for Sprint 0 vertical prototype APK: https://expo.dev/artifacts/eas/oox2WQnwTiu29LCRyGhjN4.apk
-
 ## Project management
 <!--
 Software project management is the art and science of planning and leading software projects, in which software projects are planned, implemented, monitored and controlled.
@@ -396,7 +394,6 @@ Features implemented this sprint:
 
 **⭐ Rating & Reporting System**
 - Passengers can rate drivers after a completed ride
-- Drivers can rate passengers
 - Report system for inappropriate behaviour during rides
 - Only ride participants can submit reviews or reports (enforced in Firestore rules)
 - Visual feedback with star ratings and review cards on user profiles
