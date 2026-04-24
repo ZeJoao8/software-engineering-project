@@ -31,6 +31,8 @@ import { forms } from "../../styles/forms";
 import { layout } from "../../styles/layout";
 import { colors, spacing } from "../../styles/theme";
 import { calculateUserCO2Saved } from "../../utils/sustainability";
+import { getUserBadges } from "../../utils/badges";
+import { BadgeDisplay } from "../../components/BadgeDisplay";
 
 export default function PublicProfile() {
   const router = useRouter();
@@ -158,6 +160,18 @@ export default function PublicProfile() {
             <Text style={{ color: colors.textLight, fontSize: 13 }}>Total CO₂ saved</Text>
           </View>
         </View>
+      </View>
+
+      {/* BADGES & ACHIEVEMENTS */}
+      <View style={components.card}>
+        <Text style={layout.subtitle}>Achievements</Text>
+        <BadgeDisplay 
+          badges={getUserBadges(
+            user.uid,
+            getRides(),
+            calculateUserCO2Saved(getRides(), user.uid)
+          )} 
+        />
       </View>
 
       {/* CARS */}
