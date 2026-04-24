@@ -11,6 +11,7 @@ export interface BadgeStatus {
   description: string;
   progress: number;
   nextLevelThreshold: number | null;
+  currentLevelThreshold: number | null;
 }
 
 const LEVEL_THRESHOLDS = {
@@ -33,6 +34,16 @@ function getNextThreshold(value: number, thresholds: number[]): number | null {
     if (value < t) return t;
   }
   return null; // Max level
+}
+
+function getCurrentThreshold(level: BadgeLevel, thresholds: number[]): number | null {
+  switch (level) {
+    case "diamond": return thresholds[3];
+    case "gold": return thresholds[2];
+    case "silver": return thresholds[1];
+    case "bronze": return thresholds[0];
+    case "none": return null;
+  }
 }
 
 export function getUserBadges(
@@ -67,6 +78,7 @@ export function getUserBadges(
       description: `Saved ${co2Saved.toFixed(1)}kg of CO2`,
       progress: co2Saved,
       nextLevelThreshold: getNextThreshold(co2Saved, ecoThresholds),
+      currentLevelThreshold: getCurrentThreshold(ecoLevel, ecoThresholds),
     },
     {
       id: "veteran_driver",
@@ -76,6 +88,7 @@ export function getUserBadges(
       description: `Drove ${driverRides} rides`,
       progress: driverRides,
       nextLevelThreshold: getNextThreshold(driverRides, driverThresholds),
+      currentLevelThreshold: getCurrentThreshold(driverLevel, driverThresholds),
     },
     {
       id: "top_rider",
@@ -85,6 +98,7 @@ export function getUserBadges(
       description: `Rode in ${passengerRides} rides`,
       progress: passengerRides,
       nextLevelThreshold: getNextThreshold(passengerRides, riderThresholds),
+      currentLevelThreshold: getCurrentThreshold(riderLevel, riderThresholds),
     },
   ];
 }

@@ -390,6 +390,7 @@ export default function Profile() {
       <View style={components.card}>
         <Text style={layout.subtitle}>Achievements</Text>
         <BadgeDisplay 
+          showProgress={true}
           badges={getUserBadges(
             activeUser.uid,
             getRides(),

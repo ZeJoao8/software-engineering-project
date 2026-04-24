@@ -179,12 +179,16 @@ export default function RideCard({
                   openTooltip === tag.key ? null : tag.key
                 );
               }}
-              style={{
-                backgroundColor: tag.bg ?? colors.neutral,
-                paddingHorizontal: 8,
-                paddingVertical: 4,
-                borderRadius: 6,
-              }}
+              style={[
+                {
+                  backgroundColor: tag.bg ?? colors.neutral,
+                  paddingHorizontal: 8,
+                  paddingVertical: 4,
+                  borderRadius: 6,
+                },
+                openTooltip === tag.key && components.activeHighlight,
+                openTooltip && openTooltip !== tag.key && components.inactiveDim
+              ]}
             >
               <Text style={{ fontSize: 13 }}>{tag.emoji}</Text>
             </Pressable>
@@ -195,15 +199,8 @@ export default function RideCard({
 
       {/* TOOLTIP */}
       {openTooltip && (
-        <View style={{
-          marginTop: spacing.sm,
-          backgroundColor: colors.text,
-          borderRadius: 8,
-          paddingHorizontal: 10,
-          paddingVertical: 6,
-          alignSelf: "flex-end",
-        }}>
-          <Text style={{ color: "white", fontSize: 12 }}>
+        <View style={[components.tooltip, { alignSelf: "flex-end" }]}>
+          <Text style={components.tooltipText}>
             {tags.find(t => t.key === openTooltip)?.description}
           </Text>
         </View>

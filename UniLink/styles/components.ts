@@ -126,4 +126,27 @@ export const components = StyleSheet.create({
   fontSize: 15,
  },
 
+ tooltip: {
+  marginTop: spacing.sm,
+  backgroundColor: colors.text,
+  borderRadius: radius.sm,
+  paddingHorizontal: 10,
+  paddingVertical: 6,
+  zIndex: 10,
+ },
+
+ tooltipText: {
+  color: "white",
+  fontSize: 12,
+ },
+
+ activeHighlight: {
+  borderWidth: 2,
+  borderColor: colors.primary,
+ },
+
+ inactiveDim: {
+  opacity: 0.4,
+ },
+
 });
