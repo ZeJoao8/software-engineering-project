@@ -269,7 +269,30 @@ export default function Profile() {
           ⭐ {averageRating} ({userReviews.length} {userReviews.length === 1 ? "rating" : "ratings"})
         </Text>
       )}
+      {/* RIDES SHORTCUT */}
+      <View style={components.card}>
 
+        <Text style={layout.subtitle}>
+          Rides
+        </Text>
+
+        <Text
+          style={{
+            color: colors.textLight,
+            marginBottom: spacing.md
+          }}
+        >
+          View the rides you created and the rides you joined.
+        </Text>
+
+        <Button
+          outline
+          testID="profileMyRidesButton"
+          onPress={() => router.push("/(tabs)/myRides")}
+          label="My rides"
+        />
+
+      </View>
       {/* USER INFO */}
       <View style={components.card}>
 
