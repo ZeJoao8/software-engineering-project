@@ -1,71 +1,112 @@
-import { Tabs } from "expo-router";
+import { Pressable, Text } from "react-native";
+
+import {
+  Tabs,
+  useRouter
+} from "expo-router";
+
 import { colors } from "../../styles/theme";
 
+function CreateRideHeaderButton() {
+  const router = useRouter();
+
+  return (
+    <Pressable
+      onPress={() => router.push("/(tabs)/createRide")}
+      testID="createRideHeaderButton"
+      style={{
+        paddingHorizontal: 16,
+        paddingVertical: 4
+      }}
+    >
+      <Text
+        style={{
+          color: colors.primarySoft,
+          fontSize: 30,
+          fontWeight: "700",
+          lineHeight: 32
+        }}
+      >
+        +
+      </Text>
+    </Pressable>
+  );
+}
+
 export default function TabsLayout() {
+  return (
+    <Tabs
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: colors.primary
+        },
 
-    return (
+        headerTitleStyle: {
+          color: colors.primarySoft,
+          fontWeight: "600"
+        },
 
-        <Tabs
+        headerTintColor: colors.primarySoft,
 
-            screenOptions={{
+        tabBarStyle: {
+          backgroundColor: colors.primary,
+          borderTopColor: "#e5e7eb"
+        },
 
-                headerStyle: {
-                    backgroundColor: colors.primary
-                },
+        tabBarActiveTintColor: colors.primarySoft,
 
-                headerTitleStyle: {
-                    color: colors.primarySoft,
-                    fontWeight: "600"
-                },
+        tabBarInactiveTintColor: colors.primaryDark
+      }}
+    >
+      <Tabs.Screen
+        name="searchRide"
+        options={{
+          title: "Rides",
+          headerTitle: "Rides",
+          tabBarButtonTestID: "ridesTab",
+          headerRight: () => <CreateRideHeaderButton />
+        }}
+      />
 
-                headerTintColor: colors.text,
+      <Tabs.Screen
+        name="mapView"
+        options={{
+          title: "Map",
+          tabBarButtonTestID: "mapTab"
+        }}
+      />
 
-                tabBarStyle: {
-                    backgroundColor: colors.primary,
-                    borderTopColor: "#e5e7eb"
-                },
+      <Tabs.Screen
+        name="leaderboard"
+        options={{
+          title: "Leaderboard",
+          tabBarButtonTestID: "leaderboardTab"
+        }}
+      />
 
-                tabBarActiveTintColor: colors.primarySoft,
+      <Tabs.Screen
+        name="userProfile"
+        options={{
+          title: "Profile",
+          tabBarButtonTestID: "profileTab"
+        }}
+      />
 
-                tabBarInactiveTintColor: colors.primaryDark
+      <Tabs.Screen
+        name="createRide"
+        options={{
+          href: null,
+          title: "Create Ride"
+        }}
+      />
 
-            }}
-
-        >
-
-            <Tabs.Screen
-                name="searchRide"
-                options={{ title: "Search", tabBarButtonTestID: "searchTab" }}
-            />
-
-            <Tabs.Screen
-                name="mapView"
-                options={{ title: "Map", tabBarButtonTestID: "mapTab" }}
-            />
-
-            <Tabs.Screen
-                name="createRide"
-                options={{ title: "Create", tabBarButtonTestID: "createTab" }}
-            />
-
-            <Tabs.Screen
-                name="myRides"
-                options={{ title: "My Rides", tabBarButtonTestID: "myRidesTab" }}
-            />
-
-            <Tabs.Screen
-                name="leaderboard"
-                options={{ title: "Leaderboard", tabBarButtonTestID: "leaderboardTab" }}
-            />
-
-            <Tabs.Screen
-                name="userProfile"
-                options={{ title: "Profile", tabBarButtonTestID: "profileTab" }}
-            />
-            
-
-        </Tabs>
-
-    );
-
+      <Tabs.Screen
+        name="myRides"
+        options={{
+          href: null,
+          title: "My Rides"
+        }}
+      />
+    </Tabs>
+  );
 }
