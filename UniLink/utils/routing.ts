@@ -148,9 +148,7 @@ export async function searchPlaces(
     const url =
       `https://nominatim.openstreetmap.org/search?` +
       `q=${encodeURIComponent(query)}` +
-      `&format=json&limit=5&countrycodes=pt` +
-      `&viewbox=-8.72,41.24,-8.50,41.10` +
-      `&bounded=0&addressdetails=1`;
+      `&format=json&limit=5&countrycodes=pt&addressdetails=1`;
 
     const response = await fetch(url, {
       headers: {
