@@ -8,6 +8,8 @@ import {
  Alert,
  ActivityIndicator
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 
 import {
  getCurrentUser,
@@ -216,13 +218,14 @@ export default function Login(){
 
  return(
 
-<ScrollView
- style={layout.screen}
- contentContainerStyle={{
-  justifyContent:"center",
-  flexGrow:1
- }}
->
+  <SafeAreaView style={layout.screen}>
+    <ScrollView
+      style={layout.screen}
+      contentContainerStyle={{
+        justifyContent: "center",
+        flexGrow: 1
+      }}
+    >
 
 
 <Text style={[
@@ -456,8 +459,8 @@ ana@feup.pt / 123456
 </View>
 
 
-</ScrollView>
-
- );
-
+      </ScrollView>
+    </SafeAreaView>
+  );
 }
+
