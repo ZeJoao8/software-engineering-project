@@ -1,5 +1,5 @@
 import { render } from "@testing-library/react-native";
-import CreateRide from "../app/(tabs)/createRide";
+import CreateRide from "../app/createRide";
 import { getCurrentUser } from "../data/user";
 import { getUserCars, subscribeToCarsChanges } from "../data/cars";
 
