@@ -8,9 +8,47 @@ export interface TransitLeg {
   durationMin: number;
   fromCoords: Coordinates;
   toCoords: Coordinates;
+  path: Coordinates[];
+}
+
+// Standard Google polyline decoder
+function decodePolyline(str: string, precision: number = 5): Coordinates[] {
+  let index = 0;
+  let lat = 0;
+  let lng = 0;
+  const coordinates: Coordinates[] = [];
+  const factor = Math.pow(10, precision);
+
+  while (index < str.length) {
+    let b;
+    let shift = 0;
+    let result = 0;
+    do {
+      b = str.charCodeAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+    const dlat = ((result & 1) ? ~(result >> 1) : (result >> 1));
+    lat += dlat;
+
+    shift = 0;
+    result = 0;
+    do {
+      b = str.charCodeAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+    const dlng = ((result & 1) ? ~(result >> 1) : (result >> 1));
+    lng += dlng;
+
+    coordinates.push({ latitude: lat / factor, longitude: lng / factor });
+  }
+
+  return coordinates;
 }
 
 export interface TransitRoute {
+
   departureTime: string;
   arrivalTime: string;
   durationMin: number;
@@ -53,11 +91,13 @@ export async function getTransitRoutes(
         duration: number;
         routeShortName?: string;
         routeLongName?: string;
+        legGeometry?: { points: string; length: number };
         from: { name: string; lat: number; lon: number };
         to: { name: string; lat: number; lon: number };
       }>;
     }>;
   };
+
 
   if (!data.itineraries?.length) return [];
 
@@ -79,6 +119,13 @@ export async function getTransitRoutes(
       durationMin: Math.round(leg.duration / 60),
       fromCoords: { latitude: leg.from.lat, longitude: leg.from.lon },
       toCoords: { latitude: leg.to.lat, longitude: leg.to.lon },
+      path: leg.legGeometry?.points
+        ? decodePolyline(leg.legGeometry.points)
+        : [
+            { latitude: leg.from.lat, longitude: leg.from.lon },
+            { latitude: leg.to.lat, longitude: leg.to.lon },
+          ],
     })),
   }));
 }
+

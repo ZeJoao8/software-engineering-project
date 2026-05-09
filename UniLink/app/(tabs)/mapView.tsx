@@ -48,6 +48,7 @@ import {
 } from "../../styles/theme";
 
 import type { Ride } from "../../types/Ride";
+import ZoomControls from "../../components/ZoomControls";
 
 
 const FEUP_REGION = {
@@ -313,76 +314,14 @@ export default function MapViewScreen() {
 
 
       {/* ZOOM BUTTONS */}
-
-      <View style={styles.zoomControls}>
-
-        <Pressable
-          style={styles.zoomButton}
-          onPress={() => {
-
-            if (!mapRef.current) return;
-
-            mapRef.current
-              .getCamera()
-              .then(cam => {
-
-                if (!cam) return;
-
-                cam.altitude =
-                  (cam.altitude ?? 10000) / 2;
-
-                if (cam.zoom)
-                  cam.zoom += 1;
-
-                mapRef.current?.animateCamera(cam);
-
-              });
-
-          }}
-        >
-
-          <Text style={styles.zoomButtonText}>
-            +
-          </Text>
-
-        </Pressable>
-
-
-        <View style={styles.zoomDivider} />
-
-
-        <Pressable
-          style={styles.zoomButton}
-          onPress={() => {
-
-            if (!mapRef.current) return;
-
-            mapRef.current
-              .getCamera()
-              .then(cam => {
-
-                if (!cam) return;
-
-                cam.altitude =
-                  (cam.altitude ?? 10000) * 2;
-
-                if (cam.zoom)
-                  cam.zoom -= 1;
-
-                mapRef.current?.animateCamera(cam);
-
-              });
-
-          }}
-        >
-
-          <Text style={styles.zoomButtonText}>
-            −
-          </Text>
-
-        </Pressable>
-
-      </View>
+      <ZoomControls
+        mapRef={mapRef}
+        style={{
+          position: "absolute",
+          right: 16,
+          bottom: "50%",
+        }}
+      />
 
 
 
@@ -702,62 +641,4 @@ const styles = StyleSheet.create({
   },
 
 
-  zoomControls: {
-
-    position: "absolute",
-
-    right: 16,
-
-    bottom: "50%",
-
-    backgroundColor:
-      "rgba(255,255,255,0.95)",
-
-    borderRadius: 8,
-
-    elevation: 4,
-
-    borderWidth: StyleSheet.hairlineWidth,
-
-    borderColor: colors.border,
-
-    alignItems: "center",
-
-    justifyContent: "center",
-  },
-
-
-  zoomButton: {
-
-    width: 44,
-
-    height: 44,
-
-    alignItems: "center",
-
-    justifyContent: "center",
-  },
-
-
-  zoomButtonText: {
-
-    fontSize: 24,
-
-    color: colors.primary,
-
-    fontWeight: "400",
-
-    lineHeight: 28,
-  },
-
-
-  zoomDivider: {
-
-    width: 32,
-
-    height: StyleSheet.hairlineWidth,
-
-    backgroundColor: colors.border,
-  },
-
-});
+});

@@ -62,15 +62,12 @@ export default function BusAlternatives({
   }, [origin, destination, originCoords, destinationCoords]);
 
   return (
-    <View style={[components.card, { borderColor: colors.primaryLight, borderWidth: 1.5 }]}>
-
-      <Text style={[layout.subtitle, { color: colors.primary, fontWeight: "700", marginBottom: spacing.sm }]}>
-        🚌 Bus Alternatives
-      </Text>
+    <View>
 
       {loading && (
         <ActivityIndicator color={colors.primary} style={{ marginVertical: spacing.sm }} />
       )}
+
 
       {!loading && (failed || routes.length === 0) && (
         <Text style={{ color: colors.textLight }}>

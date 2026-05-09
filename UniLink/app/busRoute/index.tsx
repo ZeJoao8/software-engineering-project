@@ -1,13 +1,21 @@
+import React, { useRef, useEffect, useState } from "react";
+
 import { Pressable, ScrollView, Text, View } from "react-native";
+
+
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import MapView, { Marker, Polyline, PROVIDER_DEFAULT } from "react-native-maps";
 import { useRouter } from "expo-router";
 
 import { getSelectedBusRoute } from "../../data/busRoute";
+import { getRoute, type Coordinates } from "../../utils/routing";
+import ZoomControls from "../../components/ZoomControls";
+
 import { components } from "../../styles/components";
 import { colors, spacing } from "../../styles/theme";
 import { layout } from "../../styles/layout";
+
 
 function modeEmoji(mode: string) {
   switch (mode.toUpperCase()) {
@@ -28,9 +36,32 @@ function modeLabel(mode: string, lineName?: string) {
 
 export default function BusRouteDetail() {
   const router = useRouter();
+  const mapRef = useRef<MapView>(null);
   const selected = getSelectedBusRoute();
+  const [paths, setPaths] = useState<Record<number, Coordinates[]>>({});
+
+  useEffect(() => {
+    if (!selected) return;
+    
+    let cancelled = false;
+    async function loadPaths() {
+      const newPaths: Record<number, Coordinates[]> = {};
+      for (let i = 0; i < selected!.route.legs.length; i++) {
+        const leg = selected!.route.legs[i];
+        const res = await getRoute(leg.fromCoords, leg.toCoords);
+        if (res && !cancelled) {
+          newPaths[i] = res.coordinates;
+        }
+      }
+      if (!cancelled) setPaths(newPaths);
+    }
+    loadPaths();
+
+    return () => { cancelled = true; };
+  }, [selected]);
 
   if (!selected) {
+
     router.back();
     return null;
   }
@@ -74,41 +105,65 @@ export default function BusRouteDetail() {
 
         </View>
 
-        <MapView
-          style={{ height: 280, marginHorizontal: spacing.md, borderRadius: 12, overflow: "hidden" }}
-          provider={PROVIDER_DEFAULT}
-          initialRegion={region}
-          scrollEnabled
-          zoomEnabled
-          rotateEnabled={false}
-          pitchEnabled={false}
-        >
+        <View style={{ position: "relative" }}>
+          <MapView
+            ref={mapRef}
+            style={{ height: 280, marginHorizontal: spacing.md, borderRadius: 12, overflow: "hidden" }}
+            provider={PROVIDER_DEFAULT}
+            initialRegion={region}
+            scrollEnabled
+            zoomEnabled
+            rotateEnabled={false}
+            pitchEnabled={false}
+          >
+
+          {/* Origin Marker */}
+          <Marker
+            coordinate={route.legs[0].fromCoords}
+            title={origin}
+            pinColor={colors.primary}
+          />
+
+          {/* Transit Stops */}
           {transitLegs.map((leg, i) => (
-            <Marker
-              key={`from-${i}`}
-              coordinate={leg.fromCoords}
-              title={leg.fromStop}
-              pinColor={colors.primary}
-            />
+            <React.Fragment key={`bus-stops-${i}`}>
+              <Marker
+                coordinate={leg.fromCoords}
+                title={leg.fromStop}
+                pinColor={colors.warning}
+              />
+              <Marker
+                coordinate={leg.toCoords}
+                title={leg.toStop}
+                pinColor={colors.warning}
+              />
+            </React.Fragment>
           ))}
 
-          {transitLegs.length > 0 && (
-            <Marker
-              coordinate={transitLegs[transitLegs.length - 1].toCoords}
-              title={transitLegs[transitLegs.length - 1].toStop}
-              pinColor={colors.danger}
-            />
-          )}
+          {/* Destination Marker */}
+          <Marker
+            coordinate={route.legs[route.legs.length - 1].toCoords}
+            title={destination}
+            pinColor={colors.danger}
+          />
 
           {route.legs.map((leg, i) => (
+
             <Polyline
               key={`leg-${i}`}
-              coordinates={[leg.fromCoords, leg.toCoords]}
+              coordinates={paths[i] || leg.path || [leg.fromCoords, leg.toCoords]}
               strokeColor={leg.mode.toUpperCase() === "WALK" ? colors.textLight : colors.primary}
               strokeWidth={leg.mode.toUpperCase() === "WALK" ? 2 : 4}
             />
           ))}
-        </MapView>
+
+          </MapView>
+          <ZoomControls
+            mapRef={mapRef}
+            style={{ position: "absolute", right: spacing.md + 8, top: 8 }}
+          />
+        </View>
+
 
         <View style={{ padding: spacing.md }}>
 
@@ -124,8 +179,9 @@ export default function BusRouteDetail() {
                   {modeLabel(leg.mode, leg.lineName)}
                 </Text>
                 <Text style={{ color: colors.textLight, fontSize: 13, marginTop: 2 }}>
-                  {leg.fromStop} → {leg.toStop}
+                  {leg.fromStop === "START" ? origin : leg.fromStop} → {leg.toStop === "END" ? destination : leg.toStop}
                 </Text>
+
               </View>
 
               <Text style={{ color: colors.textLight, fontSize: 13 }}>

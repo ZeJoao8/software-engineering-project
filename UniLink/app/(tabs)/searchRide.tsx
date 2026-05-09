@@ -3,8 +3,10 @@ import {
   Switch,
   Text,
   TextInput,
-  View
+  View,
+  Pressable
 } from "react-native";
+
 
 import {
   useFocusEffect,
@@ -76,6 +78,9 @@ export default function Home() {
 
   const [now, setNow] =
     useState(new Date());
+
+  const [showBusAlternatives, setShowBusAlternatives] =
+    useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -218,6 +223,10 @@ export default function Home() {
     </View>
   );
 
+  const hasOriginText = originFilter.trim().length > 0;
+  const hasDestText = destinationFilter.trim().length > 0;
+  const hasBothCoords = originCoords !== null && destinationCoords !== null;
+
   const emptyState = (
     <>
       <View style={components.card}>
@@ -229,16 +238,55 @@ export default function Home() {
         </Text>
       </View>
 
-      {originFilter.trim().length > 0 && destinationFilter.trim().length > 0 && (
-        <BusAlternatives
-          origin={originFilter}
-          destination={destinationFilter}
-          originCoords={originCoords}
-          destinationCoords={destinationCoords}
-        />
+      {hasOriginText && hasDestText && (
+        <View style={[components.card, { borderColor: colors.primaryLight, borderWidth: 1.5 }]}>
+          <Pressable
+            onPress={() => setShowBusAlternatives(prev => !prev)}
+            style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}
+          >
+            <Text style={{ fontWeight: "700", fontSize: 15, color: colors.primary }}>
+              🚌 Bus Alternatives
+            </Text>
+            <Text style={{ fontSize: 18, color: colors.primary, fontWeight: "600" }}>
+              {showBusAlternatives ? "▲" : "▼"}
+            </Text>
+          </Pressable>
+
+          {showBusAlternatives && (
+            <View style={{ marginTop: spacing.sm }}>
+              {!hasBothCoords ? (
+                <View style={{
+                  backgroundColor: colors.warningSoft,
+                  borderRadius: 8,
+                  padding: spacing.sm,
+                  flexDirection: "row",
+                  alignItems: "flex-start",
+                  gap: spacing.xs,
+                  marginTop: spacing.xs,
+                }}>
+                  <Text style={{ fontSize: 15 }}>⚠️</Text>
+                  <Text style={{ color: colors.text, fontSize: 13, flex: 1, lineHeight: 18 }}>
+                    To see bus alternatives, please select a specific address from the suggestions for{" "}
+                    {!originCoords ? "Origin" : ""}
+                    {!originCoords && !destinationCoords ? " and " : ""}
+                    {!destinationCoords ? "Destination" : ""}.
+                  </Text>
+                </View>
+              ) : (
+                <BusAlternatives
+                  origin={originFilter}
+                  destination={destinationFilter}
+                  originCoords={originCoords}
+                  destinationCoords={destinationCoords}
+                />
+              )}
+            </View>
+          )}
+        </View>
       )}
     </>
   );
+
 
   return (
     <FlatList
@@ -246,6 +294,7 @@ export default function Home() {
       contentContainerStyle={{ padding: spacing.md, paddingBottom: spacing.xl }}
       data={availableRides}
       keyExtractor={i => i.id}
+      keyboardShouldPersistTaps="handled"
       ListHeaderComponent={filtersHeader}
       ListEmptyComponent={emptyState}
       renderItem={({ item }) => (
@@ -258,4 +307,5 @@ export default function Home() {
       )}
     />
   );
+
 }
