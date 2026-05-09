@@ -10,8 +10,8 @@ import { StatusBar } from 'expo-status-bar';
 
 import 'react-native-reanimated';
 
-import { useColorScheme }
- from '@/hooks/use-color-scheme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { colors } from '../styles/theme';
 
 export default function RootLayout() {
 
@@ -37,6 +37,11 @@ export default function RootLayout() {
     <Stack.Screen name="index" />
 
     <Stack.Screen name="(tabs)" />
+
+    <Stack.Screen 
+      name="createRide" 
+      options={{ headerShown: false }} 
+    />
 
     <Stack.Screen name="ride/[id]" />
 

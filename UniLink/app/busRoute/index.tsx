@@ -147,15 +147,19 @@ export default function BusRouteDetail() {
             pinColor={colors.danger}
           />
 
-          {route.legs.map((leg, i) => (
+          {route.legs.map((leg, i) => {
+            const isWalk = leg.mode.toUpperCase() === "WALK";
+            return (
+              <Polyline
+                key={`leg-${i}`}
+                coordinates={paths[i] || leg.path || [leg.fromCoords, leg.toCoords]}
+                strokeColor={isWalk ? colors.textLight : colors.primary}
+                strokeWidth={isWalk ? 3 : 5}
+                lineDashPattern={isWalk ? [6, 6] : undefined}
+              />
+            );
+          })}
 
-            <Polyline
-              key={`leg-${i}`}
-              coordinates={paths[i] || leg.path || [leg.fromCoords, leg.toCoords]}
-              strokeColor={leg.mode.toUpperCase() === "WALK" ? colors.textLight : colors.primary}
-              strokeWidth={leg.mode.toUpperCase() === "WALK" ? 2 : 4}
-            />
-          ))}
 
           </MapView>
           <ZoomControls

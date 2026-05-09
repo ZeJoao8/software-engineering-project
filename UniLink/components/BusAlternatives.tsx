@@ -11,12 +11,12 @@ import { layout } from "../styles/layout";
 
 function modeEmoji(mode: string) {
   switch (mode.toUpperCase()) {
-    case "BUS":    return "🚌";
+    case "BUS": return "🚌";
     case "SUBWAY": return "🚇";
-    case "RAIL":   return "🚆";
-    case "TRAM":   return "🚃";
-    case "FERRY":  return "⛴️";
-    default:       return "🚌";
+    case "RAIL": return "🚆";
+    case "TRAM": return "🚃";
+    case "FERRY": return "⛴️";
+    default: return "🚌";
   }
 }
 

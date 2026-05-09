@@ -12,22 +12,25 @@ function CreateRideHeaderButton() {
 
   return (
     <Pressable
-      onPress={() => router.push("/(tabs)/createRide")}
+      onPress={() => router.push("/createRide")}
       testID="createRideHeaderButton"
-      style={{
-        paddingHorizontal: 16,
-        paddingVertical: 4
-      }}
+      style={({ pressed }) => ({
+        backgroundColor: colors.primarySoft,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 8,
+        marginRight: 16,
+        opacity: pressed ? 0.8 : 1,
+      })}
     >
       <Text
         style={{
-          color: colors.primarySoft,
-          fontSize: 30,
+          color: colors.primary,
+          fontSize: 14,
           fontWeight: "700",
-          lineHeight: 32
         }}
       >
-        +
+        Create +
       </Text>
     </Pressable>
   );
@@ -92,13 +95,6 @@ export default function TabsLayout() {
         }}
       />
 
-      <Tabs.Screen
-        name="createRide"
-        options={{
-          href: null,
-          title: "Create Ride"
-        }}
-      />
 
       <Tabs.Screen
         name="myRides"
