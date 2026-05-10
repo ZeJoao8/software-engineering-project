@@ -27,6 +27,6 @@ export interface Ride {
   destinationCoords?: { latitude: number; longitude: number };
   distanceKm?: number;
 
-  /** Maps passengerId → 6-digit boarding code (generated on join). */
   passengerCodes?: Record<string, string>;
-}
+  verifiedPassengers?: string[];
+}
