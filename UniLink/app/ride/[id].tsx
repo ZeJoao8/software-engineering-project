@@ -8,6 +8,8 @@ import {
   ScrollView,
 } from "react-native";
 
+import * as Clipboard from "expo-clipboard";
+
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
@@ -28,7 +30,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { Button } from "../../components/Button";
 import { components } from "../../styles/components";
 import { layout } from "../../styles/layout";
-import { colors, spacing } from "../../styles/theme";
+import { colors, spacing, radius } from "../../styles/theme";
 
 import RouteMap from "../../components/RouteMap";
 
@@ -171,6 +173,10 @@ export default function RideDetails() {
     );
   }
 
+  function generateBoardingCode(): string {
+    return String(Math.floor(100000 + Math.random() * 900000));
+  }
+
   function reserveSeat() {
     if (r.completed)
       return Alert.alert("Cannot reserve", "Ride already completed.");
@@ -186,12 +192,18 @@ export default function RideDetails() {
       {
         text: "Yes",
         onPress: async () => {
+          const code = generateBoardingCode();
+          const updatedCodes = { ...(r.passengerCodes ?? {}), [activeUser.uid]: code };
           await updateRide({
             ...r,
             availableSeats: r.availableSeats - 1,
             passengers: [...r.passengers, activeUser.uid],
+            passengerCodes: updatedCodes,
           });
-          router.replace("/(tabs)/myRides");
+          Alert.alert(
+            "Seat reserved! 🎉",
+            `Your boarding code is:\n\n${code}\n\nShow this code to the driver before the ride starts.`
+          );
         },
       },
     ]);
@@ -207,10 +219,13 @@ export default function RideDetails() {
         text: "Yes",
         style: "destructive",
         onPress: async () => {
+          const updatedCodes = { ...(r.passengerCodes ?? {}) };
+          delete updatedCodes[activeUser.uid];
           await updateRide({
             ...r,
             availableSeats: Math.min(r.availableSeats + 1, r.totalSeats),
             passengers: r.passengers.filter(p => p !== activeUser.uid),
+            passengerCodes: updatedCodes,
           });
           router.replace("/(tabs)/myRides");
         },
@@ -274,10 +289,13 @@ export default function RideDetails() {
         text: "Yes",
         style: "destructive",
         onPress: async () => {
+          const updatedCodes = { ...(r.passengerCodes ?? {}) };
+          delete updatedCodes[passengerId];
           await updateRide({
             ...r,
             passengers: r.passengers.filter(pid => pid !== passengerId),
             availableSeats: Math.min(r.availableSeats + 1, r.totalSeats),
+            passengerCodes: updatedCodes,
           });
           router.replace(`/ride/${r.id}`);
         },
@@ -500,7 +518,7 @@ export default function RideDetails() {
                   marginBottom: spacing.sm,
                 }}
               >
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexShrink: 1 }}>
                   <Text
                     style={{ color: colors.primary, fontWeight: "500" }}
                     onPress={() => {
@@ -512,6 +530,22 @@ export default function RideDetails() {
                   >
                     {p.name}
                   </Text>
+
+                  {/* Boarding code visible to driver while ride not completed */}
+                  {isDriver && !r.completed && r.passengerCodes?.[p.uid] && (
+                    <View style={{
+                      backgroundColor: colors.primarySoft,
+                      borderWidth: 1,
+                      borderColor: colors.primaryLight,
+                      paddingHorizontal: 8,
+                      paddingVertical: 2,
+                      borderRadius: 6,
+                    }}>
+                      <Text style={{ fontSize: 12, fontWeight: "700", color: colors.primaryDark, letterSpacing: 1 }}>
+                        🔑 {r.passengerCodes[p.uid]}
+                      </Text>
+                    </View>
+                  )}
 
                   {hasEverReportedUser(p.uid) && (
                     <Text style={{ fontSize: 14 }}>⚠️</Text>
@@ -578,6 +612,49 @@ export default function RideDetails() {
             );
           })}
         </View>
+
+        {/* BOARDING CODE – visible to passenger only */}
+        {joined && !isDriver && !r.completed && r.passengerCodes?.[activeUser.uid] && (
+          <View style={[
+            components.card,
+            {
+              borderWidth: 1.5,
+              borderColor: colors.primaryLight,
+              backgroundColor: colors.primarySoft,
+              alignItems: "center",
+            },
+          ]}>
+            <Text style={{ fontSize: 13, fontWeight: "600", color: colors.primaryDark, marginBottom: spacing.xs }}>
+              🎫 Your Boarding Code
+            </Text>
+            <Text style={{
+              fontSize: 32,
+              fontWeight: "800",
+              letterSpacing: 6,
+              color: colors.primary,
+              marginBottom: spacing.sm,
+            }}>
+              {r.passengerCodes[activeUser.uid]}
+            </Text>
+            <Pressable
+              style={{
+                backgroundColor: colors.primary,
+                paddingHorizontal: spacing.md,
+                paddingVertical: spacing.xs + 2,
+                borderRadius: radius.md,
+              }}
+              onPress={() => {
+                Clipboard.setStringAsync(r.passengerCodes![activeUser.uid]);
+                Alert.alert("Copied!", "Boarding code copied to clipboard.");
+              }}
+            >
+              <Text style={{ color: "white", fontWeight: "600", fontSize: 13 }}>Copy code</Text>
+            </Pressable>
+            <Text style={{ fontSize: 11, color: colors.textLight, marginTop: spacing.sm, textAlign: "center" }}>
+              Show this code to the driver before the ride starts.
+            </Text>
+          </View>
+        )}
 
         {/* RIDE FEEDBACK */}
         {allFeedbackComments.length > 0 && (
