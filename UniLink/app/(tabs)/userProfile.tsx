@@ -319,7 +319,17 @@ export default function Profile() {
 
 
         <View style={{ height: spacing.sm }} />
+        
+        <Text style={forms.label}>
+          E-mail
+        </Text>
 
+        <Text>
+          {activeUser.email}
+        </Text>
+
+        <View style={{ height: spacing.sm }} />
+        
         <Text style={forms.label}>
           Gender
         </Text>
@@ -363,6 +373,82 @@ export default function Profile() {
 
 
         <View style={{ height: spacing.md }} />
+
+        <Text style={layout.subtitle}>
+          My cars
+        </Text>
+
+        {userCars.length === 0 && (
+          <Text style={{ color: colors.textLight }}>
+            No cars yet
+          </Text>
+        )}
+
+        {userCars.map(car => (
+          <View
+            key={car.id}
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: spacing.sm
+            }}
+          >
+            <Text>
+              {car.model} • {car.color} • {car.licensePlate}
+            </Text>
+
+            {editing && (
+              <Text
+                style={{
+                  color: colors.danger,
+                  fontWeight: "600"
+                }}
+                onPress={() => removeCar(car.id)}
+              >
+                remove
+              </Text>
+            )}
+          </View>
+        ))}
+
+        {editing && (
+          <View style={{ marginTop: spacing.sm }}>
+            <Button
+              outline
+              testID="toggleAddCarButton"
+              onPress={() => setShowCarForm(!showCarForm)}
+              label={showCarForm ? "Cancel" : "Add car"}
+            />
+          </View>
+        )}
+
+        {editing && showCarForm && (
+          <View style={{ marginTop: spacing.md, padding: spacing.md, backgroundColor: colors.background, borderRadius: 8 }}>
+            <Text style={{ ...layout.subtitle, fontSize: 16 }}>Add car details</Text>
+
+            <Text style={forms.label}>Model</Text>
+            <TextInput value={model} onChangeText={setModel} style={forms.input} testID="carModelInput" />
+            <View style={{ height: spacing.sm }} />
+
+            <Text style={forms.label}>Color</Text>
+            <TextInput value={color} onChangeText={setColor} style={forms.input} testID="carColorInput" />
+            <View style={{ height: spacing.sm }} />
+
+            <Text style={forms.label}>Plate</Text>
+            <TextInput value={plate} onChangeText={setPlate} autoCapitalize="characters" style={forms.input} testID="carPlateInput" />
+            <View style={{ height: spacing.sm }} />
+
+            <Text style={forms.label}>Seats</Text>
+            <TextInput value={seats} onChangeText={setSeats} keyboardType="numeric" style={forms.input} testID="carSeatsInput" />
+
+            <View style={{ marginTop: spacing.md }}>
+              <Button testID="saveCarButton" onPress={() => void addNewCar()} label="Save car" />
+            </View>
+          </View>
+        )}
+
+        <View style={{ height: spacing.lg }} />
 
         {!editing ? (
 
@@ -423,157 +509,6 @@ export default function Profile() {
       </View>
 
 
-
-      {/* CARS */}
-      <View style={components.card}>
-
-        <Text style={layout.subtitle}>
-          My cars
-        </Text>
-
-
-        {userCars.length === 0 && (
-          <Text style={{ color: colors.textLight }}>
-            No cars yet
-          </Text>
-        )}
-
-
-        {userCars.map(car => (
-
-          <View
-            key={car.id}
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: spacing.sm
-            }}
-          >
-
-            <Text>
-              {car.model} • {car.licensePlate}
-            </Text>
-
-
-            {editing && (
-
-              <Text
-                style={{
-                  color: colors.danger,
-                  fontWeight: "600"
-                }}
-                onPress={() =>
-                  removeCar(car.id)
-                }
-              >
-                remove
-              </Text>
-
-            )}
-
-          </View>
-
-        ))}
-
-
-        {editing && (
-
-          <View style={{ marginTop: spacing.sm }}>
-
-            <Button
-              outline
-              testID="toggleAddCarButton"
-              onPress={() => setShowCarForm(!showCarForm)}
-              label={showCarForm ? "Cancel" : "Add car"}
-            />
-
-          </View>
-
-        )}
-
-      </View>
-
-
-
-      {editing && showCarForm && (
-
-        <View style={components.card}>
-
-          <Text style={layout.subtitle}>
-            Add car
-          </Text>
-
-
-          <Text style={forms.label}>
-            Model
-          </Text>
-
-          <TextInput
-            value={model}
-            onChangeText={setModel}
-            style={forms.input}
-            testID="carModelInput"
-          />
-
-
-          <View style={{ height: spacing.sm }} />
-
-          <Text style={forms.label}>
-            Color
-          </Text>
-
-          <TextInput
-            value={color}
-            onChangeText={setColor}
-            style={forms.input}
-            testID="carColorInput"
-          />
-
-
-          <View style={{ height: spacing.sm }} />
-
-          <Text style={forms.label}>
-            Plate
-          </Text>
-
-          <TextInput
-            value={plate}
-            onChangeText={setPlate}
-            autoCapitalize="characters"
-            style={forms.input}
-            testID="carPlateInput"
-          />
-
-
-          <View style={{ height: spacing.sm }} />
-
-          <Text style={forms.label}>
-            Seats
-          </Text>
-
-          <TextInput
-            value={seats}
-            onChangeText={setSeats}
-            keyboardType="numeric"
-            style={forms.input}
-            testID="carSeatsInput"
-          />
-
-
-          <View style={{ marginTop: spacing.md }}>
-
-            <Button
-              testID="saveCarButton"
-              onPress={() => void addNewCar()}
-              label="Save car"
-            />
-
-          </View>
-
-        </View>
-
-      )}
 
 
 

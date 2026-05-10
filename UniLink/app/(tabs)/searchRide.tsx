@@ -223,8 +223,6 @@ export default function Home() {
     </View>
   );
 
-  const hasOriginText = originFilter.trim().length > 0;
-  const hasDestText = destinationFilter.trim().length > 0;
   const hasBothCoords = originCoords !== null && destinationCoords !== null;
 
   const emptyState = (
@@ -238,7 +236,7 @@ export default function Home() {
         </Text>
       </View>
 
-      {hasOriginText && hasDestText && (
+      {
         <View style={[components.card, { borderColor: colors.primaryLight, borderWidth: 1.5 }]}>
           <Pressable
             onPress={() => setShowBusAlternatives(prev => !prev)}
@@ -283,7 +281,7 @@ export default function Home() {
             </View>
           )}
         </View>
-      )}
+      }
     </>
   );
 
