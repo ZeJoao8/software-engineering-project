@@ -29,11 +29,13 @@ appId: host.exp.exponent
 - tapOn: "Yes"
 - waitForAnimationToEnd
 
-# VERIFICAR NAS MINHAS VIAGENS
+# VERIFICAR NAS MINHAS VIAGENS (via Profile → My rides)
 - tapOn:
-    id: myRidesTab
-- swipe:
-    direction: DOWN
+    id: profileTab
+- waitForAnimationToEnd
+- tapOn:
+    id: profileMyRidesButton
+- waitForAnimationToEnd
 - assertVisible: "FEUP → Boavista"
 
 # ABRIR VIAGEM E VER PERFIL DO CONDUTOR
@@ -46,6 +48,13 @@ appId: host.exp.exponent
 - tapOn: "← Back"
 
 # CANCELAR RESERVA (para limpar o estado para o próximo teste)
+# Navegar de volta para My Rides
+- tapOn:
+    id: profileTab
+- waitForAnimationToEnd
+- tapOn:
+    id: profileMyRidesButton
+- waitForAnimationToEnd
 - tapOn: "FEUP → Boavista"
 - tapOn:
     id: cancelReservationButton

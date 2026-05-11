@@ -3,9 +3,9 @@ appId: host.exp.exponent
 - runFlow: ../subflows/launch.yaml
 - runFlow: ../subflows/login.yaml
 
-# CRIAR VIAGEM COM MORADA VÁLIDA
+# CRIAR VIAGEM — botão "Create +" no header da tab Rides
 - tapOn:
-    id: createTab
+    id: createRideHeaderButton
 
 # --- ORIGEM ---
 - tapOn:

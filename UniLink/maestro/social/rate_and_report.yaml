@@ -3,9 +3,13 @@ appId: host.exp.exponent
 - runFlow: ../subflows/launch.yaml
 - runFlow: ../subflows/login.yaml
 
-# Vai à aba de histórico (assumindo que a viagem já foi dada como "Completed")
+# Vai ao perfil e depois a My Rides (myRidesTab já não é visível)
 - tapOn:
-    id: myRidesTab
+    id: profileTab
+- waitForAnimationToEnd
+- tapOn:
+    id: profileMyRidesButton
+- waitForAnimationToEnd
 - swipe:
     direction: DOWN
 

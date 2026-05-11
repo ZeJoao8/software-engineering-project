@@ -23,6 +23,7 @@ This Software Development Report, tailored for LEIC-ES-2025-26, provides compreh
   * [Sprint 3](#Sprint-3)
   * [Sprint 4](#Sprint-4)
   * [Final Release](#Final-Release)
+* [How to Run the Project](#How-to-Run-the-Project)
   
 
 Contributions are expected to be made exclusively by the initial team, but we may open them to the community, after the course, in all areas and topics: requirements, technologies, development, experimentation, testing, etc.
@@ -243,6 +244,56 @@ The women-only ride option represents an important safety feature requested duri
 
 A functional APK was generated and released for testing purposes. Link for Sprint 0 vertical prototype APK: https://expo.dev/artifacts/eas/oox2WQnwTiu29LCRyGhjN4.apk
 
+---
+
+## How to Run the Project
+
+To run the UniLink project locally, follow these steps:
+
+### 1. Prerequisites
+
+Ensure you have the following installed:
+- **Node.js** (LTS version)
+- **npm** (comes with Node.js)
+- **Expo Go** app on your physical device (available on App Store and Google Play) or an **Android Emulator / iOS Simulator**.
+- **Maestro CLI** (optional, for running acceptance tests).
+
+### 2. Installation & Setup
+
+Clone the repository, navigate to the `UniLink` directory, and install the dependencies:
+
+```bash
+git clone <repository-url>
+cd UniLink
+npm install
+```
+
+### 3. Running the App
+
+The project comes with the necessary Firebase configuration in the `.env` file already included in the repository. To start the application:
+
+```bash
+npm start
+```
+
+- **Physical Device**: Scan the QR code displayed in the terminal using the **Expo Go** app (Android) or the **Camera app** (iOS).
+- **Android Emulator**: Press `a` in the terminal.
+- **iOS Simulator**: Press `i` in the terminal.
+
+### 4. Running Tests
+
+- **Unit Tests**:
+  ```bash
+  npm test
+  ```
+- **Acceptance Tests (Maestro)**:
+  Make sure your emulator is running and the app is installed, then:
+  ```bash
+  npm run acceptance:maestro
+  ```
+
+---
+
 ## Project management
 <!--
 Software project management is the art and science of planning and leading software projects, in which software projects are planned, implemented, monitored and controlled.
@@ -459,6 +510,90 @@ Next improvements:
 - Improve ride completion flow
 
 ### Sprint 2
+
+### Sprint Backlog
+
+<p align="center" justify="center">
+  <img src="Sprint2Start.png"/>
+</p>
+
+### Done
+
+<p align="center" justify="center">
+  <img src="Sprint2End.png"/>
+</p>
+
+#### Sprint goal
+
+Enhance the platform with gamification, improved security for ride completion, and fallback options for public transport, while refining the overall user experience and interface.
+
+#### Sprint planning
+
+Building on the social features from Sprint 1, the team focused on:
+
+- **Gamification** — driving user retention through streaks and achievements
+- **Ride Security** — ensuring safe and verified ride completion
+- **Bus Alternatives** — providing utility even when no rides are available
+- **UI/UX Polishing** — improving navigation and map interactions
+
+Tasks were tracked in GitHub Projects and distributed among the team.
+
+#### Development
+
+Features implemented this sprint:
+
+**🏆 Gamification & Badges**
+- **Medals & Achievements**: Added a comprehensive badge system to reward users for their milestones (e.g., "First Ride", "Eco Warrior").
+- **Weekly Streaks**: Implemented a streak system to encourage daily/weekly engagement with the app.
+- **Badge Display**: Created a dedicated component to showcase earned badges on user profiles.
+
+**🔒 Ride Security & Completion**
+- **Security Codes**: Drivers now require a unique security code from the passenger to mark a ride as completed. This ensures that the transaction only finishes when both parties have met.
+- **Completion Flow**: Refined the ride detail and completion logic to handle these secure transitions.
+
+**🚌 Bus Alternatives**
+- **Route Fallback**: If a ride search returns no results, the app now suggests alternative bus routes for the same path.
+- **Bus Route Details**: Integration of transit data to show bus stops and schedules as a reliable fallback.
+
+**🎨 UI/UX & Navigation**
+- **Map Enhancements**: Added custom zoom controls and improved marker interaction on the main map.
+- **Navigation Refactor**: Updated the bottom tab navigation and general routing for a smoother user flow.
+- **Safe Area Fixes**: Improved layout consistency across different device types (iOS/Android) using SafeAreaViews.
+- **Profile Improvements**: Redesigned the profile page to better organize user information and achievements.
+
+#### Testing
+
+Unit tests were expanded to include:
+
+- `badges.test.js` — Badge level calculation, thresholds and progress for all 3 badge types (Eco-Warrior, Veteran Driver, Top Rider)
+- `streaks.test.js` — Weekly streak counting logic, consecutive weeks, gap detection and edge cases
+- `transitRoutes.test.js` — Transit API response parsing, geocoding fallback and path generation
+- `CreateRide.test.js` — Updated to cover new ride creation logic and UI changes
+
+Maestro acceptance tests were updated to reflect the new navigation structure (createRide moved to header button, My Rides accessible via Profile).
+
+#### Continuous Integration
+
+The GitHub Actions workflow was updated to ensure that the new components and utility functions are properly linted and tested on every push.
+
+#### Sprint retrospective
+
+What went well:
+
+- Successful integration of gamification elements which significantly boost the "fun" factor of the app.
+- The security code feature adds a much-needed layer of trust to the ride completion process.
+- Bus alternatives make the app useful even in low-density ride-sharing periods.
+
+What could be improved:
+
+- The complexity of the map component has grown significantly; a refactor into smaller sub-components might be needed soon.
+- More automated tests for the gamification logic could be added.
+
+Next improvements:
+
+- Finalize the integration of all university bus lines.
+- Implement notifications for messaging and ride updates.
+- Refine the leaderboard with more categories.
 
 ### Sprint 3
 
