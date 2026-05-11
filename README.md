@@ -561,6 +561,16 @@ Features implemented this sprint:
 - **Safe Area Fixes**: Improved layout consistency across different device types (iOS/Android) using SafeAreaViews.
 - **Profile Improvements**: Redesigned the profile page to better organize user information and achievements.
 
+**🐛 Bug Fixes**
+- Fixed SafeAreaView deprecation warnings causing layout issues on iOS devices
+- Fixed map markers not responding to taps on certain Android devices due to z-index conflicts
+- Fixed ride search showing completed rides in results when they should be hidden
+- Fixed ride completion allowing drivers to mark rides as done without passenger verification
+- Fixed navigation crash when returning from the Create Ride screen after the tab restructure
+- Fixed profile page not scrolling when too many cars or badges were displayed
+- Fixed CO₂ calculation returning NaN when ride distance data was missing
+- Fixed chat messages not appearing in chronological order on first load
+
 #### Testing
 
 Unit tests were expanded to include:
