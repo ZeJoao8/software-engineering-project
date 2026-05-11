@@ -1,31 +1,30 @@
 import { useEffect, useState } from "react";
 
 import {
-  View,
-  Text,
-  TextInput,
   Alert,
   ScrollView,
-  Pressable
+  Text,
+  TextInput,
+  View
 } from "react-native";
 
 import {
   getCurrentUser,
-  updateUser,
-  logoutUser
+  logoutUser,
+  updateUser
 } from "../../data/user";
 
 import {
-  getUserCars,
   addCar,
   deleteCar,
+  getUserCars,
   subscribeToCarsChanges
 } from "../../data/cars";
 import { generateId } from "../../lib/firebase";
 
 import {
-  getRides,
   deleteRide,
+  getRides,
   subscribeToRidesChanges
 } from "../../data/rides";
 
@@ -35,14 +34,16 @@ import {
   subscribeToReviewsChanges
 } from "../../data/reviews";
 
-import { useRouter }
-  from "expo-router";
+import { useRouter } from "expo-router";
 
-import { components } from "../../styles/components";
+import { BadgeDisplay } from "../../components/BadgeDisplay";
 import { Button } from "../../components/Button";
+import { components } from "../../styles/components";
 import { forms } from "../../styles/forms";
 import { layout } from "../../styles/layout";
 import { colors, spacing } from "../../styles/theme";
+import { getUserBadges } from "../../utils/badges";
+import { calculateWeeklyStreak } from "../../utils/streaks";
 import { calculateUserCO2Saved } from "../../utils/sustainability";
 
 export default function Profile() {
@@ -115,6 +116,12 @@ export default function Profile() {
   const showRating =
     hasDrivenRide &&
     userReviews.length > 0;
+
+  const weeklyStreak =
+  calculateWeeklyStreak(
+    getRides(),
+    activeUser.uid
+  );
 
   function startEdit() {
     setEditing(true);
@@ -267,7 +274,30 @@ export default function Profile() {
           ⭐ {averageRating} ({userReviews.length} {userReviews.length === 1 ? "rating" : "ratings"})
         </Text>
       )}
+      {/* RIDES SHORTCUT */}
+      <View style={components.card}>
 
+        <Text style={layout.subtitle}>
+          Rides
+        </Text>
+
+        <Text
+          style={{
+            color: colors.textLight,
+            marginBottom: spacing.md
+          }}
+        >
+          View the rides you created and the rides you joined.
+        </Text>
+
+        <Button
+          outline
+          testID="profileMyRidesButton"
+          onPress={() => router.push("/(tabs)/myRides")}
+          label="My rides"
+        />
+
+      </View>
       {/* USER INFO */}
       <View style={components.card}>
 
@@ -294,7 +324,17 @@ export default function Profile() {
 
 
         <View style={{ height: spacing.sm }} />
+        
+        <Text style={forms.label}>
+          E-mail
+        </Text>
 
+        <Text>
+          {activeUser.email}
+        </Text>
+
+        <View style={{ height: spacing.sm }} />
+        
         <Text style={forms.label}>
           Gender
         </Text>
@@ -339,6 +379,82 @@ export default function Profile() {
 
         <View style={{ height: spacing.md }} />
 
+        <Text style={layout.subtitle}>
+          My cars
+        </Text>
+
+        {userCars.length === 0 && (
+          <Text style={{ color: colors.textLight }}>
+            No cars yet
+          </Text>
+        )}
+
+        {userCars.map(car => (
+          <View
+            key={car.id}
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: spacing.sm
+            }}
+          >
+            <Text>
+              {car.model} • {car.color} • {car.licensePlate}
+            </Text>
+
+            {editing && (
+              <Text
+                style={{
+                  color: colors.danger,
+                  fontWeight: "600"
+                }}
+                onPress={() => removeCar(car.id)}
+              >
+                remove
+              </Text>
+            )}
+          </View>
+        ))}
+
+        {editing && (
+          <View style={{ marginTop: spacing.sm }}>
+            <Button
+              outline
+              testID="toggleAddCarButton"
+              onPress={() => setShowCarForm(!showCarForm)}
+              label={showCarForm ? "Cancel" : "Add car"}
+            />
+          </View>
+        )}
+
+        {editing && showCarForm && (
+          <View style={{ marginTop: spacing.md, padding: spacing.md, backgroundColor: colors.background, borderRadius: 8 }}>
+            <Text style={{ ...layout.subtitle, fontSize: 16 }}>Add car details</Text>
+
+            <Text style={forms.label}>Model</Text>
+            <TextInput value={model} onChangeText={setModel} style={forms.input} testID="carModelInput" />
+            <View style={{ height: spacing.sm }} />
+
+            <Text style={forms.label}>Color</Text>
+            <TextInput value={color} onChangeText={setColor} style={forms.input} testID="carColorInput" />
+            <View style={{ height: spacing.sm }} />
+
+            <Text style={forms.label}>Plate</Text>
+            <TextInput value={plate} onChangeText={setPlate} autoCapitalize="characters" style={forms.input} testID="carPlateInput" />
+            <View style={{ height: spacing.sm }} />
+
+            <Text style={forms.label}>Seats</Text>
+            <TextInput value={seats} onChangeText={setSeats} keyboardType="numeric" style={forms.input} testID="carSeatsInput" />
+
+            <View style={{ marginTop: spacing.md }}>
+              <Button testID="saveCarButton" onPress={() => void addNewCar()} label="Save car" />
+            </View>
+          </View>
+        )}
+
+        <View style={{ height: spacing.lg }} />
+
         {!editing ? (
 
           <Button
@@ -370,6 +486,35 @@ export default function Profile() {
         )}
 
       </View>
+      <View style={components.card}>
+        <Text style={layout.subtitle}>
+          Weekly Streak 🔥
+        </Text>
+
+        <Text
+          style={{
+            fontSize: 28,
+            fontWeight: "700",
+            color: colors.primary,
+            marginTop: spacing.xs
+          }}
+        >
+          {weeklyStreak}
+        </Text>
+
+        <Text
+          style={{
+            color: colors.textLight,
+            marginTop: spacing.xs
+          }}
+        >
+          {weeklyStreak === 1
+            ? "week in a row"
+            : "weeks in a row"}
+        </Text>
+      </View>
+
+
 
       <View style={components.card}>
         <Text style={layout.subtitle}>Sustainability Impact</Text>
@@ -384,158 +529,20 @@ export default function Profile() {
         </View>
       </View>
 
-
-
-      {/* CARS */}
+      {/* BADGES & ACHIEVEMENTS */}
       <View style={components.card}>
-
-        <Text style={layout.subtitle}>
-          My cars
-        </Text>
-
-
-        {userCars.length === 0 && (
-          <Text style={{ color: colors.textLight }}>
-            No cars yet
-          </Text>
-        )}
-
-
-        {userCars.map(car => (
-
-          <View
-            key={car.id}
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: spacing.sm
-            }}
-          >
-
-            <Text>
-              {car.model} • {car.licensePlate}
-            </Text>
-
-
-            {editing && (
-
-              <Text
-                style={{
-                  color: colors.danger,
-                  fontWeight: "600"
-                }}
-                onPress={() =>
-                  removeCar(car.id)
-                }
-              >
-                remove
-              </Text>
-
-            )}
-
-          </View>
-
-        ))}
-
-
-        {editing && (
-
-          <View style={{ marginTop: spacing.sm }}>
-
-            <Button
-              outline
-              testID="toggleAddCarButton"
-              onPress={() => setShowCarForm(!showCarForm)}
-              label={showCarForm ? "Cancel" : "Add car"}
-            />
-
-          </View>
-
-        )}
-
+        <Text style={layout.subtitle}>Achievements</Text>
+        <BadgeDisplay 
+          showProgress={true}
+          badges={getUserBadges(
+            activeUser.uid,
+            getRides(),
+            calculateUserCO2Saved(getRides(), activeUser.uid)
+          )} 
+        />
       </View>
 
 
-
-      {editing && showCarForm && (
-
-        <View style={components.card}>
-
-          <Text style={layout.subtitle}>
-            Add car
-          </Text>
-
-
-          <Text style={forms.label}>
-            Model
-          </Text>
-
-          <TextInput
-            value={model}
-            onChangeText={setModel}
-            style={forms.input}
-            testID="carModelInput"
-          />
-
-
-          <View style={{ height: spacing.sm }} />
-
-          <Text style={forms.label}>
-            Color
-          </Text>
-
-          <TextInput
-            value={color}
-            onChangeText={setColor}
-            style={forms.input}
-            testID="carColorInput"
-          />
-
-
-          <View style={{ height: spacing.sm }} />
-
-          <Text style={forms.label}>
-            Plate
-          </Text>
-
-          <TextInput
-            value={plate}
-            onChangeText={setPlate}
-            autoCapitalize="characters"
-            style={forms.input}
-            testID="carPlateInput"
-          />
-
-
-          <View style={{ height: spacing.sm }} />
-
-          <Text style={forms.label}>
-            Seats
-          </Text>
-
-          <TextInput
-            value={seats}
-            onChangeText={setSeats}
-            keyboardType="numeric"
-            style={forms.input}
-            testID="carSeatsInput"
-          />
-
-
-          <View style={{ marginTop: spacing.md }}>
-
-            <Button
-              testID="saveCarButton"
-              onPress={() => void addNewCar()}
-              label="Save car"
-            />
-
-          </View>
-
-        </View>
-
-      )}
 
 
 

@@ -12,6 +12,9 @@ import MapView, {
   PROVIDER_DEFAULT,
 } from "react-native-maps";
 
+import ZoomControls from "./ZoomControls";
+
+
 import {
   getRoute,
   type Coordinates,
@@ -19,6 +22,7 @@ import {
 } from "../utils/routing";
 
 import { colors, spacing } from "../styles/theme";
+import { CO2_PER_KM } from "../utils/sustainability";
 
 interface RouteMapProps {
   origin: Coordinates;
@@ -44,7 +48,10 @@ export default function RouteMap({
   const [loading, setLoading] =
     useState(true);
 
+  const mapRef = React.useRef<MapView>(null);
+
   useEffect(() => {
+
     let cancelled = false;
 
     async function fetchRoute() {
@@ -90,9 +97,11 @@ export default function RouteMap({
     <View style={[styles.container, { height }]}>
 
       <MapView
+        ref={mapRef}
         style={styles.map}
         provider={PROVIDER_DEFAULT}
         scrollEnabled={interactive}
+
         zoomEnabled={interactive}
         rotateEnabled={false}
         pitchEnabled={false}
@@ -126,7 +135,19 @@ export default function RouteMap({
 
       </MapView>
 
+      {interactive && (
+        <ZoomControls
+          mapRef={mapRef}
+          style={{
+            position: "absolute",
+            right: 12,
+            bottom: "35%",
+          }}
+        />
+      )}
+
       {loading && (
+
         <View style={styles.loadingOverlay}>
           <ActivityIndicator
             size="small"
@@ -138,10 +159,13 @@ export default function RouteMap({
       {route && !loading && (
         <View style={styles.infoBar}>
           <Text style={styles.infoText}>
-            📍 {route.distanceKm} km
+            📍{route.distanceKm}km
           </Text>
           <Text style={styles.infoText}>
-            ⏱ ~{route.durationMin} min
+            ⏱~{route.durationMin}min
+          </Text>
+          <Text style={styles.infoText}>
+            🌳~{(route.distanceKm * CO2_PER_KM).toFixed(2)} kgCO₂/passenger
           </Text>
         </View>
       )}

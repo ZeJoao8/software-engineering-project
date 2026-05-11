@@ -26,4 +26,7 @@ export interface Ride {
 
   destinationCoords?: { latitude: number; longitude: number };
   distanceKm?: number;
-}
+
+  passengerCodes?: Record<string, string>;
+  verifiedPassengers?: string[];
+}

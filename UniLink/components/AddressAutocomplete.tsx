@@ -96,6 +96,9 @@ export default function AddressAutocomplete({
               setShowSuggestions(true);
             }
           }}
+          onBlur={() => {
+            setTimeout(() => setShowSuggestions(false), 0);
+          }}
         />
         {loading && (
           <ActivityIndicator

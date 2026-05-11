@@ -6,7 +6,9 @@ import {
   Alert,
   Pressable,
   ScrollView,
+  TextInput,
 } from "react-native";
+
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -28,7 +30,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { Button } from "../../components/Button";
 import { components } from "../../styles/components";
 import { layout } from "../../styles/layout";
-import { colors, spacing } from "../../styles/theme";
+import { colors, spacing, radius } from "../../styles/theme";
 
 import RouteMap from "../../components/RouteMap";
 
@@ -49,6 +51,7 @@ export default function RideDetails() {
   const [carDropdownOpen, setCarDropdownOpen] = useState(false);
   const [, setVersion] = useState(0);
   const [rideCar, setRideCar] = useState<Car | null>(null);
+  const [codeInputs, setCodeInputs] = useState<Record<string, string>>({});
 
   // Hooks must come before any conditional return (Rules of Hooks)
   useEffect(() => {
@@ -100,7 +103,11 @@ export default function RideDetails() {
   const now = new Date();
   const rideStarted = rideDate < now;
 
-  const canComplete = isDriver && !r.completed;
+  const allPassengersVerified =
+    r.passengers.length === 0 ||
+    r.passengers.every(pid => (r.verifiedPassengers ?? []).includes(pid));
+
+  const canComplete = isDriver && !r.completed && allPassengersVerified;
 
   const canRateDriver =
     joined &&
@@ -171,6 +178,10 @@ export default function RideDetails() {
     );
   }
 
+  function generateBoardingCode(): string {
+    return String(Math.floor(100000 + Math.random() * 900000));
+  }
+
   function reserveSeat() {
     if (r.completed)
       return Alert.alert("Cannot reserve", "Ride already completed.");
@@ -186,12 +197,18 @@ export default function RideDetails() {
       {
         text: "Yes",
         onPress: async () => {
+          const code = generateBoardingCode();
+          const updatedCodes = { ...(r.passengerCodes ?? {}), [activeUser.uid]: code };
           await updateRide({
             ...r,
             availableSeats: r.availableSeats - 1,
             passengers: [...r.passengers, activeUser.uid],
+            passengerCodes: updatedCodes,
           });
-          router.replace("/(tabs)/myRides");
+          Alert.alert(
+            "Seat reserved! 🎉",
+            `Your boarding code is:\n\n${code}\n\nShow this code to the driver before the ride starts.`
+          );
         },
       },
     ]);
@@ -207,10 +224,13 @@ export default function RideDetails() {
         text: "Yes",
         style: "destructive",
         onPress: async () => {
+          const updatedCodes = { ...(r.passengerCodes ?? {}) };
+          delete updatedCodes[activeUser.uid];
           await updateRide({
             ...r,
             availableSeats: Math.min(r.availableSeats + 1, r.totalSeats),
             passengers: r.passengers.filter(p => p !== activeUser.uid),
+            passengerCodes: updatedCodes,
           });
           router.replace("/(tabs)/myRides");
         },
@@ -274,10 +294,15 @@ export default function RideDetails() {
         text: "Yes",
         style: "destructive",
         onPress: async () => {
+          const updatedCodes = { ...(r.passengerCodes ?? {}) };
+          delete updatedCodes[passengerId];
+          const updatedVerified = (r.verifiedPassengers ?? []).filter(pid => pid !== passengerId);
           await updateRide({
             ...r,
             passengers: r.passengers.filter(pid => pid !== passengerId),
             availableSeats: Math.min(r.availableSeats + 1, r.totalSeats),
+            passengerCodes: updatedCodes,
+            verifiedPassengers: updatedVerified,
           });
           router.replace(`/ride/${r.id}`);
         },
@@ -494,13 +519,15 @@ export default function RideDetails() {
               <View
                 key={p.uid}
                 style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
                   marginBottom: spacing.sm,
                 }}
               >
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                <View style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexShrink: 1 }}>
                   <Text
                     style={{ color: colors.primary, fontWeight: "500" }}
                     onPress={() => {
@@ -512,6 +539,22 @@ export default function RideDetails() {
                   >
                     {p.name}
                   </Text>
+
+                  {/* Verified badge */}
+                  {isDriver && !r.completed && (r.verifiedPassengers ?? []).includes(p.uid) && (
+                    <View style={{
+                      backgroundColor: colors.primarySoft,
+                      borderWidth: 1,
+                      borderColor: colors.primaryLight,
+                      paddingHorizontal: 8,
+                      paddingVertical: 2,
+                      borderRadius: 6,
+                    }}>
+                      <Text style={{ fontSize: 12, fontWeight: "700", color: colors.primaryDark }}>
+                        ✅ Verified
+                      </Text>
+                    </View>
+                  )}
 
                   {hasEverReportedUser(p.uid) && (
                     <Text style={{ fontSize: 14 }}>⚠️</Text>
@@ -574,10 +617,96 @@ export default function RideDetails() {
                     </Text>
                   )}
                 </View>
+                </View>
+
+                {/* Code verification input — driver only, unverified passengers */}
+                {isDriver && !r.completed && r.passengerCodes?.[p.uid] && !(r.verifiedPassengers ?? []).includes(p.uid) && (
+                  <View style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 8,
+                    marginTop: spacing.sm,
+                  }}>
+                    <TextInput
+                      style={{
+                        flex: 1,
+                        borderWidth: 1.5,
+                        borderColor: colors.border,
+                        borderRadius: radius.md,
+                        paddingHorizontal: spacing.md,
+                        paddingVertical: spacing.sm,
+                        fontSize: 16,
+                        letterSpacing: 3,
+                        fontWeight: "600",
+                        backgroundColor: "#f8fafc",
+                        textAlign: "center",
+                      }}
+                      placeholder="Enter code"
+                      placeholderTextColor={colors.textLight}
+                      keyboardType="number-pad"
+                      maxLength={6}
+                      value={codeInputs[p.uid] ?? ""}
+                      onChangeText={(text) =>
+                        setCodeInputs(prev => ({ ...prev, [p.uid]: text }))
+                      }
+                    />
+                    <Pressable
+                      style={{
+                        backgroundColor: colors.primary,
+                        paddingHorizontal: spacing.md,
+                        paddingVertical: spacing.sm,
+                        borderRadius: radius.md,
+                      }}
+                      onPress={async () => {
+                        const entered = codeInputs[p.uid]?.trim();
+                        const expected = r.passengerCodes?.[p.uid];
+                        if (!entered || !expected) return;
+                        if (entered === expected) {
+                          const updatedVerified = [...(r.verifiedPassengers ?? []), p.uid];
+                          await updateRide({ ...r, verifiedPassengers: updatedVerified });
+                          setCodeInputs(prev => { const next = { ...prev }; delete next[p.uid]; return next; });
+                        } else {
+                          Alert.alert("Wrong code", "The code entered does not match. Ask the passenger again.");
+                        }
+                      }}
+                    >
+                      <Text style={{ color: "white", fontWeight: "700", fontSize: 14 }}>Verify</Text>
+                    </Pressable>
+                  </View>
+                )}
               </View>
             );
           })}
         </View>
+
+        {/* BOARDING CODE – visible to passenger only */}
+        {joined && !isDriver && !r.completed && r.passengerCodes?.[activeUser.uid] && (
+          <View style={[
+            components.card,
+            {
+              borderWidth: 1.5,
+              borderColor: colors.primaryLight,
+              backgroundColor: colors.primarySoft,
+              alignItems: "center",
+            },
+          ]}>
+            <Text style={{ fontSize: 13, fontWeight: "600", color: colors.primaryDark, marginBottom: spacing.xs }}>
+              🎫 Your Boarding Code
+            </Text>
+            <Text style={{
+              fontSize: 32,
+              fontWeight: "800",
+              letterSpacing: 6,
+              color: colors.primary,
+              marginBottom: spacing.sm,
+            }}>
+              {r.passengerCodes[activeUser.uid]}
+            </Text>
+            <Text style={{ fontSize: 11, color: colors.textLight, marginTop: spacing.sm, textAlign: "center" }}>
+              Show this code to the driver before the ride starts.
+            </Text>
+          </View>
+        )}
 
         {/* RIDE FEEDBACK */}
         {allFeedbackComments.length > 0 && (

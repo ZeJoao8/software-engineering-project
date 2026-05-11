@@ -9,12 +9,13 @@ import {
   Pressable,
   Alert
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { layout } from "../../styles/layout";
-import { forms } from "../../styles/forms";
-import { Button } from "../../components/Button";
-import { components } from "../../styles/components";
-import { colors, spacing } from "../../styles/theme";
+import { layout } from "../styles/layout";
+import { forms } from "../styles/forms";
+import { Button } from "../components/Button";
+import { components } from "../styles/components";
+import { colors, spacing } from "../styles/theme";
 
 import DropDownPicker from "react-native-dropdown-picker";
 
@@ -23,27 +24,27 @@ import DateTimePicker
 
 import {
   addRide
-} from "../../data/rides";
+} from "../data/rides";
 
 import {
   getUserCars,
   subscribeToCarsChanges
-} from "../../data/cars";
-import { generateId } from "../../lib/firebase";
+} from "../data/cars";
+import { generateId } from "../lib/firebase";
 
 import {
   getCurrentUser
-} from "../../data/user";
+} from "../data/user";
 
 import {
   useFocusEffect,
   useRouter
 } from "expo-router";
 
-import LocationPickerMap from "../../components/LocationPickerMap";
-import RouteMap from "../../components/RouteMap";
-import AddressAutocomplete from "../../components/AddressAutocomplete";
-import type { Coordinates } from "../../utils/routing";
+import LocationPickerMap from "../components/LocationPickerMap";
+import RouteMap from "../components/RouteMap";
+import AddressAutocomplete from "../components/AddressAutocomplete";
+import type { Coordinates } from "../utils/routing";
 
 export default function CreateRide() {
 
@@ -237,26 +238,31 @@ export default function CreateRide() {
 
   if (cars.length === 0) {
     return (
-      <View style={layout.screen}>
+      <SafeAreaView style={layout.screen}>
+        <View style={{ padding: spacing.lg, flex: 1 }}>
+          <Pressable onPress={() => router.back()} style={{ marginBottom: spacing.md }}>
+            <Text style={{ color: colors.primary, fontWeight: "600", fontSize: 16 }}>← Back</Text>
+          </Pressable>
 
-        <Text style={layout.title}>
-          Create Ride
-        </Text>
+          <Text style={layout.title}>
+            Create Ride
+          </Text>
 
-        <View style={components.card}>
-          <Text style={layout.subtitle}>
-            No car available
-          </Text>
-          <Text style={{ marginBottom: spacing.md }}>
-            You need to add a car before creating a ride.
-          </Text>
-          <Button
-            testID="createRideGoToProfileButton"
-            onPress={() => router.push("/(tabs)/userProfile")}
-            label="Go to profile"
-          />
+          <View style={components.card}>
+            <Text style={layout.subtitle}>
+              No car available
+            </Text>
+            <Text style={{ marginBottom: spacing.md }}>
+              You need to add a car before creating a ride.
+            </Text>
+            <Button
+              testID="createRideGoToProfileButton"
+              onPress={() => router.push("/(tabs)/userProfile")}
+              label="Go to profile"
+            />
+          </View>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -268,22 +274,25 @@ export default function CreateRide() {
 
 
   return (
+    <SafeAreaView style={layout.scrollScreen}>
+      <ScrollView
+        style={layout.scrollScreen}
+        contentContainerStyle={{
+          flexGrow: 1,
+          padding: spacing.lg,
+          paddingBottom: spacing.xl
+        }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Pressable onPress={() => router.back()} style={{ marginBottom: spacing.md }}>
+          <Text style={{ color: colors.primary, fontWeight: "600", fontSize: 16 }}>← Back</Text>
+        </Pressable>
 
-    <ScrollView
-      style={layout.scrollScreen}
-      contentContainerStyle={{
-        flexGrow: 1,
-        padding: spacing.lg,
-        paddingBottom: spacing.xl
-      }}
-      keyboardShouldPersistTaps="handled"
-    >
+        <Text style={layout.title}>
+          Create Ride
+        </Text>
 
-      <Text style={layout.title}>
-        Create Ride
-      </Text>
-
-      <View style={[components.card, { zIndex: 20 }]}>
+        <View style={[components.card, { zIndex: 20 }]}>
 
         <Text style={layout.subtitle}>
           Origin
@@ -559,8 +568,7 @@ export default function CreateRide() {
         }}
       />
 
-    </ScrollView>
-
+      </ScrollView>
+    </SafeAreaView>
   );
-
 }

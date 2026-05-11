@@ -3,8 +3,10 @@ import {
   Switch,
   Text,
   TextInput,
-  View
+  View,
+  Pressable
 } from "react-native";
+
 
 import {
   useFocusEffect,
@@ -31,6 +33,8 @@ import {
 } from "../../data/user";
 
 import RideCard from "../../components/rideCard";
+import BusAlternatives from "../../components/BusAlternatives";
+import AddressAutocomplete from "../../components/AddressAutocomplete";
 
 import { components } from "../../styles/components";
 import { forms } from "../../styles/forms";
@@ -38,6 +42,7 @@ import { layout } from "../../styles/layout";
 import { colors, spacing } from "../../styles/theme";
 import { sortByDateAsc } from "../../utils/date";
 import { FilterCriteria, filterRides } from "../../utils/rideFilters";
+import { type Coordinates } from "../../utils/routing";
 
 
 export default function Home() {
@@ -53,8 +58,14 @@ export default function Home() {
   const [originFilter, setOriginFilter] =
     useState("");
 
+  const [originCoords, setOriginCoords] =
+    useState<Coordinates | null>(null);
+
   const [destinationFilter, setDestinationFilter] =
     useState("");
+
+  const [destinationCoords, setDestinationCoords] =
+    useState<Coordinates | null>(null);
 
   const [dateFilter, setDateFilter] =
     useState("");
@@ -67,6 +78,9 @@ export default function Home() {
 
   const [now, setNow] =
     useState(new Date());
+
+  const [showBusAlternatives, setShowBusAlternatives] =
+    useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -112,48 +126,35 @@ export default function Home() {
     filterRides(rides, user, filters, now)
   );
 
-
-  return (
-
-    <View style={layout.screen}>
-
+  const filtersHeader = (
+    <View>
       <Text style={layout.title}>
         Search rides
       </Text>
 
-
-      {/* FILTERS */}
       <View style={[components.card, { backgroundColor: colors.neutral, borderColor: colors.neutralLight, borderWidth: 1.5 }]}>
 
-        <Text style={layout.subtitle}>
-          Origin
-        </Text>
+        <Text style={layout.subtitle}>Origin</Text>
 
-        <TextInput
+        <AddressAutocomplete
           placeholder="Origin"
-          placeholderTextColor={colors.textLight}
           value={originFilter}
-          onChangeText={setOriginFilter}
-          style={forms.input}
+          onChangeText={(text) => { setOriginFilter(text); setOriginCoords(null); }}
+          onSelect={(name, coords) => { setOriginFilter(name); setOriginCoords(coords); }}
           testID="searchOriginInput"
         />
 
-
         <View style={{ height: spacing.sm }} />
 
-        <Text style={layout.subtitle}>
-          Destination
-        </Text>
+        <Text style={layout.subtitle}>Destination</Text>
 
-        <TextInput
+        <AddressAutocomplete
           placeholder="Destination"
-          placeholderTextColor={colors.textLight}
           value={destinationFilter}
-          onChangeText={setDestinationFilter}
-          style={forms.input}
+          onChangeText={(text) => { setDestinationFilter(text); setDestinationCoords(null); }}
+          onSelect={(name, coords) => { setDestinationFilter(name); setDestinationCoords(coords); }}
           testID="searchDestinationInput"
         />
-
 
         <View style={{ height: spacing.sm }} />
 
@@ -170,7 +171,6 @@ export default function Home() {
           testID="searchDateInput"
         />
 
-
         <View style={{ height: spacing.sm }} />
 
         <Text style={layout.subtitle}>
@@ -186,7 +186,6 @@ export default function Home() {
           style={forms.input}
           testID="searchMinSeatsInput"
         />
-
 
         {user.gender === "Female" && (
 
@@ -209,7 +208,6 @@ export default function Home() {
                 false: "#bcbdc1",
                 true: "#fbcfe8"
               }}
-
               thumbColor={
                 womenOnlyFilter
                   ? colors.women
@@ -222,56 +220,90 @@ export default function Home() {
         )}
 
       </View>
-
-
-
-      {/* RESULTS */}
-
-      {availableRides.length === 0 ? (
-
-        <View style={components.card}>
-
-          <Text
-            style={{ color: colors.textLight }}
-            testID="searchEmptyState"
-          >
-            No rides found
-          </Text>
-
-        </View>
-
-      ) : (
-
-        <FlatList
-          data={availableRides}
-
-          keyExtractor={i => i.id}
-
-          contentContainerStyle={{
-            paddingBottom: spacing.xl
-          }}
-
-          renderItem={({ item }) => (
-
-            <View style={{ marginBottom: spacing.md }}>
-
-              <RideCard
-                ride={item}
-
-                onPress={() =>
-                  router.push(`/ride/${item.id}`)
-                }
-              />
-
-            </View>
-
-          )}
-
-        />
-
-      )}
-
     </View>
-
   );
+
+  const hasBothCoords = originCoords !== null && destinationCoords !== null;
+
+  const emptyState = (
+    <>
+      <View style={components.card}>
+        <Text
+          style={{ color: colors.textLight }}
+          testID="searchEmptyState"
+        >
+          No rides found
+        </Text>
+      </View>
+
+      {
+        <View style={[components.card, { borderColor: colors.primaryLight, borderWidth: 1.5 }]}>
+          <Pressable
+            onPress={() => setShowBusAlternatives(prev => !prev)}
+            style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}
+          >
+            <Text style={{ fontWeight: "700", fontSize: 15, color: colors.primary }}>
+              🚌 Bus Alternatives
+            </Text>
+            <Text style={{ fontSize: 18, color: colors.primary, fontWeight: "600" }}>
+              {showBusAlternatives ? "▲" : "▼"}
+            </Text>
+          </Pressable>
+
+          {showBusAlternatives && (
+            <View style={{ marginTop: spacing.sm }}>
+              {!hasBothCoords ? (
+                <View style={{
+                  backgroundColor: colors.warningSoft,
+                  borderRadius: 8,
+                  padding: spacing.sm,
+                  flexDirection: "row",
+                  alignItems: "flex-start",
+                  gap: spacing.xs,
+                  marginTop: spacing.xs,
+                }}>
+                  <Text style={{ fontSize: 15 }}>⚠️</Text>
+                  <Text style={{ color: colors.text, fontSize: 13, flex: 1, lineHeight: 18 }}>
+                    To see bus alternatives, please select a specific address from the suggestions for{" "}
+                    {!originCoords ? "Origin" : ""}
+                    {!originCoords && !destinationCoords ? " and " : ""}
+                    {!destinationCoords ? "Destination" : ""}.
+                  </Text>
+                </View>
+              ) : (
+                <BusAlternatives
+                  origin={originFilter}
+                  destination={destinationFilter}
+                  originCoords={originCoords}
+                  destinationCoords={destinationCoords}
+                />
+              )}
+            </View>
+          )}
+        </View>
+      }
+    </>
+  );
+
+
+  return (
+    <FlatList
+      style={{ flex: 1, backgroundColor: colors.background }}
+      contentContainerStyle={{ padding: spacing.md, paddingBottom: spacing.xl }}
+      data={availableRides}
+      keyExtractor={i => i.id}
+      keyboardShouldPersistTaps="handled"
+      ListHeaderComponent={filtersHeader}
+      ListEmptyComponent={emptyState}
+      renderItem={({ item }) => (
+        <View style={{ marginBottom: spacing.md }}>
+          <RideCard
+            ride={item}
+            onPress={() => router.push(`/ride/${item.id}`)}
+          />
+        </View>
+      )}
+    />
+  );
+
 }

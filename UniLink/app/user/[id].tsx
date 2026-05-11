@@ -31,6 +31,8 @@ import { forms } from "../../styles/forms";
 import { layout } from "../../styles/layout";
 import { colors, spacing } from "../../styles/theme";
 import { calculateUserCO2Saved } from "../../utils/sustainability";
+import { getUserBadges } from "../../utils/badges";
+import { BadgeDisplay } from "../../components/BadgeDisplay";
 
 export default function PublicProfile() {
   const router = useRouter();
@@ -144,6 +146,20 @@ export default function PublicProfile() {
 
         <Text style={forms.label}>Course</Text>
         <Text>{user.course}</Text>
+
+        <View style={{ height: spacing.md }} />
+
+        <Text style={layout.subtitle}>Cars</Text>
+
+        {userCars.length === 0 ? (
+          <Text style={{ color: colors.textLight }}>No cars</Text>
+        ) : (
+          userCars.map(c => (
+            <View key={c.id} style={{ marginBottom: spacing.sm }}>
+              <Text>{c.model} • {c.color} • {c.licensePlate}</Text>
+            </View>
+          ))
+        )}
       </View>
 
       {/* SUSTAINABILITY IMPACT */}
@@ -160,22 +176,18 @@ export default function PublicProfile() {
         </View>
       </View>
 
-      {/* CARS */}
+      {/* BADGES & ACHIEVEMENTS */}
       <View style={components.card}>
-        <Text style={layout.subtitle}>Cars</Text>
-
-        {userCars.length === 0 ? (
-          <Text style={{ color: colors.textLight }}>No cars</Text>
-        ) : (
-          userCars.map(c => (
-            <View key={c.id} style={{ marginBottom: spacing.sm }}>
-              <Text style={{ fontWeight: "500" }}>{c.model}</Text>
-              <Text style={{ color: colors.textLight }}>{c.color}</Text>
-              <Text style={{ fontWeight: "600" }}>{c.licensePlate}</Text>
-            </View>
-          ))
-        )}
+        <Text style={layout.subtitle}>Achievements</Text>
+        <BadgeDisplay 
+          badges={getUserBadges(
+            user.uid,
+            getRides(),
+            calculateUserCO2Saved(getRides(), user.uid)
+          )} 
+        />
       </View>
+
 
       {/* MY REPORTS ON THIS USER */}
       {hasReportedThisUser && (
