@@ -587,13 +587,12 @@ What went well:
 What could be improved:
 
 - The complexity of the map component has grown significantly; a refactor into smaller sub-components might be needed soon.
-- More automated tests for the gamification logic could be added.
 
 Next improvements:
 
-- Finalize the integration of all university bus lines.
 - Implement notifications for messaging and ride updates.
-- Refine the leaderboard with more categories.
+- Improve navigation even further
+- Add images to the app instead of the placeholders
 
 ### Sprint 3
 
