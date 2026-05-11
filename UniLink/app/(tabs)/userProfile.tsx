@@ -1,31 +1,30 @@
 import { useEffect, useState } from "react";
 
 import {
-  View,
-  Text,
-  TextInput,
   Alert,
   ScrollView,
-  Pressable
+  Text,
+  TextInput,
+  View
 } from "react-native";
 
 import {
   getCurrentUser,
-  updateUser,
-  logoutUser
+  logoutUser,
+  updateUser
 } from "../../data/user";
 
 import {
-  getUserCars,
   addCar,
   deleteCar,
+  getUserCars,
   subscribeToCarsChanges
 } from "../../data/cars";
 import { generateId } from "../../lib/firebase";
 
 import {
-  getRides,
   deleteRide,
+  getRides,
   subscribeToRidesChanges
 } from "../../data/rides";
 
@@ -35,17 +34,17 @@ import {
   subscribeToReviewsChanges
 } from "../../data/reviews";
 
-import { useRouter }
-  from "expo-router";
+import { useRouter } from "expo-router";
 
-import { components } from "../../styles/components";
+import { BadgeDisplay } from "../../components/BadgeDisplay";
 import { Button } from "../../components/Button";
+import { components } from "../../styles/components";
 import { forms } from "../../styles/forms";
 import { layout } from "../../styles/layout";
 import { colors, spacing } from "../../styles/theme";
-import { calculateUserCO2Saved } from "../../utils/sustainability";
 import { getUserBadges } from "../../utils/badges";
-import { BadgeDisplay } from "../../components/BadgeDisplay";
+import { calculateWeeklyStreak } from "../../utils/streaks";
+import { calculateUserCO2Saved } from "../../utils/sustainability";
 
 export default function Profile() {
 
@@ -117,6 +116,12 @@ export default function Profile() {
   const showRating =
     hasDrivenRide &&
     userReviews.length > 0;
+
+  const weeklyStreak =
+  calculateWeeklyStreak(
+    getRides(),
+    activeUser.uid
+  );
 
   function startEdit() {
     setEditing(true);
@@ -481,6 +486,35 @@ export default function Profile() {
         )}
 
       </View>
+      <View style={components.card}>
+        <Text style={layout.subtitle}>
+          Weekly Streak 🔥
+        </Text>
+
+        <Text
+          style={{
+            fontSize: 28,
+            fontWeight: "700",
+            color: colors.primary,
+            marginTop: spacing.xs
+          }}
+        >
+          {weeklyStreak}
+        </Text>
+
+        <Text
+          style={{
+            color: colors.textLight,
+            marginTop: spacing.xs
+          }}
+        >
+          {weeklyStreak === 1
+            ? "week in a row"
+            : "weeks in a row"}
+        </Text>
+      </View>
+
+
 
       <View style={components.card}>
         <Text style={layout.subtitle}>Sustainability Impact</Text>
