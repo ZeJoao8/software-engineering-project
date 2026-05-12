@@ -7,11 +7,12 @@ import {
   Pressable,
   ScrollView,
   TextInput,
+  Linking,
 } from "react-native";
-
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import * as Contacts from "expo-contacts";
 
 import { getRides, updateRide, deleteRide } from "../../data/rides";
 import { getCurrentUser, getUserById } from "../../data/user";
@@ -308,6 +309,96 @@ export default function RideDetails() {
         },
       },
     ]);
+  }
+
+  function callEmergencyNumber() {
+    Alert.alert(
+      "Call 112",
+      "This will open your phone app to call emergency services.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Call 112",
+          style: "destructive",
+          onPress: () => Linking.openURL("tel:112"),
+        },
+      ]
+    );
+  }
+
+  async function openPhoneContacts() {
+    try {
+      const { status } = await Contacts.requestPermissionsAsync();
+
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission needed",
+          "UniLink needs access to your contacts so you can choose an emergency contact."
+        );
+        return;
+      }
+
+      const contact = await Contacts.presentContactPickerAsync();
+
+      if (!contact) {
+        return;
+      }
+
+      const phoneNumber = contact.phoneNumbers?.[0]?.number;
+
+      if (!phoneNumber) {
+        Alert.alert(
+          "No phone number",
+          "The selected contact does not have a phone number."
+        );
+        return;
+      }
+
+      Alert.alert(
+        "Call contact",
+        `Do you want to call ${contact.name ?? "this contact"}?\n\n${phoneNumber}`,
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+          {
+            text: "Call",
+            onPress: () => Linking.openURL(`tel:${phoneNumber.replace(/\s/g, "")}`),
+          },
+        ]
+      );
+    } catch {
+      Alert.alert(
+        "Contacts unavailable",
+        "Could not open your phone contacts."
+      );
+    }
+  }
+
+  function openEmergencyOptions() {
+    Alert.alert(
+      "Emergency contact",
+      "Choose an emergency option.",
+      [
+        {
+          text: "Call 112",
+          style: "destructive",
+          onPress: callEmergencyNumber,
+        },
+        {
+          text: "Choose phone contact",
+          onPress: openPhoneContacts,
+        },
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+      ]
+    );
   }
 
   function changeCar() {
@@ -741,7 +832,28 @@ export default function RideDetails() {
           </View>
         )}
 
+        {/* SAFETY */}
+        {(isDriver || joined) && (
+          <View style={components.card}>
+            <Text style={layout.subtitle}>Safety</Text>
 
+            <Text
+              style={{
+                color: colors.textLight,
+                marginBottom: spacing.md,
+              }}
+            >
+              If something feels unsafe during this ride, use the emergency contact options.
+            </Text>
+
+            <Button
+              outline
+              testID="emergencyContactButton"
+              onPress={openEmergencyOptions}
+              label="Emergency contact"
+            />
+          </View>
+        )}
         {/* ACTIONS */}
         {(isDriver || joined) && (
           <Pressable
