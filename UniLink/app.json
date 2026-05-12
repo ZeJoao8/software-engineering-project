@@ -11,9 +11,15 @@
 
     "ios": {
       "supportsTablet": true,
+      "infoPlist": {
+        "NSContactsUsageDescription": "UniLink needs access to your contacts so you can choose an emergency contact during a ride."
+      }
     },
 
     "android": {
+      "permissions": [
+        "READ_CONTACTS"
+      ],
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyDDGp82PUKAPHpLneu2sMpos7gP0Q-_kFQ"
