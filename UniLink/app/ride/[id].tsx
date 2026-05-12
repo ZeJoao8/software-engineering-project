@@ -851,6 +851,12 @@ export default function RideDetails() {
               testID="emergencyContactButton"
               onPress={openEmergencyOptions}
               label="Emergency contact"
+              style={{
+                borderColor: colors.danger,
+              }}
+              textStyle={{
+                color: colors.danger,
+              }}
             />
           </View>
         )}
