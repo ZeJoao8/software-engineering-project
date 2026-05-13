@@ -18,13 +18,14 @@ export const colors = {
  danger:     "#ef4444",
  dangerSoft: "#fee2e2",
 
- women:     "#f43f5e", // modern rose
- womenSoft: "#ffe4e6",
+ women:     "#ec4899", // pink-500 — clearly pink, not rose-red
+ womenSoft: "#fce7f3", // pink-100
 
  // Rating / feedback states
  warning:      "#fef08a",
  warningSoft:  "#fef2f2",
- neutral:      "#f1f5f9",
+ neutral:      "#f1f5f9", // slate-100
+ neutralDark:  "#cbd5e1", // slate-300 — for selected neutral states
  textFaint: "#94a3b8",  // slate-400 — lighter than textLight, for de-emphasised metadata
 
  // Women-only Switch colours (trackColor / thumbColor)
