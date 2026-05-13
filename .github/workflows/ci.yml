@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ main, sprint0, sprint1, sprint2]
+    branches: [ main, sprint0, sprint1, sprint2, sprint3]
   pull_request:
 
 jobs:
