@@ -59,17 +59,6 @@ export const components = StyleSheet.create({
   fontSize: 16,
  },
 
- tag: {
-  backgroundColor: colors.primarySoft,
-  color: colors.primaryDark,
-  paddingHorizontal: spacing.md,
-  paddingVertical: 6,
-  borderRadius: radius.md,
-  fontSize: 12,
-  fontWeight: "600",
-  overflow: "hidden", // for ios border radius on text
- },
-
  /** Small inline button for primary actions (e.g. "Verify") — mirrors dangerTag. */
  primaryTag: {
   backgroundColor: colors.primarySoft,
@@ -506,6 +495,20 @@ export const components = StyleSheet.create({
  },
 
 
+ /** Women-only active chip — rose background matching the ♀️ tag in ride cards. */
+ badgeWomen: {
+  backgroundColor: colors.womenSoft,
+  paddingHorizontal: 8,
+  paddingVertical: 4,
+  borderRadius: 6,
+ },
+
+ badgeWomenText: {
+  fontSize: 13,
+  color: colors.women,
+  fontWeight: "600",
+ },
+
  /** Rating pill — apply a background colour override based on the rating value. */
  ratingBadge: {
   paddingHorizontal: 7,
@@ -556,14 +559,6 @@ export const components = StyleSheet.create({
  cardMap: {
   padding: 0,
   overflow: "hidden",
- },
-
- // ─── Expandable section card ─────────────────────────────────────────────
-
- /** Card variant with a primary-colour border, used for featured collapsible sections. */
- expandableCard: {
-  borderColor: colors.primaryLight,
-  borderWidth: 1.5,
  },
 
  // ─── Warning / info box ───────────────────────────────────────────────────
