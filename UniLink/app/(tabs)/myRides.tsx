@@ -108,7 +108,7 @@ export default function MyRides() {
       const rideReviews = allReviews.filter(
         rev => rev.rideId === r.id && rev.revieweeId === activeUser.uid
       );
-      if (ratingFilter === "none") return rideReviews.length === 0;
+      if (ratingFilter === "none") return r.completed && rideReviews.length === 0;
       if (rideReviews.length === 0) return false;
       const avg = rideReviews.reduce((s, rev) => s + rev.rating, 0) / rideReviews.length;
       if (ratingFilter === "1-2") return avg < 3;
@@ -118,7 +118,7 @@ export default function MyRides() {
     const myReview = allReviews.find(
       rev => rev.rideId === r.id && rev.reviewerId === activeUser.uid
     );
-    if (ratingFilter === "none") return !myReview;
+    if (ratingFilter === "none") return r.completed && !myReview;
     if (!myReview) return false;
     if (ratingFilter === "1-2") return myReview.rating <= 2;
     if (ratingFilter === "3") return myReview.rating === 3;
