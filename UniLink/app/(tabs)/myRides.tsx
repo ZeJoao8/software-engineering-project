@@ -34,7 +34,7 @@ import { sortByDateDesc } from "../../utils/date";
 import RideCard from "../../components/rideCard";
 import { components } from "../../styles/components";
 import { layout } from "../../styles/layout";
-import { spacing, colors } from "../../styles/theme";
+import { colors } from "../../styles/theme";
 
 export default function MyRides(){
 
@@ -91,11 +91,7 @@ return(
 
 <ScrollView
       style={layout.scrollScreen}
-      contentContainerStyle={{
-        flexGrow: 1,
-        padding: spacing.lg,
-        paddingBottom: spacing.xl
-      }}
+      contentContainerStyle={layout.scrollContentTab}
       keyboardShouldPersistTaps="handled"
     >
 
@@ -105,7 +101,7 @@ return(
 
 
 {/* DRIVER */}
-<View style={[components.card, { backgroundColor: colors.primarySoft, borderColor: colors.primaryLight, borderWidth: 1.5 }]}>
+<View style={[components.card, components.cardPrimary]}>
 
 <Text style={layout.subtitle}>
  Driver
@@ -113,7 +109,7 @@ return(
 
 {driverRides.length === 0 ? (
 
-<Text style={{color:colors.textLight}}>
+<Text style={layout.textLight}>
  No rides created
 </Text>
 
@@ -129,7 +125,7 @@ return(
 
  renderItem={({item}) => (
 
-<View style={{marginTop:spacing.sm}}>
+<View style={components.mtMd}>
 
 <RideCard
 
@@ -156,7 +152,7 @@ return(
 
 
 {/* PASSENGER */}
-<View style={[components.card, { backgroundColor: colors.neutral, borderColor: colors.neutralLight, borderWidth: 1.5 }]}>
+<View style={[components.card, components.cardNeutral]}>
 
 <Text style={layout.subtitle}>
  Passenger
@@ -164,7 +160,7 @@ return(
 
 {passengerRides.length === 0 ? (
 
-<Text style={{color:colors.textLight}}>
+<Text style={layout.textLight}>
  No reservations
 </Text>
 
@@ -180,7 +176,7 @@ return(
 
  renderItem={({item}) => (
 
-<View style={{marginBottom:spacing.sm}}>
+<View style={components.mbSm}>
 
 <RideCard
 

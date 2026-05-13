@@ -3,7 +3,6 @@ import {
   View,
   Text,
   ActivityIndicator,
-  StyleSheet,
 } from "react-native";
 
 import MapView, {
@@ -14,14 +13,14 @@ import MapView, {
 
 import ZoomControls from "./ZoomControls";
 
-
 import {
   getRoute,
   type Coordinates,
   type RouteResult,
 } from "../utils/routing";
 
-import { colors, spacing } from "../styles/theme";
+import { colors } from "../styles/theme";
+import { mapStyles } from "../styles/map";
 import { CO2_PER_KM } from "../utils/sustainability";
 
 interface RouteMapProps {
@@ -31,6 +30,8 @@ interface RouteMapProps {
   destinationLabel?: string;
   height?: number;
   interactive?: boolean;
+  showInfoBar?: boolean;
+  onRouteLoaded?: (route: RouteResult) => void;
 }
 
 export default function RouteMap({
@@ -40,6 +41,8 @@ export default function RouteMap({
   destinationLabel = "Destination",
   height = 250,
   interactive = false,
+  showInfoBar = true,
+  onRouteLoaded,
 }: RouteMapProps) {
 
   const [route, setRoute] =
@@ -62,6 +65,7 @@ export default function RouteMap({
       if (!cancelled) {
         setRoute(result);
         setLoading(false);
+        if (result) onRouteLoaded?.(result);
       }
     }
 
@@ -94,14 +98,13 @@ export default function RouteMap({
     ) * 1.6 + 0.01;
 
   return (
-    <View style={[styles.container, { height }]}>
+    <View style={[mapStyles.routeContainer, { height }]}>
 
       <MapView
         ref={mapRef}
-        style={styles.map}
+        style={mapStyles.routeMap}
         provider={PROVIDER_DEFAULT}
         scrollEnabled={interactive}
-
         zoomEnabled={interactive}
         rotateEnabled={false}
         pitchEnabled={false}
@@ -148,7 +151,7 @@ export default function RouteMap({
 
       {loading && (
 
-        <View style={styles.loadingOverlay}>
+        <View style={mapStyles.routeLoadingOverlay}>
           <ActivityIndicator
             size="small"
             color={colors.primary}
@@ -156,15 +159,15 @@ export default function RouteMap({
         </View>
       )}
 
-      {route && !loading && (
-        <View style={styles.infoBar}>
-          <Text style={styles.infoText}>
+      {showInfoBar && route && !loading && (
+        <View style={mapStyles.routeInfoBar}>
+          <Text style={mapStyles.routeInfoText}>
             📍{route.distanceKm}km
           </Text>
-          <Text style={styles.infoText}>
+          <Text style={mapStyles.routeInfoText}>
             ⏱~{route.durationMin}min
           </Text>
-          <Text style={styles.infoText}>
+          <Text style={mapStyles.routeInfoText}>
             🌳~{(route.distanceKm * CO2_PER_KM).toFixed(2)} kgCO₂/passenger
           </Text>
         </View>
@@ -173,47 +176,3 @@ export default function RouteMap({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-
-  container: {
-    borderRadius: 12,
-    overflow: "hidden",
-    backgroundColor: "#e5e7eb",
-  },
-
-  map: {
-    flex: 1,
-  },
-
-  loadingOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.5)",
-  },
-
-  infoBar: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 16,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    backgroundColor: "rgba(255,255,255,0.92)",
-  },
-
-  infoText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: colors.text,
-  },
-
-});

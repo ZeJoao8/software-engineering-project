@@ -24,14 +24,17 @@ import { subscribeToReviewsChanges } from "../../data/reviews";
 import { subscribeToRidesChanges } from "../../data/rides";
 import { formatDate } from "../../utils/date";
 import { getRoute } from "../../utils/routing";
+import type { RouteResult } from "../../utils/routing";
+import { CO2_PER_KM } from "../../utils/sustainability";
 import type { User } from "../../types/User";
 
 import DropDownPicker from "react-native-dropdown-picker";
 
 import { Button } from "../../components/Button";
 import { components } from "../../styles/components";
+import { forms } from "../../styles/forms";
 import { layout } from "../../styles/layout";
-import { colors, spacing, radius } from "../../styles/theme";
+import { colors, spacing } from "../../styles/theme";
 
 import RouteMap from "../../components/RouteMap";
 
@@ -52,7 +55,9 @@ export default function RideDetails() {
   const [carDropdownOpen, setCarDropdownOpen] = useState(false);
   const [, setVersion] = useState(0);
   const [rideCar, setRideCar] = useState<Car | null>(null);
-  const [codeInputs, setCodeInputs] = useState<Record<string, string>>({});
+  const [verifyCode, setVerifyCode] = useState("");
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [routeStats, setRouteStats] = useState<RouteResult | null>(null);
 
   // Hooks must come before any conditional return (Rules of Hooks)
   useEffect(() => {
@@ -105,7 +110,7 @@ export default function RideDetails() {
   const rideStarted = rideDate < now;
 
   const allPassengersVerified =
-    r.passengers.length === 0 ||
+    r.passengers.length != 0 &&
     r.passengers.every(pid => (r.verifiedPassengers ?? []).includes(pid));
 
   const canComplete = isDriver && !r.completed && allPassengersVerified;
@@ -432,17 +437,10 @@ export default function RideDetails() {
     <SafeAreaView style={layout.screen}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: spacing.xl }}
+        contentContainerStyle={layout.scrollContent}
       >
 
-        <Text
-          style={{
-            color: colors.primary,
-            marginBottom: spacing.sm,
-            fontWeight: "600",
-          }}
-          onPress={() => router.back()}
-        >
+        <Text style={layout.backLink} onPress={() => router.back()}>
           ← Back
         </Text>
 
@@ -451,17 +449,30 @@ export default function RideDetails() {
           <Text style={layout.title}>
             {ride.origin} → {ride.destination}
           </Text>
-          <Text style={{ marginBottom: spacing.sm }}>
+          <Text style={layout.textLight}>
             {formatDate(ride.departureDateTime)}
           </Text>
-          <Text style={{ fontWeight: "500", color: colors.textLight }}>
+          <Text style={layout.textLight}>
             {ride.totalSeats - ride.availableSeats} / {ride.totalSeats} seats
           </Text>
+          {routeStats && (
+            <View style={[components.tagRow, components.mtSm]}>
+              <View style={components.miniTag}>
+                <Text style={components.miniTagText}>📍 {routeStats.distanceKm} km</Text>
+              </View>
+              <View style={components.miniTag}>
+                <Text style={components.miniTagText}>⏱ ~{routeStats.durationMin} min</Text>
+              </View>
+              <View style={components.miniTag}>
+                <Text style={components.miniTagText}>🌳 ~{(routeStats.distanceKm * CO2_PER_KM).toFixed(2)} kgCO₂/p</Text>
+              </View>
+            </View>
+          )}
         </View>
 
         {/* MAP */}
         {ride.originCoords && ride.destinationCoords && (
-          <View style={[components.card, { padding: 0 }]}>
+          <View style={[components.card, components.cardMap]}>
             <RouteMap
               origin={ride.originCoords}
               destination={ride.destinationCoords}
@@ -469,6 +480,8 @@ export default function RideDetails() {
               destinationLabel={ride.destination}
               height={220}
               interactive
+              showInfoBar={false}
+              onRouteLoaded={setRouteStats}
             />
           </View>
         )}
@@ -477,14 +490,10 @@ export default function RideDetails() {
         <View style={components.card}>
           <Text style={layout.subtitle}>Driver</Text>
 
-          <View style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <View style={components.rowSpaceBetween}>
+            <View style={components.rowGap}>
               <Text
-                style={{ color: colors.primary, fontWeight: "600" }}
+                style={layout.link}
                 onPress={() => {
                   if (driver?.uid === activeUser.uid)
                     router.push("/(tabs)/userProfile");
@@ -495,7 +504,7 @@ export default function RideDetails() {
                 {driver?.name}
               </Text>
               {hasEverReportedUser(driver?.uid ?? r.driverId) && (
-                <Text style={{ fontSize: 14 }}>⚠️</Text>
+                <Text>⚠️</Text>
               )}
             </View>
 
@@ -512,7 +521,7 @@ export default function RideDetails() {
                   })
                 }
               >
-                <Text style={{ color: colors.danger, fontSize: 12, fontWeight: "600" }}>
+                <Text style={components.dangerTagText}>
                   Report
                 </Text>
               </Pressable>
@@ -528,10 +537,8 @@ export default function RideDetails() {
             <>
               {car ? (
                 <>
-                  <Text>{car.model}</Text>
-                  <Text style={{ color: colors.textLight }}>{car.color}</Text>
-                  <Text style={{ fontWeight: "600", paddingBottom: spacing.sm }}>
-                    {car.licensePlate}
+                  <Text style={components.mbSm}>
+                    {car.model} • {car.color} • {car.licensePlate}
                   </Text>
 
                   {isDriver && !rideStarted && !r.completed && driverCars.length > 1 && (
@@ -544,12 +551,12 @@ export default function RideDetails() {
                   )}
                 </>
               ) : (
-                <Text style={{ color: colors.textLight }}>Vehicle unavailable</Text>
+                <Text style={layout.textLight}>Vehicle unavailable</Text>
               )}
             </>
           ) : (
             <View>
-              <Text style={{ marginBottom: spacing.xs, fontWeight: "500" }}>Select new car</Text>
+              <Text style={[layout.textLight, { marginBottom: spacing.xs }]}>Select new car</Text>
               <View style={components.pickerWrapper}>
                 <DropDownPicker
                   open={carDropdownOpen}
@@ -570,10 +577,10 @@ export default function RideDetails() {
                 />
               </View>
 
-              <View style={{ height: spacing.md }} />
+              <View style={components.spacerMd} />
 
-              <Pressable 
-                style={components.button} 
+              <Pressable
+                style={components.button}
                 onPress={() => {
                   if (selectedCarId) changeCar();
                 }}
@@ -581,7 +588,7 @@ export default function RideDetails() {
                 <Text style={components.buttonText}>Save car</Text>
               </Pressable>
 
-              <View style={{ height: spacing.xs }} />
+              <View style={components.spacerXs} />
 
               <Pressable
                 style={components.outlineButton}
@@ -598,202 +605,119 @@ export default function RideDetails() {
           <Text style={layout.subtitle}>Passengers</Text>
 
           {passengers.length === 0 && (
-            <Text style={{ color: colors.textLight }}>No passengers yet</Text>
+            <Text style={layout.textLight}>No passengers yet</Text>
           )}
 
-          {passengers.map(p => {
+          {passengers.map((p, i) => {
             const passengerReview = isDriver
               ? getPassengerRatingForThisRide(p.uid)
               : undefined;
-
             return (
-              <View
-                key={p.uid}
-                style={{
-                  marginBottom: spacing.sm,
-                }}
-              >
-                <View style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexShrink: 1 }}>
-                  <Text
-                    style={{ color: colors.primary, fontWeight: "500" }}
-                    onPress={() => {
-                      if (p.uid === activeUser.uid)
-                        router.push("/(tabs)/userProfile");
-                      else
-                        router.push(`/user/${p.uid}`);
-                    }}
-                  >
-                    {p.name}
-                  </Text>
-
-                  {/* Verified badge */}
-                  {isDriver && !r.completed && (r.verifiedPassengers ?? []).includes(p.uid) && (
-                    <View style={{
-                      backgroundColor: colors.primarySoft,
-                      borderWidth: 1,
-                      borderColor: colors.primaryLight,
-                      paddingHorizontal: 8,
-                      paddingVertical: 2,
-                      borderRadius: 6,
-                    }}>
-                      <Text style={{ fontSize: 12, fontWeight: "700", color: colors.primaryDark }}>
-                        ✅ Verified
-                      </Text>
-                    </View>
-                  )}
-
-                  {hasEverReportedUser(p.uid) && (
-                    <Text style={{ fontSize: 14 }}>⚠️</Text>
-                  )}
-
-                  {isDriver && r.completed && (
-                    passengerReview ? (
-                      <View style={{
-                        backgroundColor: passengerReview.rating >= 4
-                          ? colors.primaryLight
-                          : passengerReview.rating === 3
-                            ? colors.warning
-                            : colors.dangerSoft,
-                        paddingHorizontal: 7,
-                        paddingVertical: 2,
-                        borderRadius: 5,
-                      }}>
-                        <Text style={{ fontSize: 12, fontWeight: "600" }}>
-                          ⭐ {passengerReview.rating}/5
-                        </Text>
-                      </View>
-                    ) : (
-                      <View style={{
-                        backgroundColor: colors.neutral,
-                        paddingHorizontal: 7,
-                        paddingVertical: 2,
-                        borderRadius: 5,
-                      }}>
-                        <Text style={{ fontSize: 11, color: colors.textLight }}>
-                          not rated yet
-                        </Text>
-                      </View>
-                    )
-                  )}
-                </View>
-
-                <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
-                  {canReportUser(p.uid) && (
-                    <Pressable
-                      style={components.dangerTag}
-                      onPress={() =>
-                        router.push({
-                          pathname: "/reportUser/[id]",
-                          params: { id: r.id, targetUserId: p.uid },
-                        })
-                      }
-                    >
-                      <Text style={{ color: colors.danger, fontSize: 12, fontWeight: "600" }}>
-                        Report
-                      </Text>
-                    </Pressable>
-                  )}
-
-                  {isDriver && !rideStarted && !r.completed && (
+              <View key={p.uid} style={i > 0 ? components.mtSm : undefined}>
+                <View style={components.rowSpaceBetween}>
+                  <View style={[components.rowGap, { flexShrink: 1 }]}>
                     <Text
-                      style={{ color: colors.danger, fontWeight: "600" }}
-                      onPress={() => removePassenger(p.uid)}
+                      style={layout.link}
+                      onPress={() => {
+                        if (p.uid === activeUser.uid)
+                          router.push("/(tabs)/userProfile");
+                        else
+                          router.push(`/user/${p.uid}`);
+                      }}
                     >
-                      Remove
+                      {p.name}
                     </Text>
-                  )}
-                </View>
+
+                    {isDriver && !r.completed && (r.verifiedPassengers ?? []).includes(p.uid) && (
+                      <View style={components.verifiedBadge}>
+                        <Text style={components.verifiedBadgeText}>✅ Verified</Text>
+                      </View>
+                    )}
+
+                    {hasEverReportedUser(p.uid) && <Text>⚠️</Text>}
+
+                    {isDriver && r.completed && (
+                      passengerReview ? (
+                        <View style={[
+                          components.ratingBadge,
+                          { backgroundColor: passengerReview.rating >= 4 ? colors.primaryLight : passengerReview.rating === 3 ? colors.warning : colors.dangerSoft },
+                        ]}>
+                          <Text style={components.ratingBadgeText}>⭐ {passengerReview.rating}/5</Text>
+                        </View>
+                      ) : (
+                        <View style={[components.ratingBadge, { backgroundColor: colors.neutral }]}>
+                          <Text style={components.ratingBadgeText}>⭐ ?/5</Text>
+                        </View>
+                      )
+                    )}
+                  </View>
+
+                  <View style={components.rowGap}>
+                    {canReportUser(p.uid) && (
+                      <Pressable
+                        style={components.dangerTag}
+                        onPress={() => router.push({ pathname: "/reportUser/[id]", params: { id: r.id, targetUserId: p.uid } })}
+                      >
+                        <Text style={components.dangerTagText}>Report</Text>
+                      </Pressable>
+                    )}
+                    {isDriver && !rideStarted && !r.completed && (
+                      <Pressable style={components.dangerTag} onPress={() => removePassenger(p.uid)}>
+                        <Text style={components.dangerTagText}>Remove</Text>
+                      </Pressable>
+                    )}
+                  </View>
                 </View>
 
-                {/* Code verification input — driver only, unverified passengers */}
-                {isDriver && !r.completed && r.passengerCodes?.[p.uid] && !(r.verifiedPassengers ?? []).includes(p.uid) && (
-                  <View style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 8,
-                    marginTop: spacing.sm,
-                  }}>
-                    <TextInput
-                      style={{
-                        flex: 1,
-                        borderWidth: 1.5,
-                        borderColor: colors.border,
-                        borderRadius: radius.md,
-                        paddingHorizontal: spacing.md,
-                        paddingVertical: spacing.sm,
-                        fontSize: 16,
-                        letterSpacing: 3,
-                        fontWeight: "600",
-                        backgroundColor: "#f8fafc",
-                        textAlign: "center",
-                      }}
-                      placeholder="Enter code"
-                      placeholderTextColor={colors.textLight}
-                      keyboardType="number-pad"
-                      maxLength={6}
-                      value={codeInputs[p.uid] ?? ""}
-                      onChangeText={(text) =>
-                        setCodeInputs(prev => ({ ...prev, [p.uid]: text }))
-                      }
-                    />
-                    <Pressable
-                      style={{
-                        backgroundColor: colors.primary,
-                        paddingHorizontal: spacing.md,
-                        paddingVertical: spacing.sm,
-                        borderRadius: radius.md,
-                      }}
-                      onPress={async () => {
-                        const entered = codeInputs[p.uid]?.trim();
-                        const expected = r.passengerCodes?.[p.uid];
-                        if (!entered || !expected) return;
-                        if (entered === expected) {
-                          const updatedVerified = [...(r.verifiedPassengers ?? []), p.uid];
-                          await updateRide({ ...r, verifiedPassengers: updatedVerified });
-                          setCodeInputs(prev => { const next = { ...prev }; delete next[p.uid]; return next; });
-                        } else {
-                          Alert.alert("Wrong code", "The code entered does not match. Ask the passenger again.");
-                        }
-                      }}
-                    >
-                      <Text style={{ color: "white", fontWeight: "700", fontSize: 14 }}>Verify</Text>
-                    </Pressable>
-                  </View>
-                )}
               </View>
             );
           })}
+
+          {/* Single shared code input — matches any unverified passenger */}
+          {isDriver && !r.completed && passengers.some(p => r.passengerCodes?.[p.uid] && !(r.verifiedPassengers ?? []).includes(p.uid)) && (
+            <View style={[components.rowGap, components.mtSm]}>
+              <TextInput
+                style={[forms.inputSm, forms.boardingCodeInput]}
+                placeholder="Enter code"
+                placeholderTextColor={colors.textLight}
+                keyboardType="number-pad"
+                maxLength={6}
+                value={verifyCode}
+                onChangeText={setVerifyCode}
+              />
+              <Pressable
+                style={components.primaryTag}
+                onPress={async () => {
+                  const entered = verifyCode.trim();
+                  const match = passengers.find(
+                    p => r.passengerCodes?.[p.uid] === entered &&
+                         !(r.verifiedPassengers ?? []).includes(p.uid)
+                  );
+                  if (!match) {
+                    Alert.alert("Wrong code", "No unverified passenger matches this code.");
+                    return;
+                  }
+                  const updatedVerified = [...(r.verifiedPassengers ?? []), match.uid];
+                  await updateRide({ ...r, verifiedPassengers: updatedVerified });
+                  setVerifyCode("");
+                }}
+              >
+                <Text style={components.primaryTagText}>Verify</Text>
+              </Pressable>
+            </View>
+          )}
         </View>
 
         {/* BOARDING CODE – visible to passenger only */}
         {joined && !isDriver && !r.completed && r.passengerCodes?.[activeUser.uid] && (
-          <View style={[
-            components.card,
-            {
-              borderWidth: 1.5,
-              borderColor: colors.primaryLight,
-              backgroundColor: colors.primarySoft,
-              alignItems: "center",
-            },
-          ]}>
-            <Text style={{ fontSize: 13, fontWeight: "600", color: colors.primaryDark, marginBottom: spacing.xs }}>
+          <View style={[components.card, components.boardingCodeCard]}>
+            <Text style={components.verifiedBadgeText}>
               🎫 Your Boarding Code
             </Text>
-            <Text style={{
-              fontSize: 32,
-              fontWeight: "800",
-              letterSpacing: 6,
-              color: colors.primary,
-              marginBottom: spacing.sm,
-            }}>
+            <Text style={components.boardingCode}>
               {r.passengerCodes[activeUser.uid]}
             </Text>
-            <Text style={{ fontSize: 11, color: colors.textLight, marginTop: spacing.sm, textAlign: "center" }}>
+            <Text style={[components.boardingCodeHint, { marginTop: spacing.sm }]}>
               Show this code to the driver before the ride starts.
             </Text>
           </View>
@@ -802,33 +726,44 @@ export default function RideDetails() {
         {/* RIDE FEEDBACK */}
         {allFeedbackComments.length > 0 && (
           <View style={components.card}>
-            <Text style={layout.subtitle}>
-              {isDriver ? "Feedback received" : "Your feedback"}
-            </Text>
-            {allFeedbackComments.map(review => {
-              const reviewer = getUserById(review.reviewerId);
-              return (
-                <View 
-                  key={review.id} 
-                  style={[
-                    components.feedbackCard, 
-                    getFeedbackStyle(review.rating)
-                  ]}
-                >
-                  {isDriver && (
-                    <Text style={{ fontSize: 13, color: colors.text, fontWeight: "600", marginBottom: 2 }}>
-                      From {reviewer?.name ?? "passenger"}
-                    </Text>
-                  )}
-                  <Text style={{ fontSize: 12, color: colors.textLight, marginBottom: 4 }}>
-                    {"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)} · {review.rating}/5
-                  </Text>
-                  <Text style={{ color: colors.text, fontSize: 14 }}>
-                    {review.comment}
-                  </Text>
-                </View>
-              );
-            })}
+            <Pressable
+              style={components.rowSpaceBetween}
+              onPress={() => setShowFeedback(prev => !prev)}
+            >
+              <Text style={layout.subtitle}>
+                {isDriver ? `Feedback received (${allFeedbackComments.length})` : "Your feedback "}
+              </Text>
+              <Text style={layout.collapseIndicator}>
+                {showFeedback ? "Hide ▲" : "Show ▼"}
+              </Text>
+            </Pressable>
+
+            {showFeedback && (
+              <View style={components.mtMd}>
+                {allFeedbackComments.map(review => {
+                  const reviewer = getUserById(review.reviewerId);
+                  return (
+                    <View
+                      key={review.id}
+                      style={[
+                        components.feedbackCard,
+                        getFeedbackStyle(review.rating)
+                      ]}
+                    >
+                      {isDriver && (
+                        <Text style={[layout.headingSm, { marginBottom: 2 }]}>
+                          From {reviewer?.name ?? "passenger"}
+                        </Text>
+                      )}
+                      <Text style={[layout.textLightSm, { marginBottom: 4 }]}>
+                        {"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)} · {review.rating}/5
+                      </Text>
+                      <Text>{review.comment}</Text>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
           </View>
         )}
 
@@ -837,12 +772,7 @@ export default function RideDetails() {
           <View style={components.card}>
             <Text style={layout.subtitle}>Safety</Text>
 
-            <Text
-              style={{
-                color: colors.textLight,
-                marginBottom: spacing.md,
-              }}
-            >
+            <Text style={[layout.textLight, { marginBottom: spacing.md }]}>
               If something feels unsafe during this ride, use the emergency contact options.
             </Text>
 
@@ -863,32 +793,32 @@ export default function RideDetails() {
         {/* ACTIONS */}
         {(isDriver || joined) && (
           <Pressable
-            style={components.button}
+            style={components.outlineButton}
             onPress={() => router.push({ pathname: "/chat/[id]", params: { id: r.id } })}
           >
-            <Text style={components.buttonText}>Open Group Chat</Text>
+            <Text style={components.outlineButtonText}>Open Group Chat</Text>
           </Pressable>
         )}
 
         {!isDriver && !joined && !rideStarted && !r.completed && (
-          <Button onPress={reserveSeat} style={[components.button, { marginTop: spacing.md }]}  label="Reserve seat" />
+          <Button onPress={reserveSeat} style={[components.button, components.mtMd]}  label="Reserve seat" />
         )}
 
         {joined && !isDriver && !rideStarted && !r.completed && (
-          <Button onPress={cancelSeat} style={[components.button, { marginTop: spacing.md }]}  label="Cancel reservation" />
+          <Button onPress={cancelSeat} style={[components.button, components.mtMd]}  label="Cancel reservation" />
         )}
 
         {isDriver && !rideStarted && !r.completed && !editingCar && (
-          <Button onPress={cancelRide} style={[components.button, { marginTop: spacing.md }]}  label="Cancel ride" />
+          <Button onPress={cancelRide} style={[components.button, components.mtMd]}  label="Cancel ride" />
         )}
 
         {canComplete && (
-          <Button onPress={completeRide} style={[components.button, { marginTop: spacing.md }]}  label="Complete ride" />
+          <Button onPress={completeRide} style={[components.button, components.mtMd]}  label="Complete ride" />
         )}
 
         {canRateDriver && (
           <Pressable
-            style={[components.button, { marginTop: spacing.md }]}
+            style={[components.button, components.mtMd]}
             onPress={() =>
               router.push({
                 pathname: "/review/[id]",
