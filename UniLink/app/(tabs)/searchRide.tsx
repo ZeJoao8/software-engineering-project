@@ -128,11 +128,18 @@ export default function Home() {
 
   const filtersHeader = (
     <View>
-      <Text style={layout.title}>
-        Search rides
-      </Text>
+      <View style={components.rowSpaceBetween}>
+        <Text style={layout.title}>Search rides</Text>
+        <Pressable
+          onPress={() => router.push("/mapView")}
+          testID="openMapButton"
+          style={[components.badgePrimary, { paddingVertical: 6 }]}
+        >
+          <Text style={components.badgePrimaryText}>🗺️ Search on Map</Text>
+        </Pressable>
+      </View>
 
-      <View style={[components.card, { backgroundColor: colors.neutral, borderColor: colors.neutralLight, borderWidth: 1.5 }]}>
+      <View style={[components.card, components.cardNeutral]}>
 
         <Text style={layout.subtitle}>Origin</Text>
 
@@ -144,7 +151,7 @@ export default function Home() {
           testID="searchOriginInput"
         />
 
-        <View style={{ height: spacing.sm }} />
+        <View style={components.spacerSm} />
 
         <Text style={layout.subtitle}>Destination</Text>
 
@@ -156,7 +163,7 @@ export default function Home() {
           testID="searchDestinationInput"
         />
 
-        <View style={{ height: spacing.sm }} />
+        <View style={components.spacerSm} />
 
         <Text style={layout.subtitle}>
           Date
@@ -171,7 +178,7 @@ export default function Home() {
           testID="searchDateInput"
         />
 
-        <View style={{ height: spacing.sm }} />
+        <View style={components.spacerSm} />
 
         <Text style={layout.subtitle}>
           Minimum seats
@@ -189,12 +196,7 @@ export default function Home() {
 
         {user.gender === "Female" && (
 
-          <View style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginTop: spacing.sm
-          }}>
+          <View style={[components.rowSpaceBetween, { marginTop: spacing.sm }]}>
 
             <Text style={layout.subtitle}>
               Women only
@@ -205,13 +207,13 @@ export default function Home() {
               onValueChange={setWomenOnlyFilter}
               testID="searchWomenOnlySwitch"
               trackColor={{
-                false: "#bcbdc1",
-                true: "#fbcfe8"
+                false: colors.switchTrackOff,
+                true: colors.switchTrackOn,
               }}
               thumbColor={
                 womenOnlyFilter
                   ? colors.women
-                  : "#8b8e91"
+                  : colors.switchThumbOff
               }
             />
 
@@ -228,42 +230,31 @@ export default function Home() {
   const emptyState = (
     <>
       <View style={components.card}>
-        <Text
-          style={{ color: colors.textLight }}
-          testID="searchEmptyState"
-        >
+        <Text style={layout.textLight} testID="searchEmptyState">
           No rides found
         </Text>
       </View>
 
       {
-        <View style={[components.card, { borderColor: colors.primaryLight, borderWidth: 1.5 }]}>
+        <View style={components.card}>
           <Pressable
             onPress={() => setShowBusAlternatives(prev => !prev)}
-            style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}
+            style={components.rowSpaceBetween}
           >
-            <Text style={{ fontWeight: "700", fontSize: 15, color: colors.primary }}>
+            <Text style={[layout.headingSm, { color: colors.textLight }]}>
               🚌 Bus Alternatives
             </Text>
-            <Text style={{ fontSize: 18, color: colors.primary, fontWeight: "600" }}>
-              {showBusAlternatives ? "▲" : "▼"}
+            <Text style={layout.collapseIndicator}>
+              {showBusAlternatives ? "Hide ▲" : "Show ▼"}
             </Text>
           </Pressable>
 
           {showBusAlternatives && (
-            <View style={{ marginTop: spacing.sm }}>
+            <View style={components.mtMd}>
               {!hasBothCoords ? (
-                <View style={{
-                  backgroundColor: colors.warningSoft,
-                  borderRadius: 8,
-                  padding: spacing.sm,
-                  flexDirection: "row",
-                  alignItems: "flex-start",
-                  gap: spacing.xs,
-                  marginTop: spacing.xs,
-                }}>
-                  <Text style={{ fontSize: 15 }}>⚠️</Text>
-                  <Text style={{ color: colors.text, fontSize: 13, flex: 1, lineHeight: 18 }}>
+                <View style={components.infoBox}>
+                  <Text>⚠️</Text>
+                  <Text style={components.infoBoxText}>
                     To see bus alternatives, please select a specific address from the suggestions for{" "}
                     {!originCoords ? "Origin" : ""}
                     {!originCoords && !destinationCoords ? " and " : ""}

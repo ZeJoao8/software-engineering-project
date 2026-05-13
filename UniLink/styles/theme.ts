@@ -25,7 +25,12 @@ export const colors = {
  warning:      "#fef08a",
  warningSoft:  "#fef2f2",
  neutral:      "#f1f5f9",
- neutralLight: "#e2e8f0",
+ textFaint: "#94a3b8",  // slate-400 — lighter than textLight, for de-emphasised metadata
+
+ // Women-only Switch colours (trackColor / thumbColor)
+ switchTrackOff:  "#bcbdc1",
+ switchTrackOn:   "#fbcfe8",
+ switchThumbOff:  "#8b8e91",
 };
 
 export const spacing = {

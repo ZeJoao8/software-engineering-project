@@ -258,7 +258,7 @@ export default function Login(){
 />
 
 
-<View style={{height:spacing.sm}} />
+<View style={components.spacerSm} />
 
 
 <Text style={forms.label}>
@@ -273,7 +273,7 @@ export default function Login(){
 />
 
 
-<View style={{height:spacing.sm}} />
+<View style={components.spacerSm} />
 
 
 <Text style={forms.label}>
@@ -288,7 +288,7 @@ export default function Login(){
 />
 
 
-<View style={{height:spacing.sm}} />
+<View style={components.spacerSm} />
 
 
 <Text style={forms.label}>
@@ -331,7 +331,7 @@ export default function Login(){
 </View>
 
 
-<View style={{height:spacing.sm}} />
+<View style={components.spacerSm} />
 
 </>
 
@@ -353,7 +353,7 @@ export default function Login(){
 />
 
 
-<View style={{height:spacing.sm}} />
+<View style={components.spacerSm} />
 
 
 <Text style={forms.label}>
@@ -373,7 +373,7 @@ export default function Login(){
 
 <>
 
-<View style={{height:spacing.sm}} />
+<View style={components.spacerSm} />
 
 <Text style={forms.label}>
  Confirm password
@@ -394,7 +394,7 @@ export default function Login(){
 
 
 
-<View style={{height:spacing.md}} />
+<View style={components.spacerMd} />
 
 
 <Button testID="authSubmitButton"
@@ -412,7 +412,7 @@ export default function Login(){
 
 
 
-<View style={{height:spacing.sm}} />
+<View style={components.spacerSm} />
 
 
 <Button
@@ -429,14 +429,7 @@ export default function Login(){
 
 {!registerMode && (
 
-<Text
- style={{
-  marginTop:spacing.md,
-  fontSize:12,
-  color:colors.textLight,
-  textAlign:"center"
- }}
->
+<Text style={[layout.textLightSm, { marginTop: spacing.md, textAlign: "center" }]}>
 
 test accounts:
 
