@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import {
   Alert,
+  Pressable,
   ScrollView,
   Text,
   TextInput,
@@ -41,7 +42,7 @@ import { Button } from "../../components/Button";
 import { components } from "../../styles/components";
 import { forms } from "../../styles/forms";
 import { layout } from "../../styles/layout";
-import { colors, spacing } from "../../styles/theme";
+import { colors, spacing, radius } from "../../styles/theme";
 import { getUserBadges } from "../../utils/badges";
 import { calculateWeeklyStreak } from "../../utils/streaks";
 import { calculateUserCO2Saved } from "../../utils/sustainability";
@@ -250,11 +251,7 @@ export default function Profile() {
 
     <ScrollView
       style={layout.scrollScreen}
-      contentContainerStyle={{
-        flexGrow: 1,
-        padding: spacing.lg,
-        paddingBottom: 80,
-      }}
+      contentContainerStyle={layout.scrollContentTab}
       keyboardDismissMode="on-drag"
     >
 
@@ -264,40 +261,10 @@ export default function Profile() {
 
       {/* OWN RATING — same display as public profile */}
       {showRating && (
-        <Text
-          style={{
-            marginBottom: spacing.md,
-            color: colors.textLight,
-            fontSize: 16
-          }}
-        >
+        <Text style={layout.ratingText}>
           ⭐ {averageRating} ({userReviews.length} {userReviews.length === 1 ? "rating" : "ratings"})
         </Text>
       )}
-      {/* RIDES SHORTCUT */}
-      <View style={components.card}>
-
-        <Text style={layout.subtitle}>
-          Rides
-        </Text>
-
-        <Text
-          style={{
-            color: colors.textLight,
-            marginBottom: spacing.md
-          }}
-        >
-          View the rides you created and the rides you joined.
-        </Text>
-
-        <Button
-          outline
-          testID="profileMyRidesButton"
-          onPress={() => router.push("/(tabs)/myRides")}
-          label="My rides"
-        />
-
-      </View>
       {/* USER INFO */}
       <View style={components.card}>
 
@@ -323,7 +290,7 @@ export default function Profile() {
         )}
 
 
-        <View style={{ height: spacing.sm }} />
+        <View style={components.spacerSm} />
         
         <Text style={forms.label}>
           E-mail
@@ -333,7 +300,7 @@ export default function Profile() {
           {activeUser.email}
         </Text>
 
-        <View style={{ height: spacing.sm }} />
+        <View style={components.spacerSm} />
         
         <Text style={forms.label}>
           Gender
@@ -344,7 +311,7 @@ export default function Profile() {
         </Text>
 
 
-        <View style={{ height: spacing.sm }} />
+        <View style={components.spacerSm} />
 
         <Text style={forms.label}>
           University
@@ -355,7 +322,7 @@ export default function Profile() {
         </Text>
 
 
-        <View style={{ height: spacing.sm }} />
+        <View style={components.spacerSm} />
 
         <Text style={forms.label}>
           Course
@@ -377,48 +344,32 @@ export default function Profile() {
         )}
 
 
-        <View style={{ height: spacing.md }} />
+        <View style={components.spacerMd} />
 
         <Text style={layout.subtitle}>
           My cars
         </Text>
 
         {userCars.length === 0 && (
-          <Text style={{ color: colors.textLight }}>
-            No cars yet
-          </Text>
+          <Text style={layout.textLight}>No cars yet</Text>
         )}
 
         {userCars.map(car => (
-          <View
-            key={car.id}
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: spacing.sm
-            }}
-          >
+          <View key={car.id} style={[components.rowSpaceBetween, components.mbSm]}>
             <Text>
               {car.model} • {car.color} • {car.licensePlate}
             </Text>
 
             {editing && (
-              <Text
-                style={{
-                  color: colors.danger,
-                  fontWeight: "600"
-                }}
-                onPress={() => removeCar(car.id)}
-              >
-                remove
-              </Text>
+              <Pressable style={components.dangerTag} onPress={() => removeCar(car.id)}>
+                <Text style={components.dangerTagText}>Remove</Text>
+              </Pressable>
             )}
           </View>
         ))}
 
         {editing && (
-          <View style={{ marginTop: spacing.sm }}>
+          <View style={components.mtMd}>
             <Button
               outline
               testID="toggleAddCarButton"
@@ -429,31 +380,31 @@ export default function Profile() {
         )}
 
         {editing && showCarForm && (
-          <View style={{ marginTop: spacing.md, padding: spacing.md, backgroundColor: colors.background, borderRadius: 8 }}>
-            <Text style={{ ...layout.subtitle, fontSize: 16 }}>Add car details</Text>
+          <View style={[components.mtMd, { padding: spacing.md, backgroundColor: colors.background, borderRadius: radius.sm }]}>
+            <Text style={layout.subtitle}>Add car details</Text>
 
             <Text style={forms.label}>Model</Text>
             <TextInput value={model} onChangeText={setModel} style={forms.input} testID="carModelInput" />
-            <View style={{ height: spacing.sm }} />
+            <View style={components.spacerSm} />
 
             <Text style={forms.label}>Color</Text>
             <TextInput value={color} onChangeText={setColor} style={forms.input} testID="carColorInput" />
-            <View style={{ height: spacing.sm }} />
+            <View style={components.spacerSm} />
 
             <Text style={forms.label}>Plate</Text>
             <TextInput value={plate} onChangeText={setPlate} autoCapitalize="characters" style={forms.input} testID="carPlateInput" />
-            <View style={{ height: spacing.sm }} />
+            <View style={components.spacerSm} />
 
             <Text style={forms.label}>Seats</Text>
             <TextInput value={seats} onChangeText={setSeats} keyboardType="numeric" style={forms.input} testID="carSeatsInput" />
 
-            <View style={{ marginTop: spacing.md }}>
+            <View style={components.mtMd}>
               <Button testID="saveCarButton" onPress={() => void addNewCar()} label="Save car" />
             </View>
           </View>
         )}
 
-        <View style={{ height: spacing.lg }} />
+        <View style={components.spacerLg} />
 
         {!editing ? (
 
@@ -473,7 +424,7 @@ export default function Profile() {
               label="Save profile"
             />
 
-            <View style={{ height: spacing.sm }} />
+            <View style={components.spacerSm} />
 
             <Button
               outline
@@ -487,44 +438,27 @@ export default function Profile() {
 
       </View>
       <View style={components.card}>
-        <Text style={layout.subtitle}>
-          Weekly Streak 🔥
-        </Text>
-
-        <Text
-          style={{
-            fontSize: 28,
-            fontWeight: "700",
-            color: colors.primary,
-            marginTop: spacing.xs
-          }}
-        >
-          {weeklyStreak}
-        </Text>
-
-        <Text
-          style={{
-            color: colors.textLight,
-            marginTop: spacing.xs
-          }}
-        >
-          {weeklyStreak === 1
-            ? "week in a row"
-            : "weeks in a row"}
-        </Text>
+        <Text style={layout.subtitle}>Weekly Streak</Text>
+        <View style={components.statRow}>
+          <Text style={layout.emojiLg}>🔥</Text>
+          <View>
+            <Text style={layout.statValue}>{weeklyStreak}</Text>
+            <Text style={layout.statLabel}>
+              {weeklyStreak === 1 ? "week in a row" : "weeks in a row"}
+            </Text>
+          </View>
+        </View>
       </View>
-
-
 
       <View style={components.card}>
         <Text style={layout.subtitle}>Sustainability Impact</Text>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: spacing.xs }}>
-          <Text style={{ fontSize: 32 }}>🌳</Text>
+        <View style={components.statRow}>
+          <Text style={layout.emojiLg}>🌳</Text>
           <View>
-            <Text style={{ fontSize: 20, fontWeight: "700", color: colors.primary }}>
+            <Text style={layout.statValue}>
               {calculateUserCO2Saved(getRides(), activeUser.uid).toFixed(2)} kg
             </Text>
-            <Text style={{ color: colors.textLight, fontSize: 13 }}>Total CO₂ saved</Text>
+            <Text style={layout.statLabel}>Total CO₂ saved</Text>
           </View>
         </View>
       </View>

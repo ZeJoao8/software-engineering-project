@@ -3,6 +3,7 @@ import { Pressable, Text, View } from "react-native";
 
 import { formatDate } from "../utils/date";
 import { components } from "../styles/components";
+import { layout } from "../styles/layout";
 import { colors, spacing } from "../styles/theme";
 import { getCurrentUser, getUserById } from "../data/user";
 import { getReports } from "../data/reports";
@@ -127,7 +128,7 @@ export default function RideCard({
           key: "rate",
           emoji: "⭐",
           description: "You haven't rated this driver yet",
-          bg: colors.neutralLight,
+          bg: colors.border,
         });
       }
     }
@@ -137,30 +138,26 @@ export default function RideCard({
     <Pressable style={components.card} onPress={onPress}>
       {/* COMPLETED BADGE */}
       {ride.completed && (
-        <View style={{ alignSelf: "flex-end", backgroundColor: colors.primarySoft, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, marginBottom: 4, borderWidth: 1, borderColor: colors.primaryLight }}>
-          <Text style={{ fontSize: 11, fontWeight: "700", color: colors.primary }}>COMPLETED ✅</Text>
+        <View style={components.completedTag}>
+          <Text style={components.completedTagText}>COMPLETED ✅</Text>
         </View>
       )}
 
       {/* ROUTE */}
-      <Text style={{ fontSize: 16, fontWeight: "700", marginBottom: 4 }}>
+      <Text style={layout.cardTitle}>
         {ride.origin} → {ride.destination}
       </Text>
 
       {/* DATE */}
-      <Text style={{ marginBottom: spacing.sm }}>
+      <Text style={[layout.textLight, { marginBottom: spacing.sm }]}>
         {formatDate(ride.departureDateTime)}
       </Text>
 
       {/* INFO ROW */}
-      <View style={{
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}>
+      <View style={components.rowSpaceBetween}>
 
         {/* OCCUPANCY */}
-        <Text style={{ fontWeight: "500", color: colors.textLight }}>
+        <Text style={layout.textLight}>
           {showOccupancyLabel && "Seats: "}
           {ride.totalSeats - ride.availableSeats}
           {" / "}
@@ -169,7 +166,7 @@ export default function RideCard({
         </Text>
 
         {/* TAGS */}
-        <View style={{ flexDirection: "row", gap: 6, alignItems: "center" }}>
+        <View style={components.rowGap}>
           {tags.map(tag => (
             <Pressable
               key={tag.key}

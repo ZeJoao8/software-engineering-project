@@ -129,17 +129,10 @@ export default function ReviewRide() {
       >
         <ScrollView
           style={layout.scrollScreen}
-          contentContainerStyle={{ flexGrow: 1, paddingBottom: spacing.xl, padding: spacing.lg }}
+          contentContainerStyle={layout.scrollContentLg}
           keyboardShouldPersistTaps="handled"
         >
-          <Text
-            style={{
-              color: colors.primary,
-              marginBottom: spacing.sm,
-              fontWeight: "600"
-            }}
-            onPress={() => router.back()}
-          >
+          <Text style={layout.backLink} onPress={() => router.back()}>
             ← Back
           </Text>
 
@@ -148,26 +141,15 @@ export default function ReviewRide() {
               Rate driver
             </Text>
 
-            <Text style={{ marginBottom: spacing.sm, fontWeight: "500", fontSize: 16 }}>
+            <Text style={[layout.headingSm, { marginBottom: spacing.sm }]}>
               {targetUser.name}
             </Text>
 
-            <Text
-              style={{
-                color: colors.textLight,
-                marginBottom: spacing.xl
-              }}
-            >
+            <Text style={[layout.textLight, { marginBottom: spacing.xl }]}>
               {ride.origin} → {ride.destination}
             </Text>
 
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "center",
-                marginBottom: spacing.xl
-              }}
-            >
+            <View style={[components.row, { justifyContent: "center", marginBottom: spacing.xl }]}>
               {[1, 2, 3, 4, 5].map(value => (
                 <Pressable
                   key={value}
@@ -187,10 +169,10 @@ export default function ReviewRide() {
               ))}
             </View>
 
-            <Text style={{ fontSize: 15, fontWeight: "600", marginBottom: spacing.sm }}>
+            <Text style={[layout.headingSm, { marginBottom: spacing.sm }]}>
               Add a comment (optional)
             </Text>
-            
+
             <TextInput
               value={comment}
               onChangeText={setComment}
@@ -199,10 +181,7 @@ export default function ReviewRide() {
               multiline
               numberOfLines={4}
               maxLength={250}
-              style={[
-                forms.input,
-                { minHeight: 100, textAlignVertical: "top", marginBottom: spacing.xl }
-              ]}
+              style={[forms.input, forms.multiline, { marginBottom: spacing.xl }]}
               testID="reviewCommentInput"
             />
 
