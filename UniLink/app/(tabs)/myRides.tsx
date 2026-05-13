@@ -238,7 +238,7 @@ export default function MyRides() {
             Driver{driverRides.length > 0 ? ` (${driverRides.length})` : ""}
           </Text>
           <Text style={layout.collapseIndicator}>
-            {driverOpen ? "▲" : "▼"}
+            {driverOpen ? "Hide ▲" : "Show ▼"}
           </Text>
         </Pressable>
 
@@ -274,7 +274,7 @@ export default function MyRides() {
             Passenger{passengerRides.length > 0 ? ` (${passengerRides.length})` : ""}
           </Text>
           <Text style={layout.collapseIndicator}>
-            {passengerOpen ? "▲" : "▼"}
+            {passengerOpen ? "Hide ▲" : "Show ▼"}
           </Text>
         </Pressable>
 
