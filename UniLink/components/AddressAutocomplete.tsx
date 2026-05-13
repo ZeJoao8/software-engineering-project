@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   Pressable,
-  StyleSheet,
   ActivityIndicator,
   Keyboard,
 } from "react-native";
@@ -15,8 +14,9 @@ import {
   type Coordinates,
 } from "../utils/routing";
 
-import { colors, spacing, radius } from "../styles/theme";
+import { colors } from "../styles/theme";
 import { forms } from "../styles/forms";
+import { components } from "../styles/components";
 
 interface AddressAutocompleteProps {
   placeholder: string;
@@ -49,7 +49,6 @@ export default function AddressAutocomplete({
     (text: string) => {
       onChangeText(text);
 
-      // Clear previous debounce
       if (debounceRef.current) {
         clearTimeout(debounceRef.current);
       }
@@ -60,7 +59,6 @@ export default function AddressAutocomplete({
         return;
       }
 
-      // Debounce 500ms to avoid spamming Nominatim
       debounceRef.current = setTimeout(async () => {
         setLoading(true);
         const results = await searchPlaces(text);
@@ -80,16 +78,16 @@ export default function AddressAutocomplete({
   }
 
   return (
-    <View style={styles.container}>
+    <View style={components.autocomplete}>
 
-      <View style={styles.inputRow}>
+      <View style={components.autocompleteRow}>
         <TextInput
           placeholder={placeholder}
           placeholderTextColor={colors.textLight}
           value={value}
           maxLength={80}
           onChangeText={handleTextChange}
-          style={[forms.input, styles.input]}
+          style={[forms.input, { flex: 1 }]}
           testID={testID}
           onFocus={() => {
             if (suggestions.length > 0) {
@@ -102,7 +100,7 @@ export default function AddressAutocomplete({
         />
         {loading && (
           <ActivityIndicator
-            style={styles.loader}
+            style={components.autocompleteLoader}
             size="small"
             color={colors.primary}
           />
@@ -110,31 +108,31 @@ export default function AddressAutocomplete({
       </View>
 
       {showSuggestions && suggestions.length > 0 && (
-        <View style={styles.suggestionsContainer}>
+        <View style={components.suggestionsList}>
 
           {suggestions.map((item, index) => (
             <Pressable
               key={`${item.coords.latitude}-${item.coords.longitude}-${index}`}
               testID={testID ? `${testID}-suggestion-${index}` : undefined}
               style={({ pressed }) => [
-                styles.suggestionItem,
-                index < suggestions.length - 1 && styles.suggestionBorder,
-                pressed && styles.suggestionPressed,
+                components.suggestionItem,
+                index < suggestions.length - 1 && components.suggestionSeparator,
+                pressed && components.suggestionHighlight,
               ]}
               onPress={() => handleSelect(item)}
             >
 
-              <Text style={styles.suggestionIcon}>📍</Text>
+              <Text style={components.suggestionIconText}>📍</Text>
 
-              <View style={styles.suggestionText}>
+              <View style={components.suggestionTextGroup}>
                 <Text
-                  style={styles.suggestionName}
+                  style={components.suggestionName}
                   numberOfLines={1}
                 >
                   {item.shortName}
                 </Text>
                 <Text
-                  style={styles.suggestionDetail}
+                  style={components.suggestionDetail}
                   numberOfLines={1}
                 >
                   {item.displayName}
@@ -150,77 +148,3 @@ export default function AddressAutocomplete({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-
-  container: {
-    position: "relative",
-    zIndex: 10,
-  },
-
-  inputRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  input: {
-    flex: 1,
-  },
-
-  loader: {
-    position: "absolute",
-    right: 12,
-  },
-
-  suggestionsContainer: {
-    backgroundColor: "white",
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    marginTop: 4,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 4,
-    overflow: "hidden",
-  },
-
-  suggestionItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    gap: 10,
-  },
-
-  suggestionBorder: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
-  },
-
-  suggestionPressed: {
-    backgroundColor: colors.primarySoft,
-  },
-
-  suggestionIcon: {
-    fontSize: 16,
-  },
-
-  suggestionText: {
-    flex: 1,
-  },
-
-  suggestionName: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.text,
-  },
-
-  suggestionDetail: {
-    fontSize: 11,
-    color: colors.textLight,
-    marginTop: 1,
-  },
-
-});

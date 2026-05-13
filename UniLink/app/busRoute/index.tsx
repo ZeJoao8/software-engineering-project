@@ -13,7 +13,7 @@ import { getRoute, type Coordinates } from "../../utils/routing";
 import ZoomControls from "../../components/ZoomControls";
 
 import { components } from "../../styles/components";
-import { colors, spacing } from "../../styles/theme";
+import { colors, spacing, radius } from "../../styles/theme";
 import { layout } from "../../styles/layout";
 
 
@@ -91,11 +91,9 @@ export default function BusRouteDetail() {
 
         <View style={{ padding: spacing.md }}>
 
-          <Pressable onPress={() => router.back()} style={{ marginBottom: spacing.sm }}>
-            <Text style={{ color: colors.primary, fontWeight: "600" }}>← Back</Text>
-          </Pressable>
+          <Text style={layout.backLink} onPress={() => router.back()}>← Back</Text>
 
-          <Text style={{ fontSize: 17, fontWeight: "700", color: colors.text, marginBottom: 2 }}>
+          <Text style={layout.sectionTitle}>
             {origin} → {destination}
           </Text>
 
@@ -108,7 +106,7 @@ export default function BusRouteDetail() {
         <View style={{ position: "relative" }}>
           <MapView
             ref={mapRef}
-            style={{ height: 280, marginHorizontal: spacing.md, borderRadius: 12, overflow: "hidden" }}
+            style={{ height: 280, marginHorizontal: spacing.md, borderRadius: radius.md, overflow: "hidden" }}
             provider={PROVIDER_DEFAULT}
             initialRegion={region}
             scrollEnabled
@@ -174,21 +172,20 @@ export default function BusRouteDetail() {
           {route.legs.map((leg, i) => (
             <View
               key={i}
-              style={[components.card, { marginBottom: spacing.sm, flexDirection: "row", alignItems: "center", gap: spacing.sm }]}
+              style={[components.card, components.legRow]}
             >
               <Text style={{ fontSize: 22 }}>{modeEmoji(leg.mode)}</Text>
 
               <View style={{ flex: 1 }}>
-                <Text style={{ fontWeight: "700", color: colors.text }}>
+                <Text style={layout.headingSm}>
                   {modeLabel(leg.mode, leg.lineName)}
                 </Text>
-                <Text style={{ color: colors.textLight, fontSize: 13, marginTop: 2 }}>
+                <Text style={[layout.textLightSm, { marginTop: 2 }]}>
                   {leg.fromStop === "START" ? origin : leg.fromStop} → {leg.toStop === "END" ? destination : leg.toStop}
                 </Text>
-
               </View>
 
-              <Text style={{ color: colors.textLight, fontSize: 13 }}>
+              <Text style={layout.textLightSm}>
                 {leg.durationMin} min
               </Text>
             </View>
