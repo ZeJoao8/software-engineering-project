@@ -17,6 +17,23 @@ import { colors, spacing, radius } from "../../styles/theme";
 import { layout } from "../../styles/layout";
 
 
+const TRANSIT_COLORS = ["#2563EB", "#eb8614", "#7C3AED", "#eedc3d"];
+
+function buildLegColorMap(legs: { mode: string; lineName?: string }[]): Record<number, string> {
+  const map: Record<number, string> = {};
+  let colorIndex = -1;
+  let lastLineName: string | undefined = undefined;
+  for (let i = 0; i < legs.length; i++) {
+    if (legs[i].mode.toUpperCase() === "WALK") continue;
+    if (legs[i].lineName !== lastLineName) {
+      colorIndex = (colorIndex + 1) % TRANSIT_COLORS.length;
+      lastLineName = legs[i].lineName;
+    }
+    map[i] = TRANSIT_COLORS[colorIndex];
+  }
+  return map;
+}
+
 function modeEmoji(mode: string) {
   switch (mode.toUpperCase()) {
     case "BUS":    return "🚌";
@@ -67,6 +84,7 @@ export default function BusRouteDetail() {
   }
 
   const { route, origin, destination } = selected;
+  const legColorMap = buildLegColorMap(route.legs);
 
   const allCoords = route.legs.flatMap(leg => [leg.fromCoords, leg.toCoords]);
   const lats = allCoords.map(c => c.latitude);
@@ -82,8 +100,6 @@ export default function BusRouteDetail() {
     latitudeDelta: (maxLat - minLat) * 1.6 + 0.01,
     longitudeDelta: (maxLon - minLon) * 1.6 + 0.01,
   };
-
-  const transitLegs = route.legs.filter(l => l.mode.toUpperCase() !== "WALK");
 
   return (
     <SafeAreaView style={layout.scrollScreen}>
@@ -123,20 +139,23 @@ export default function BusRouteDetail() {
           />
 
           {/* Transit Stops */}
-          {transitLegs.map((leg, i) => (
-            <React.Fragment key={`bus-stops-${i}`}>
-              <Marker
-                coordinate={leg.fromCoords}
-                title={leg.fromStop}
-                pinColor={colors.warning}
-              />
-              <Marker
-                coordinate={leg.toCoords}
-                title={leg.toStop}
-                pinColor={colors.warning}
-              />
-            </React.Fragment>
-          ))}
+          {route.legs
+            .map((leg, i) => ({ leg, i }))
+            .filter(({ leg }) => leg.mode.toUpperCase() !== "WALK")
+            .map(({ leg, i }) => (
+              <React.Fragment key={`bus-stops-${i}`}>
+                <Marker
+                  coordinate={leg.fromCoords}
+                  title={leg.fromStop}
+                  pinColor={legColorMap[i]}
+                />
+                <Marker
+                  coordinate={leg.toCoords}
+                  title={leg.toStop}
+                  pinColor={legColorMap[i]}
+                />
+              </React.Fragment>
+            ))}
 
           {/* Destination Marker */}
           <Marker
@@ -151,7 +170,7 @@ export default function BusRouteDetail() {
               <Polyline
                 key={`leg-${i}`}
                 coordinates={paths[i] || leg.path || [leg.fromCoords, leg.toCoords]}
-                strokeColor={isWalk ? colors.textLight : colors.primary}
+                strokeColor={isWalk ? colors.textLight : legColorMap[i]}
                 strokeWidth={isWalk ? 3 : 5}
                 lineDashPattern={isWalk ? [6, 6] : undefined}
               />
@@ -174,6 +193,9 @@ export default function BusRouteDetail() {
               key={i}
               style={[components.card, components.legRow]}
             >
+              {legColorMap[i] && (
+                <View style={{ width: 4, alignSelf: "stretch", borderRadius: 2, backgroundColor: legColorMap[i], marginRight: 2 }} />
+              )}
               <Text style={{ fontSize: 22 }}>{modeEmoji(leg.mode)}</Text>
 
               <View style={{ flex: 1 }}>
