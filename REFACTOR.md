@@ -105,13 +105,13 @@ domain/                          store/  ── estado reactivo
 
 ### `services/` (orquestração — devolve `{ok, error}`)
 
-- [ ] `services/AuthService.ts` — `login`, `register`, `logout` (traduz erros, sem Alert)
-- [ ] `services/RideService.ts` — `createRide`, `reserveSeat`, `cancelSeat`, `completeRide`, `cancelRide`, `removePassenger`, `verifyPassengerCode`, `changeCar`, `removeEmptyPastRides`
-- [ ] `services/CarService.ts` — `addCar` (com validação), `removeCarCascade` (apaga rides afetadas)
-- [ ] `services/ChatService.ts` — `sendMessage` (com check de autorização)
-- [ ] `services/ReviewService.ts` — `addReview`
-- [ ] `services/ReportService.ts` — `addReport`
-- [ ] `services/ProfileService.ts` — `updateProfile`
+- [x] `services/AuthService.ts` — `login`, `register`, `logout` (traduz erros, sem Alert)
+- [x] `services/RideService.ts` — `createRide`, `reserveSeat`, `cancelSeat`, `completeRide`, `cancelRide`, `removePassenger`, `verifyPassengerCode`, `changeCar`, `removeEmptyPastRides`
+- [x] `services/CarService.ts` — `addCar` (com validação), `removeCarCascade` (apaga rides afetadas)
+- [x] `services/ChatService.ts` — `sendMessage` (com check de autorização)
+- [x] `services/ReviewService.ts` — `addReview`
+- [x] `services/ReportService.ts` — `addReport`
+- [x] `services/ProfileService.ts` — `updateProfile`
 
 ### `hooks/` (ponte React ↔ store)
 
@@ -156,10 +156,10 @@ domain/                          store/  ── estado reactivo
 - [x] Criar `store/*.ts` que usam repositories e mantêm estado reactivo
 - [x] Ainda em paralelo a `/data/`
 
-### FASE 6 — Services (≈4h, médio-alto risco)
-- [ ] Criar `services/*.ts` com lógica extraída de screens + `/data/`
-- [ ] Convenção: devolver `{ok: boolean, error?: string, data?: T }`
-- [ ] **Marco crítico:** services nunca chamam `Alert`
+### FASE 6 — Services ✅
+- [x] Criar `services/*.ts` com lógica extraída de screens + `/data/`
+- [x] Convenção: devolver `{ok: boolean, error?: string, data?: T }`
+- [x] **Marco crítico:** services nunca chamam `Alert`
 
 ### FASE 7 — Hooks (≈1h, baixo risco)
 - [ ] Criar `hooks/use*.ts` que envolvem os stores
