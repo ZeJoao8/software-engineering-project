@@ -95,13 +95,13 @@ domain/                          store/  ── estado reactivo
 
 ### `store/` (estado reactivo — substitui parte de `/data/`)
 
-- [ ] `store/authStore.ts` — `currentUser`, `users`, `authReady`, `subscribe()`
-- [ ] `store/rideStore.ts` — `rides[]` + sync com `RideRepository.subscribeAll`
-- [ ] `store/carStore.ts` — `cars[]` (próprios)
-- [ ] `store/reviewStore.ts` — `reviews[]` (que o user vê)
-- [ ] `store/reportStore.ts` — `reports[]` (do user)
-- [ ] `store/busRouteStore.ts` ← `data/busRoute.ts`
-- [ ] Apagar `/data/` por completo
+- [x] `store/authStore.ts` — `currentUser`, `users`, `authReady`, `subscribe()`
+- [x] `store/rideStore.ts` — `rides[]` + sync com `RideRepository.subscribeAll`
+- [x] `store/carStore.ts` — `cars[]` (próprios)
+- [x] `store/reviewStore.ts` — `reviews[]` (que o user vê)
+- [x] `store/reportStore.ts` — `reports[]` (do user)
+- [x] `store/busRouteStore.ts` ← `data/busRoute.ts`
+- [ ] Apagar `/data/` por completo — feito na Fase 8
 
 ### `services/` (orquestração — devolve `{ok, error}`)
 
@@ -152,9 +152,9 @@ domain/                          store/  ── estado reactivo
 - [x] Criar `repositories/*.ts` em paralelo a `/data/` (ainda não ligar nada)
 - [x] Cada repository SÓ faz Firestore, lança erros, sem UI
 
-### FASE 5 — Stores (≈3h, médio risco)
-- [ ] Criar `store/*.ts` que usam repositories e mantêm estado reactivo
-- [ ] Ainda em paralelo a `/data/`
+### FASE 5 — Stores ✅
+- [x] Criar `store/*.ts` que usam repositories e mantêm estado reactivo
+- [x] Ainda em paralelo a `/data/`
 
 ### FASE 6 — Services (≈4h, médio-alto risco)
 - [ ] Criar `services/*.ts` com lógica extraída de screens + `/data/`
@@ -297,20 +297,31 @@ Todos os consumidores (screens, components, tests) a importar diretamente de `do
 
 ### O que falta — próxima fase a fazer
 
-**Fase 5 — `store/` (≈3h, médio risco)**
+**Fase 5 ✅ — `store/`**
+6 stores criados. Cada um usa o repository correspondente e mantém estado reactivo.
+`/data/` continua intacto — nada quebrado.
 
-Criar stores reactivos que usam os repositories e mantêm estado em memória. Ainda em paralelo a `/data/`.
+### O que falta — próxima fase a fazer
+
+**Fase 6 — `services/` (≈4h, médio-alto risco)**
+
+Orquestração: rules + repositories. Devolve `{ ok, error?, data? }`, **nunca** chama `Alert`.
 
 ```
-store/authStore.ts    — currentUser, users, authReady + subscribe()
-store/rideStore.ts    — rides[] + sync via RideRepository.subscribeAll
-store/carStore.ts     — cars[] (próprios do user)
-store/reviewStore.ts  — reviews[] (que o user vê, como reviewer e reviewee)
-store/reportStore.ts  — reports[] (do user como reporter)
-store/busRouteStore.ts ← data/busRoute.ts (mover estado simples)
+services/AuthService.ts    — login, register, logout (erros de Auth traduzidos para strings)
+services/RideService.ts    — createRide, reserveSeat, cancelSeat, completeRide,
+                             cancelRide, removePassenger, verifyPassengerCode,
+                             changeCar, removeEmptyPastRides
+services/CarService.ts     — addCar (com isValidPlate), removeCarCascade
+services/ChatService.ts    — sendMessage (verifica autorização)
+services/ReviewService.ts  — addReview
+services/ReportService.ts  — addReport
+services/ProfileService.ts — updateProfile
 ```
 
-**Fases seguintes:** 6 Services → 7 Hooks → 8 UI.
+Critério de fim: nenhum service chama `Alert`. `tsc` + 111 testes.
+
+**Fases seguintes:** 7 Hooks → 8 UI.
 
 ### Convenções estabelecidas
 - Imports de tipos → sempre `import type { X }` (não `import { X }`)
