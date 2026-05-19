@@ -114,6 +114,10 @@ export function filterRides(
       !friendsOnly ||
       friendIds.includes(r.driverId);
 
+    const canSeeFriendsOnlyRide =
+      !r.friendsOnly ||
+      friendIds.includes(r.driverId);
+
     return (
 
       matchesOrigin &&
@@ -122,7 +126,8 @@ export function filterRides(
       matchesMinSeats &&
       canJoinGenderWise &&
       matchesWomenOnlyFilter &&
-      matchesFriendsOnly
+      matchesFriendsOnly &&
+      canSeeFriendsOnlyRide
 
     );
 
