@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { useRouter } from "expo-router";
-import { setSelectedBusRoute } from "../data/busRoute";
+import { setSelectedBusRoute } from "../store/busRouteStore";
 
 import { getTransitRoutes, TransitRoute } from "../infra/transit";
 import type { Coordinates } from "../infra/routing";

@@ -63,12 +63,12 @@ domain/                          store/  ── estado reactivo
   - [x] `canCancelRide(ride, now)`
   - [x] `canCompleteRide(ride, userId)`
   - [x] `canRemovePassenger(ride, now)`
-  - [ ] `canChangeCar(ride, newCar, currentPassengers)` — ⚠️ lógica ainda na screen, extrair na Fase 6
-  - [ ] `isRideStarted(ride, now)` — ⚠️ calculado inline na screen, extrair na Fase 6
+  - [x] `canChangeCar(ride, newCar, currentPassengers)` — extraído para `rideRules.ts`, usado em `RideService.changeCar`
+  - [x] `isRideStarted(ride, now)` — extraído para `rideRules.ts`, usado por `canCancelSeat`, `canCancelRide`, `canRemovePassenger`, `canChangeCar`
   - [x] `generateBoardingCode()`
   - [x] `shouldAutoDeleteRide(ride, now)`
 - [x] `domain/rules/rideFilters.ts` ← `utils/rideFilters.ts` (apagado)
-- [ ] `domain/rules/myRidesFilters.ts` — **novo**, extrair de `myRides.tsx:96-149` — ⚠️ deixar para Fase 8 (envolve estado React)
+- [x] `domain/rules/myRidesFilters.ts` — **novo**, `StatusFilter`, `ExtraFilter`, `RatingFilter`, `matchesRating`, `applyMyRidesFilters`
 - [x] `domain/rules/badges.ts` ← `utils/badges.ts` (apagado)
 - [x] `domain/rules/sustainability.ts` ← `utils/sustainability.ts` (apagado)
 - [x] `domain/rules/streaks.ts` ← `utils/streaks.ts` (apagado)
@@ -101,7 +101,7 @@ domain/                          store/  ── estado reactivo
 - [x] `store/reviewStore.ts` — `reviews[]` (que o user vê)
 - [x] `store/reportStore.ts` — `reports[]` (do user)
 - [x] `store/busRouteStore.ts` ← `data/busRoute.ts`
-- [ ] Apagar `/data/` por completo — feito na Fase 8
+- [x] Apagar `/data/` por completo — feito na Fase 8
 
 ### `services/` (orquestração — devolve `{ok, error}`)
 
@@ -140,8 +140,8 @@ domain/                          store/  ── estado reactivo
 - [x] Criar `domain/rules/rideRules.ts` com regras puras (canReserveSeat, canCancelSeat, canCancelRide, canCompleteRide, canRemovePassenger, shouldAutoDeleteRide, generateBoardingCode)
 - [x] Criar `domain/rules/reviewRules.ts` com `calculateAverageRating`
 - [x] Corrigir `plateRegex` duplicado em `userProfile.tsx` — usa `isValidPlate`
-- [ ] `canChangeCar` e `isRideStarted` — adiar para Fase 6 (precisam do contexto do service)
-- [ ] `myRidesFilters.ts` — adiar para Fase 8 (lógica acoplada ao estado React)
+- [x] `canChangeCar` e `isRideStarted` — extraídos para `rideRules.ts`
+- [x] `myRidesFilters.ts` — extraído para `domain/rules/myRidesFilters.ts`
 
 ### FASE 3 — Infra ✅
 - [x] Mover `lib/firebase` → `infra/firebase`
@@ -165,13 +165,13 @@ domain/                          store/  ── estado reactivo
 - [x] Criar `hooks/use*.ts` que envolvem os stores
 - [x] Substituem o padrão atual `useState + subscribeToXChanges`
 
-### FASE 8 — Migrar UI (≈5h, alto risco mas linear)
+### FASE 8 — Migrar UI ✅
 Para cada screen:
-- [ ] Substituir imports de `/data/` por `services/` + `hooks/`
-- [ ] Mover `Alert.alert` para o screen (consumir o `result.error`)
-- [ ] Extrair lógica de negócio remanescente para `domain/rules/` ou `services/`
-- [ ] Passar dados a componentes via props (parar `getReviews()` em `rideCard.tsx`)
-- [ ] Apagar `/data/` no fim
+- [x] Substituir imports de `/data/` por `services/` + `hooks/`
+- [x] Mover `Alert.alert` para o screen (consumir o `result.error`)
+- [x] Extrair lógica de negócio remanescente para `domain/rules/` ou `services/`
+- [x] Passar dados a componentes via hooks (rideCard.tsx usa useAuth/useReviews/useReports)
+- [x] Apagar `/data/` no fim
 
 **Total estimado:** ~22h. Pode ser dividido entre os 5 membros por camada.
 

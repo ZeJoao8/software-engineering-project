@@ -17,9 +17,10 @@ import {
   useRouter
 } from "expo-router";
 
-import { getRides } from "../../data/rides";
-import { getCurrentUser, getUserById } from "../../data/user";
-import { addReview, hasReviewForRide } from "../../data/reviews";
+import { useAuth } from "../../hooks/useAuth";
+import { useRides } from "../../hooks/useRides";
+import { useReviews } from "../../hooks/useReviews";
+import { addReview } from "../../services/ReviewService";
 import { generateId } from "../../infra/firebase";
 
 import { components } from "../../styles/components";
@@ -36,41 +37,33 @@ export default function ReviewRide() {
   const id = typeof params.id === "string" ? params.id : "";
   const targetUserId = typeof params.targetUserId === "string" ? params.targetUserId : "";
 
-  const ride = getRides().find(currentRide => currentRide.id === id);
-  const activeUser = getCurrentUser();
+  const rides = useRides();
+  const { user: activeUser, getUserById } = useAuth();
+  const { hasReviewForRide } = useReviews();
+
+  const ride = rides.find(r => r.id === id);
   const targetUser = targetUserId ? getUserById(targetUserId) : undefined;
 
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  if (!ride || !activeUser || !targetUser) {
-    return null;
-  }
+  const joined = ride && activeUser ? ride.passengers.includes(activeUser.uid) : false;
+  const isDriver = ride && activeUser ? ride.driverId === activeUser.uid : false;
+  const canAccess = !!ride && !!activeUser && !!targetUser && joined && !isDriver && ride.completed;
 
-  const joined = ride.passengers.includes(activeUser.uid);
-
-  const isDriver = ride.driverId === activeUser.uid;
-
-  const canAccess = joined && !isDriver && ride.completed;
-
-  const alreadyReviewed = hasReviewForRide(
-    ride.id,
-    activeUser.uid,
-    targetUser.uid
-  );
+  const alreadyReviewed = ride && activeUser && targetUser
+    ? hasReviewForRide(ride.id, activeUser.uid, targetUser.uid)
+    : false;
 
   useEffect(() => {
-    if (!canAccess) {
-      Alert.alert(
-        "Not allowed",
-        "You cannot review this ride."
-      );
+    if (ride && activeUser && targetUser && !canAccess) {
+      Alert.alert("Not allowed", "You cannot review this ride.");
       router.replace("/(tabs)/myRides");
     }
-  }, [canAccess, router]);
+  }, [canAccess, ride, activeUser, targetUser, router]);
 
-  if (!canAccess) {
+  if (!ride || !activeUser || !targetUser || !canAccess) {
     return null;
   }
 
@@ -79,25 +72,19 @@ export default function ReviewRide() {
     if (submitting) return;
 
     if (rating < 1 || rating > 5) {
-      Alert.alert(
-        "Select rating",
-        "Choose a rating between 1 and 5 stars."
-      );
+      Alert.alert("Select rating", "Choose a rating between 1 and 5 stars.");
       return;
     }
 
     if (alreadyReviewed) {
-      Alert.alert(
-        "Already reviewed",
-        "You have already reviewed this user for this ride."
-      );
+      Alert.alert("Already reviewed", "You have already reviewed this user for this ride.");
       router.replace("/(tabs)/myRides");
       return;
     }
 
     setSubmitting(true);
 
-    await addReview({
+    const result = await addReview({
       id: generateId("reviews"),
       rideId: ride.id,
       reviewerId: activeUser.uid,
@@ -109,15 +96,15 @@ export default function ReviewRide() {
 
     setSubmitting(false);
 
+    if (!result.ok) {
+      Alert.alert("Error", result.error);
+      return;
+    }
+
     Alert.alert(
       "Feedback submitted",
       "Thank you for your feedback.",
-      [
-        {
-          text: "OK",
-          onPress: () => router.replace("/(tabs)/myRides")
-        }
-      ]
+      [{ text: "OK", onPress: () => router.replace("/(tabs)/myRides") }]
     );
   }
 

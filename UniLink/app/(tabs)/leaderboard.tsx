@@ -1,47 +1,24 @@
 import { useEffect, useState } from "react";
 import { Text, View, Pressable, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-
-import { getRides } from "../../data/rides";
-import { getUsers, getCurrentUser } from "../../data/user";
-import { colors, spacing } from "../../styles/theme";
+import { useAuth } from "../../hooks/useAuth";
+import { useRides } from "../../hooks/useRides";
+import { spacing } from "../../styles/theme";
 import { layout } from "../../styles/layout";
 import { components } from "../../styles/components";
-import { calculateUserCO2Saved } from "../../domain/rules/sustainability";
-
-interface UserRankEntry {
-  id: string;
-  name: string;
-  co2: number;
-}
+import { buildLeaderboard, type UserRankEntry } from "../../domain/rules/leaderboard";
 
 export default function Leaderboard() {
   const router = useRouter();
-  const currentUser = getCurrentUser();
+  const { user: currentUser, getUsers } = useAuth();
+  const rides = useRides();
   const [ranking, setRanking] = useState<UserRankEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    function loadLeaderboard() {
-      const rides = getRides();
-      const users = getUsers();
-
-      const result = users
-        .map(u => ({
-          id: u.uid,
-          name: u.name,
-          co2: calculateUserCO2Saved(rides, u.uid)
-        }))
-        .filter(u => u.co2 > 0)
-        .sort((a, b) => b.co2 - a.co2);
-
-      setRanking(result);
-      setLoading(false);
-    }
-
-    loadLeaderboard();
-  }, [currentUser]);
+    setRanking(buildLeaderboard(getUsers(), rides));
+    setLoading(false);
+  }, [rides, currentUser]);
 
 
   if (loading) {

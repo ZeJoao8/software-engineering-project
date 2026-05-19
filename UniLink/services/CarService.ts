@@ -1,13 +1,17 @@
 import * as CarRepo from "../repositories/CarRepository";
 import * as RideRepo from "../repositories/RideRepository";
 import * as MessageRepo from "../repositories/MessageRepository";
-import { getCars, getUserCars } from "../store/carStore";
+import { getUserCars } from "../store/carStore";
 import { getRides } from "../store/rideStore";
 import { isValidPlate } from "../domain/rules/validation";
 import { generateId } from "../infra/firebase";
 import type { Car } from "../domain/entities/Car";
 
 type Result<T = void> = { ok: true; data?: T } | { ok: false; error: string };
+
+export function getById(carId: string): Promise<Car | null> {
+  return CarRepo.getById(carId);
+}
 
 export async function addCar(
   model: string,

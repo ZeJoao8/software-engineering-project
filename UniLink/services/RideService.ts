@@ -8,6 +8,7 @@ import {
   canCancelRide,
   canCompleteRide,
   canRemovePassenger,
+  canChangeCar,
   generateBoardingCode,
   shouldAutoDeleteRide,
 } from "../domain/rules/rideRules";
@@ -179,13 +180,10 @@ export async function changeCar(
   const ride = findRide(rideId);
   if (!ride) return { ok: false, error: "Ride not found." };
 
-  if (new Date(ride.departureDateTime) < new Date() || ride.completed)
-    return { ok: false, error: "Ride already started." };
+  const check = canChangeCar(ride, newCarSeatCapacity, new Date());
+  if (!check.ok) return check;
 
   const newLimit = Math.min(ride.totalSeats, newCarSeatCapacity - 1);
-  if (ride.passengers.length > newLimit)
-    return { ok: false, error: "New car is too small for current passengers." };
-
   try {
     await RideRepo.save({
       ...ride,

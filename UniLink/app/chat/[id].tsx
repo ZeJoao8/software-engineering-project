@@ -11,11 +11,13 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
-import { getRides } from "../../data/rides";
-import { getCurrentUser, getUserById } from "../../data/user";
-import { subscribeToRideChat, sendMessage } from "../../data/chat";
+import { useAuth } from "../../hooks/useAuth";
+import { useRides } from "../../hooks/useRides";
+import { useMessages } from "../../hooks/useMessages";
+import { sendMessage } from "../../services/ChatService";
 import type { Message } from "../../domain/entities/Message";
 import { generateId } from "../../infra/firebase";
+
 
 import { colors, spacing } from "../../styles/theme";
 import { chatStyles } from "../../styles/chat";
@@ -26,28 +28,23 @@ export default function RideChat() {
   const params = useLocalSearchParams();
   const id = typeof params.id === "string" ? params.id : "";
 
-  const ride = getRides().find(r => r.id === id);
-  const activeUser = getCurrentUser();
+  const rides = useRides();
+  const { user: activeUser, getUserById } = useAuth();
 
-  const [messages, setMessages] = useState<Message[]>([]);
+  const ride = rides.find(r => r.id === id);
+
+  const joined = ride ? ride.passengers.includes(activeUser?.uid ?? "") : false;
+  const isDriver = ride ? ride.driverId === activeUser?.uid : false;
+  const messages = useMessages(joined || isDriver ? ride?.id ?? null : null);
+
   const [inputText, setInputText] = useState("");
   const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
     if (!ride || !activeUser) return;
-
-    const joined = ride.passengers.includes(activeUser.uid);
-    const isDriver = ride.driverId === activeUser.uid;
-
     if (!joined && !isDriver) {
       router.replace("/(tabs)/myRides");
-      return;
     }
-
-    const unsub = subscribeToRideChat(ride.id, (msgs) => setMessages(msgs));
-    return () => {
-      if (unsub) unsub();
-    };
   }, [ride?.id, activeUser?.uid]);
 
   if (!ride || !activeUser) return null;
@@ -67,7 +64,7 @@ export default function RideChat() {
       createdAt: new Date().toISOString(),
     };
 
-    await sendMessage(newMessage);
+    await sendMessage(newMessage, activeUser.uid);
   }
 
   function formatTime(isoString: string) {

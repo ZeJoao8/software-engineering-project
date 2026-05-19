@@ -20,12 +20,8 @@ import {
   useFocusEffect,
 } from "expo-router";
 
-import {
-  getRides,
-  subscribeToRidesChanges,
-} from "../data/rides";
-
-import { getCurrentUser } from "../data/user";
+import { useAuth } from "../hooks/useAuth";
+import { useRides } from "../hooks/useRides";
 
 import {
   getRoute,
@@ -57,15 +53,22 @@ const FEUP_REGION = {
   longitudeDelta: 0.08,
 };
 
+const EMPTY_FILTERS: FilterCriteria = {
+  origin: "",
+  destination: "",
+  date: "",
+  womenOnly: false,
+  minSeats: "",
+};
+
 
 export default function MapViewScreen() {
 
   const router = useRouter();
+  const { user } = useAuth();
+  const rides = useRides();
 
   const mapRef = React.useRef<MapView>(null);
-
-  const [rides, setRides] =
-    useState<Ride[]>([]);
 
   const [selectedRide, setSelectedRide] =
     useState<Ride | null>(null);
@@ -75,7 +78,6 @@ export default function MapViewScreen() {
 
   const [loadingRoute, setLoadingRoute] =
     useState(false);
-
 
 
   useEffect(() => {
@@ -104,64 +106,19 @@ export default function MapViewScreen() {
   }, []);
 
 
-  function computeFilteredRides() {
-
-    const user = getCurrentUser();
-    if (!user) return [];
-
-    const filters: FilterCriteria = {
-      origin: "",
-      destination: "",
-      date: "",
-      womenOnly: false,
-      minSeats: "",
-    };
-
-    return sortByDateAsc(
-      filterRides(
-        getRides(),
-        user,
-        filters,
-        new Date()
-      )
-    ).filter(
-      r =>
-        r.originCoords &&
-        r.destinationCoords
-    );
-
-  }
-
-
   useFocusEffect(
     useCallback(() => {
-
-      setRides(
-        computeFilteredRides()
-      );
-
       setSelectedRide(null);
       setRoute(null);
-
     }, [])
   );
 
 
-  useEffect(() => {
-
-    const unsubscribe =
-      subscribeToRidesChanges(() => {
-
-        setRides(
-          computeFilteredRides()
-        );
-
-      });
-
-    return unsubscribe;
-
-  }, []);
-
+  const filteredRides = user
+    ? sortByDateAsc(
+        filterRides(rides, user, EMPTY_FILTERS, new Date())
+      ).filter(r => r.originCoords && r.destinationCoords)
+    : [];
 
 
   async function selectRide(ride: Ride) {
@@ -231,7 +188,7 @@ export default function MapViewScreen() {
           <Text style={layout.link}>← Back</Text>
         </Pressable>
         <Text style={mapStyles.badgeText}>
-          {rides.length} ride{rides.length !== 1 && "s"}
+          {filteredRides.length} ride{filteredRides.length !== 1 && "s"}
         </Text>
       </View>
 
@@ -247,7 +204,7 @@ export default function MapViewScreen() {
         onPress={clearSelection}
       >
 
-        {rides.map(ride => (
+        {filteredRides.map(ride => (
 
           <React.Fragment key={ride.id}>
 

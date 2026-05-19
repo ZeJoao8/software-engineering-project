@@ -1,19 +1,28 @@
 import { render } from "@testing-library/react-native";
 import RideCard from "../components/rideCard";
 
-// Mock data services to avoid importing real Firebase/Auth
-jest.mock("../data/user", () => ({
-  getCurrentUser: jest.fn(() => ({ uid: "test-user" })),
-  getUserById: jest.fn(),
+jest.mock("../hooks/useAuth", () => ({
+  useAuth: jest.fn(() => ({
+    user: { uid: "test-user" },
+    getUserById: jest.fn(),
+    isReady: true,
+  })),
 }));
 
-jest.mock("../data/reports", () => ({
-  getReports: jest.fn(() => []),
+jest.mock("../hooks/useReviews", () => ({
+  useReviews: jest.fn(() => ({
+    reviews: [],
+    getReviewsForUser: jest.fn(() => []),
+    hasReviewForRide: jest.fn(() => false),
+  })),
 }));
 
-jest.mock("../data/reviews", () => ({
-  getReviews: jest.fn(() => []),
-  getReviewsForUser: jest.fn(() => []),
+jest.mock("../hooks/useReports", () => ({
+  useReports: jest.fn(() => ({
+    reports: [],
+    getReportsForUser: jest.fn(() => []),
+    hasReportForRide: jest.fn(() => false),
+  })),
 }));
 
 const ride = {
