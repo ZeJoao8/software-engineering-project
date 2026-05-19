@@ -1,4 +1,4 @@
-import { filterRides, FilterCriteria } from "../utils/rideFilters";
+﻿import { filterRides, FilterCriteria } from "../domain/rules/rideFilters";
 
 const mockRides = [
   {

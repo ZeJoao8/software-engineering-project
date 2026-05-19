@@ -35,7 +35,7 @@ import {
   isPasswordStrong,
   isValidEmail,
   isUniversityEmail
-} from "../utils/validation";
+} from "../domain/rules/validation";
 
 
 export default function Login(){

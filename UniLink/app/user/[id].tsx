@@ -30,8 +30,8 @@ import { components } from "../../styles/components";
 import { forms } from "../../styles/forms";
 import { layout } from "../../styles/layout";
 import { spacing } from "../../styles/theme";
-import { calculateUserCO2Saved } from "../../utils/sustainability";
-import { getUserBadges } from "../../utils/badges";
+import { calculateUserCO2Saved } from "../../domain/rules/sustainability";
+import { getUserBadges } from "../../domain/rules/badges";
 import { BadgeDisplay } from "../../components/BadgeDisplay";
 
 export default function PublicProfile() {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -21,7 +21,7 @@ import {
 
 import { colors } from "../styles/theme";
 import { mapStyles } from "../styles/map";
-import { CO2_PER_KM } from "../utils/sustainability";
+import { CO2_PER_KM } from "../domain/rules/sustainability";
 
 interface RouteMapProps {
   origin: Coordinates;

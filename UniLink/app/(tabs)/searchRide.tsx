@@ -41,7 +41,7 @@ import { forms } from "../../styles/forms";
 import { layout } from "../../styles/layout";
 import { colors, spacing } from "../../styles/theme";
 import { sortByDateAsc } from "../../utils/date";
-import { FilterCriteria, filterRides } from "../../utils/rideFilters";
+import { FilterCriteria, filterRides } from "../../domain/rules/rideFilters";
 import { type Coordinates } from "../../utils/routing";
 
 

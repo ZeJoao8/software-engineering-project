@@ -1,8 +1,8 @@
-import { render } from "@testing-library/react-native";
+﻿import { render } from "@testing-library/react-native";
 import Leaderboard from "../app/(tabs)/leaderboard";
 import { getRides } from "../data/rides";
 import { getUsers, getCurrentUser } from "../data/user";
-import { calculateUserCO2Saved } from "../utils/sustainability";
+import { calculateUserCO2Saved } from "../domain/rules/sustainability";
 
 // Mock router
 jest.mock("expo-router", () => ({
@@ -24,7 +24,7 @@ jest.mock("../data/user", () => ({
   getCurrentUser: jest.fn(),
 }));
 
-jest.mock("../utils/sustainability", () => ({
+jest.mock("../domain/rules/sustainability", () => ({
   calculateUserCO2Saved: jest.fn(),
 }));
 

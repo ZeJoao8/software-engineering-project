@@ -1,4 +1,4 @@
-import { getUserBadges } from "../utils/badges";
+﻿import { getUserBadges } from "../domain/rules/badges";
 
 const makeRide = (overrides) => ({
   id: "r1",

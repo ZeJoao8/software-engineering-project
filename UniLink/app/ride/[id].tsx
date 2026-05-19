@@ -25,7 +25,7 @@ import { subscribeToRidesChanges } from "../../data/rides";
 import { formatDate } from "../../utils/date";
 import { getRoute } from "../../utils/routing";
 import type { RouteResult } from "../../utils/routing";
-import { CO2_PER_KM } from "../../utils/sustainability";
+import { CO2_PER_KM } from "../../domain/rules/sustainability";
 import type { User } from "../../domain/entities/User";
 
 import DropDownPicker from "react-native-dropdown-picker";

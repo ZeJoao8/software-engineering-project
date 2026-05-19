@@ -22,6 +22,7 @@ import {
   subscribeToCarsChanges
 } from "../../data/cars";
 import { generateId } from "../../lib/firebase";
+import { isValidPlate } from "../../domain/rules/validation";
 
 import {
   deleteRide,
@@ -43,9 +44,9 @@ import { components } from "../../styles/components";
 import { forms } from "../../styles/forms";
 import { layout } from "../../styles/layout";
 import { colors, spacing, radius } from "../../styles/theme";
-import { getUserBadges } from "../../utils/badges";
-import { calculateWeeklyStreak } from "../../utils/streaks";
-import { calculateUserCO2Saved } from "../../utils/sustainability";
+import { getUserBadges } from "../../domain/rules/badges";
+import { calculateWeeklyStreak } from "../../domain/rules/streaks";
+import { calculateUserCO2Saved } from "../../domain/rules/sustainability";
 
 export default function Profile() {
 
@@ -217,8 +218,7 @@ export default function Profile() {
     }
     const formattedPlate =
       plate.toUpperCase().replace(/\s/g, "");
-    const plateRegex = /^[A-Z0-9-]{6,8}$/;
-    if (!plateRegex.test(formattedPlate)) {
+    if (!isValidPlate(formattedPlate)) {
       Alert.alert("Invalid plate format");
       return;
     }

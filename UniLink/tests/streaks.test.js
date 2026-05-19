@@ -1,4 +1,4 @@
-import { calculateWeeklyStreak } from "../utils/streaks";
+import { calculateWeeklyStreak } from "../domain/rules/streaks";
 
 const makeRide = (overrides) => ({
   id: "r1",

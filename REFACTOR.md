@@ -46,14 +46,14 @@ domain/                          store/  ── estado reactivo
 
 ### `domain/entities/` (entidades puras, sem dependências)
 
-- [ ] `domain/entities/User.ts` ← `types/User.ts` (sem mudanças)
-- [ ] `domain/entities/Ride.ts` ← `types/Ride.ts` (sem mudanças)
-- [ ] `domain/entities/Car.ts` ← `types/Car.ts` (sem mudanças)
-- [ ] `domain/entities/Message.ts` ← extrair de `data/chat.ts:17-23`
-- [ ] `domain/entities/Review.ts` ← extrair de `data/reviews.ts:21-29`
-- [ ] `domain/entities/Report.ts` ← extrair de `data/reports.ts:20-33` (`Report` + `ReportStatus`)
-- [ ] `domain/entities/Badge.ts` ← extrair de `utils/badges.ts:4-15` (`BadgeLevel`, `BadgeStatus`)
-- [ ] Apagar pasta `/types/`
+- [x] `domain/entities/User.ts` ← `types/User.ts` (sem mudanças)
+- [x] `domain/entities/Ride.ts` ← `types/Ride.ts` (sem mudanças)
+- [x] `domain/entities/Car.ts` ← `types/Car.ts` (sem mudanças)
+- [x] `domain/entities/Message.ts` ← extrair de `data/chat.ts:17-23`
+- [x] `domain/entities/Review.ts` ← extrair de `data/reviews.ts:21-29`
+- [x] `domain/entities/Report.ts` ← extrair de `data/reports.ts:20-33` (`Report` + `ReportStatus`)
+- [x] `domain/entities/Badge.ts` ← extrair de `utils/badges.ts:4-15` (`BadgeLevel`, `BadgeStatus`)
+- [x] Apagar pasta `/types/`
 
 ### `domain/rules/` (lógica de negócio pura)
 

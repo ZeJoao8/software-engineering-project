@@ -1,4 +1,4 @@
-import { calculateUserCO2Saved, CO2_PER_KM } from "../utils/sustainability";
+﻿import { calculateUserCO2Saved, CO2_PER_KM } from "../domain/rules/sustainability";
 
 const mockRides = [
   {

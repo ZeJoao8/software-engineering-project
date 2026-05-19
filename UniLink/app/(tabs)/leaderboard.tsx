@@ -8,7 +8,7 @@ import { getUsers, getCurrentUser } from "../../data/user";
 import { colors, spacing } from "../../styles/theme";
 import { layout } from "../../styles/layout";
 import { components } from "../../styles/components";
-import { calculateUserCO2Saved } from "../../utils/sustainability";
+import { calculateUserCO2Saved } from "../../domain/rules/sustainability";
 
 interface UserRankEntry {
   id: string;

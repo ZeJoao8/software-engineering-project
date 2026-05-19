@@ -4,7 +4,7 @@ import {
   isPasswordStrong,
   doPasswordsMatch,
   areRequiredFieldsFilled,
-} from "../utils/validation";
+} from "../domain/rules/validation";
 
 describe("Validation Utilities", () => {
   test("isValidEmail validates general email formats correctly", () => {

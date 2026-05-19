@@ -1,6 +1,6 @@
-import { Ride } from "../domain/entities/Ride";
+import type { Ride } from "../entities/Ride";
 import { calculateUserCO2Saved } from "./sustainability";
-import type { BadgeLevel, BadgeStatus } from "../domain/entities/Badge";
+import type { BadgeLevel, BadgeStatus } from "../entities/Badge";
 
 export type { BadgeLevel, BadgeStatus };
 
@@ -23,7 +23,7 @@ function getNextThreshold(value: number, thresholds: number[]): number | null {
   for (const t of thresholds) {
     if (value < t) return t;
   }
-  return null; // Max level
+  return null;
 }
 
 function getCurrentThreshold(level: BadgeLevel, thresholds: number[]): number | null {
@@ -41,21 +41,14 @@ export function getUserBadges(
   rides: Ride[],
   co2Saved: number
 ): BadgeStatus[] {
-  // 1. Eco-Warrior
   const ecoThresholds = [10, 50, 100, 150];
   const ecoLevel = determineLevel(co2Saved, ecoThresholds);
 
-  // 2. Veteran Driver
-  const driverRides = rides.filter(
-    (r) => r.driverId === userId && r.completed
-  ).length;
+  const driverRides = rides.filter(r => r.driverId === userId && r.completed).length;
   const driverThresholds = [3, 10, 25, 50];
   const driverLevel = determineLevel(driverRides, driverThresholds);
 
-  // 3. Top Rider
-  const passengerRides = rides.filter(
-    (r) => r.passengers.includes(userId) && r.completed
-  ).length;
+  const passengerRides = rides.filter(r => r.passengers.includes(userId) && r.completed).length;
   const riderThresholds = [3, 10, 25, 50];
   const riderLevel = determineLevel(passengerRides, riderThresholds);
 
@@ -84,7 +77,7 @@ export function getUserBadges(
       id: "top_rider",
       title: "Top Rider",
       level: riderLevel,
-      icon: "bag-handle", // Backpack alternative
+      icon: "bag-handle",
       description: `Rode in ${passengerRides} rides`,
       progress: passengerRides,
       nextLevelThreshold: getNextThreshold(passengerRides, riderThresholds),

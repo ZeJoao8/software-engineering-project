@@ -35,7 +35,7 @@ import {
 import {
   filterRides,
   FilterCriteria,
-} from "../utils/rideFilters";
+} from "../domain/rules/rideFilters";
 
 import {
   sortByDateAsc,
