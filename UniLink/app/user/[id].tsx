@@ -11,6 +11,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 import { getUserById } from "../../data/user";
+import {
+  getFriendshipStatus,
+  getFriendshipWith,
+  sendFriendRequest,
+  acceptFriendRequest,
+  removeFriend,
+  subscribeToFriendshipsChanges,
+} from "../../data/friends";
 import { fetchCarById } from "../../data/cars";
 import type { Car } from "../../types/Car";
 import { getRides, subscribeToRidesChanges } from "../../data/rides";
@@ -65,10 +73,12 @@ export default function PublicProfile() {
     const unsubReviews = subscribeToReviewsChanges(rerender);
     const unsubRides = subscribeToRidesChanges(rerender);
     const unsubReports = subscribeToReportsChanges(rerender);
+    const unsubFriends = subscribeToFriendshipsChanges(rerender);
     return () => {
       unsubReviews();
       unsubRides();
       unsubReports();
+      unsubFriends();
     };
   }, []);
 
@@ -89,7 +99,8 @@ export default function PublicProfile() {
 
   const hasReportedThisUser = myReportsOnUser.length > 0;
 
-  // Get ride info for each report
+  const friendStatus = getFriendshipStatus(user.uid);
+
   const allRides = getRides();
 
   function getRideForReport(rideId: string) {
@@ -129,6 +140,78 @@ export default function PublicProfile() {
         </Text>
       )}
 
+      {activeUser.uid !== user.uid && (
+        <View style={[components.card, { marginBottom: spacing.md }]}>
+          {friendStatus === "none" && (
+            <Pressable
+              onPress={() => void sendFriendRequest(user.uid)}
+              style={({ pressed }) => ({
+                backgroundColor: colors.primary,
+                padding: spacing.sm,
+                borderRadius: 8,
+                alignItems: "center" as const,
+                opacity: pressed ? 0.7 : 1,
+              })}
+            >
+              <Text style={{ color: "#fff", fontWeight: "700" }}>Add Friend</Text>
+            </Pressable>
+          )}
+
+          {friendStatus === "pending_sent" && (
+            <Text style={{ color: colors.textLight, textAlign: "center" }}>
+              Friend request sent
+            </Text>
+          )}
+
+          {friendStatus === "pending_received" && (
+            <View style={{ gap: spacing.sm }}>
+              <Text style={{ color: colors.text, fontWeight: "600" }}>
+                {user.name} sent you a friend request
+              </Text>
+              <Pressable
+                onPress={() => {
+                  const f = getFriendshipWith(user.uid);
+                  if (f) void acceptFriendRequest(f.id);
+                }}
+                style={({ pressed }) => ({
+                  backgroundColor: colors.primary,
+                  padding: spacing.sm,
+                  borderRadius: 8,
+                  alignItems: "center" as const,
+                  opacity: pressed ? 0.7 : 1,
+                })}
+              >
+                <Text style={{ color: "#fff", fontWeight: "700" }}>Accept</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => void removeFriend(user.uid)}
+                style={({ pressed }) => ({
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                  padding: spacing.sm,
+                  borderRadius: 8,
+                  alignItems: "center" as const,
+                  opacity: pressed ? 0.7 : 1,
+                })}
+              >
+                <Text style={{ color: colors.textLight }}>Decline</Text>
+              </Pressable>
+            </View>
+          )}
+
+          {friendStatus === "friends" && (
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+              <Text style={{ color: colors.primary, fontWeight: "700" }}>✓ Friends</Text>
+              <Text
+                style={{ color: colors.danger, fontSize: 13 }}
+                onPress={() => void removeFriend(user.uid)}
+              >
+                Remove
+              </Text>
+            </View>
+          )}
+        </View>
+      )}
 
       {/* INFO */}
       <View style={components.card}>

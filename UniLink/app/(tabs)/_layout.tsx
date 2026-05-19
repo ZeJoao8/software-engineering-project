@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Pressable, Text } from "react-native";
 
 import {
@@ -5,6 +6,7 @@ import {
   useRouter
 } from "expo-router";
 
+import { getPendingReceivedRequests, subscribeToFriendshipsChanges } from "../../data/friends";
 import { colors } from "../../styles/theme";
 
 function CreateRideHeaderButton() {
@@ -37,6 +39,15 @@ function CreateRideHeaderButton() {
 }
 
 export default function TabsLayout() {
+  const [pendingCount, setPendingCount] = useState(getPendingReceivedRequests().length);
+
+  useEffect(() => {
+    const unsub = subscribeToFriendshipsChanges(() => {
+      setPendingCount(getPendingReceivedRequests().length);
+    });
+    return unsub;
+  }, []);
+
   return (
     <Tabs
       screenOptions={{
@@ -91,7 +102,8 @@ export default function TabsLayout() {
         name="userProfile"
         options={{
           title: "Profile",
-          tabBarButtonTestID: "profileTab"
+          tabBarButtonTestID: "profileTab",
+          tabBarBadge: pendingCount > 0 ? pendingCount : undefined,
         }}
       />
 
