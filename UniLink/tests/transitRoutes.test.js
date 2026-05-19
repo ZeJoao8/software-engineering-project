@@ -1,7 +1,7 @@
-import { getTransitRoutes } from "../utils/transitRoutes";
+import { getTransitRoutes } from "../infra/transit";
 
 // Mock the forwardGeocode function from routing
-jest.mock("../utils/routing", () => ({
+jest.mock("../infra/geocoding", () => ({
   forwardGeocode: jest.fn((query) => {
     if (query === "Porto")
       return Promise.resolve({ latitude: 41.1579, longitude: -8.6291 });

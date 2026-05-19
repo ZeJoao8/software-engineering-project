@@ -1,3 +1,5 @@
+import type { Coordinates } from "./routing";
+
 export interface NominatimAddress {
   amenity?: string;
   building?: string;
@@ -21,66 +23,12 @@ export interface NominatimResponseItem {
   error?: string;
 }
 
-export interface Coordinates {
-  latitude: number;
-  longitude: number;
+export interface AddressSuggestion {
+  displayName: string;
+  shortName: string;
+  coords: Coordinates;
 }
 
-export interface RouteResult {
-  coordinates: Coordinates[];
-  distanceKm: number;
-  durationMin: number;
-}
-
-/**
- * Get the shortest driving route between two points using OSRM.
- */
-export async function getRoute(
-  origin: Coordinates,
-  destination: Coordinates
-): Promise<RouteResult | null> {
-  try {
-    const url =
-      `https://router.project-osrm.org/route/v1/driving/` +
-      `${origin.longitude},${origin.latitude};` +
-      `${destination.longitude},${destination.latitude}` +
-      `?overview=full&geometries=geojson`;
-
-    const response = await fetch(url);
-    const data = await response.json();
-
-    if (data.code !== "Ok" || !data.routes?.length) {
-      return null;
-    }
-
-    const route = data.routes[0];
-
-    const coordinates: Coordinates[] =
-      route.geometry.coordinates.map(
-        (coord: [number, number]) => ({
-          latitude: coord[1],
-          longitude: coord[0],
-        })
-      );
-
-    return {
-      coordinates,
-      distanceKm: Math.round(
-        (route.distance / 1000) * 10
-      ) / 10,
-      durationMin: Math.round(
-        route.duration / 60
-      ),
-    };
-  } catch (error) {
-    console.error("OSRM route error:", error);
-    return null;
-  }
-}
-
-/**
- * Reverse geocode coordinates to a place name using Nominatim.
- */
 export async function reverseGeocode(
   coords: Coordinates
 ): Promise<string> {
@@ -103,7 +51,6 @@ export async function reverseGeocode(
     const addr = data.address;
     if (!addr) return data.display_name?.split(",").slice(0, 3).join(",") ?? "Unknown place";
 
-    // Build a useful short name
     const parts: string[] = [];
 
     if (addr.amenity) parts.push(addr.amenity);
@@ -134,16 +81,6 @@ export async function reverseGeocode(
   }
 }
 
-export interface AddressSuggestion {
-  displayName: string;
-  shortName: string;
-  coords: Coordinates;
-}
-
-/**
- * Search for places matching a query — returns multiple suggestions.
- * Biased to Porto/FEUP area for better relevance.
- */
 export async function searchPlaces(
   query: string
 ): Promise<AddressSuggestion[]> {
@@ -211,9 +148,6 @@ export async function searchPlaces(
   }
 }
 
-/**
- * Forward geocode a place name to coordinates using Nominatim.
- */
 export async function forwardGeocode(
   query: string
 ): Promise<Coordinates | null> {

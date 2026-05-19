@@ -11,7 +11,7 @@ import {
   where,
 } from "firebase/firestore";
 
-import { db } from "../lib/firebase";
+import { db } from "../infra/firebase";
 import {
   getCurrentUser,
   isAuthReady,

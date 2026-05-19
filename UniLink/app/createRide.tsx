@@ -30,7 +30,7 @@ import {
   getUserCars,
   subscribeToCarsChanges
 } from "../data/cars";
-import { generateId } from "../lib/firebase";
+import { generateId } from "../infra/firebase";
 
 import {
   getCurrentUser
@@ -44,7 +44,7 @@ import {
 import LocationPickerMap from "../components/LocationPickerMap";
 import RouteMap from "../components/RouteMap";
 import AddressAutocomplete from "../components/AddressAutocomplete";
-import type { Coordinates } from "../utils/routing";
+import type { Coordinates } from "../infra/routing";
 
 export default function CreateRide() {
 

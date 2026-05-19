@@ -1,4 +1,4 @@
-import type { TransitRoute } from "../utils/transitRoutes";
+import type { TransitRoute } from "../infra/transit";
 
 export interface SelectedBusRoute {
   route: TransitRoute;

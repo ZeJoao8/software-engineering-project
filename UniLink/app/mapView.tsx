@@ -30,7 +30,7 @@ import { getCurrentUser } from "../data/user";
 import {
   getRoute,
   type RouteResult,
-} from "../utils/routing";
+} from "../infra/routing";
 
 import {
   filterRides,

@@ -23,8 +23,8 @@ import { hasReportForRide, getReports, subscribeToReportsChanges } from "../../d
 import { subscribeToReviewsChanges } from "../../data/reviews";
 import { subscribeToRidesChanges } from "../../data/rides";
 import { formatDate } from "../../utils/date";
-import { getRoute } from "../../utils/routing";
-import type { RouteResult } from "../../utils/routing";
+import { getRoute } from "../../infra/routing";
+import type { RouteResult } from "../../infra/routing";
 import { CO2_PER_KM } from "../../domain/rules/sustainability";
 import type { User } from "../../domain/entities/User";
 

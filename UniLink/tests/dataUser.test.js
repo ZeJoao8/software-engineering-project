@@ -9,7 +9,7 @@ import {
 import { signOut } from "firebase/auth";
 
 // Mock Firebase Auth
-jest.mock("../lib/firebase", () => ({
+jest.mock("../infra/firebase", () => ({
   auth: {},
   db: {}
 }));

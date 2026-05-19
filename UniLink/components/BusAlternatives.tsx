@@ -3,8 +3,8 @@ import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { setSelectedBusRoute } from "../data/busRoute";
 
-import { getTransitRoutes, TransitRoute } from "../utils/transitRoutes";
-import type { Coordinates } from "../utils/routing";
+import { getTransitRoutes, TransitRoute } from "../infra/transit";
+import type { Coordinates } from "../infra/routing";
 import { components } from "../styles/components";
 import { colors, spacing } from "../styles/theme";
 import { layout } from "../styles/layout";

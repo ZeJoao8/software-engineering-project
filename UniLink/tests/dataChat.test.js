@@ -3,7 +3,7 @@ import { setDoc, deleteDoc, getDocs, onSnapshot } from "firebase/firestore";
 import { getCurrentUser, isAuthReady } from "../data/user";
 
 // Mock Firebase
-jest.mock("../lib/firebase", () => ({
+jest.mock("../infra/firebase", () => ({
   db: {}
 }));
 

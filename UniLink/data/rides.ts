@@ -9,7 +9,7 @@ import {
  setDoc,
 } from "firebase/firestore";
 
-import { db } from "../lib/firebase";
+import { db } from "../infra/firebase";
 import type { Ride } from "../domain/entities/Ride";
 import {
  getCurrentUser,

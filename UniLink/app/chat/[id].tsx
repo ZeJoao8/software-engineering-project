@@ -15,7 +15,7 @@ import { getRides } from "../../data/rides";
 import { getCurrentUser, getUserById } from "../../data/user";
 import { subscribeToRideChat, sendMessage } from "../../data/chat";
 import type { Message } from "../../domain/entities/Message";
-import { generateId } from "../../lib/firebase";
+import { generateId } from "../../infra/firebase";
 
 import { colors, spacing } from "../../styles/theme";
 import { chatStyles } from "../../styles/chat";

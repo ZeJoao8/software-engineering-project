@@ -11,7 +11,7 @@ import {
   type Unsubscribe,
 } from "firebase/firestore";
 
-import { db } from "../lib/firebase";
+import { db } from "../infra/firebase";
 import { isAuthReady, getCurrentUser } from "./user";
 import type { Message } from "../domain/entities/Message";
 

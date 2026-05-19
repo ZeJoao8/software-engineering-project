@@ -17,7 +17,7 @@ import {
 import { getRides } from "../../data/rides";
 import { getCurrentUser, getUserById } from "../../data/user";
 import { addReport, hasReportForRide } from "../../data/reports";
-import { generateId } from "../../lib/firebase";
+import { generateId } from "../../infra/firebase";
 
 import { components } from "../../styles/components";
 import { Button } from "../../components/Button";

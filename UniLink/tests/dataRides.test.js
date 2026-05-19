@@ -2,7 +2,7 @@ import { addRide, getRides, deleteRide } from "../data/rides";
 import { setDoc, doc, deleteDoc } from "firebase/firestore";
 
 // Mock Firebase
-jest.mock("../lib/firebase", () => ({
+jest.mock("../infra/firebase", () => ({
   db: {}
 }));
 

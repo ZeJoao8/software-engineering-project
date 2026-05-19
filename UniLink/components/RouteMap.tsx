@@ -17,7 +17,7 @@ import {
   getRoute,
   type Coordinates,
   type RouteResult,
-} from "../utils/routing";
+} from "../infra/routing";
 
 import { colors } from "../styles/theme";
 import { mapStyles } from "../styles/map";

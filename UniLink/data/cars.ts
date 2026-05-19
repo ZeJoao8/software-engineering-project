@@ -12,7 +12,7 @@ import {
  where,
 } from "firebase/firestore";
 
-import { db } from "../lib/firebase";
+import { db } from "../infra/firebase";
 import type { Car } from "../domain/entities/Car";
 import {
  getCurrentUser,

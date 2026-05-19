@@ -42,7 +42,7 @@ import { layout } from "../../styles/layout";
 import { colors, spacing } from "../../styles/theme";
 import { sortByDateAsc } from "../../utils/date";
 import { FilterCriteria, filterRides } from "../../domain/rules/rideFilters";
-import { type Coordinates } from "../../utils/routing";
+import { type Coordinates } from "../../infra/routing";
 
 
 export default function Home() {

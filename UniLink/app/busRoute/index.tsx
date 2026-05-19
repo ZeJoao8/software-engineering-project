@@ -9,7 +9,7 @@ import MapView, { Marker, Polyline, PROVIDER_DEFAULT } from "react-native-maps";
 import { useRouter } from "expo-router";
 
 import { getSelectedBusRoute } from "../../data/busRoute";
-import { getRoute, type Coordinates } from "../../utils/routing";
+import { getRoute, type Coordinates } from "../../infra/routing";
 import ZoomControls from "../../components/ZoomControls";
 
 import { components } from "../../styles/components";

@@ -1,4 +1,5 @@
-import { forwardGeocode, type Coordinates } from "./routing";
+import { forwardGeocode } from "./geocoding";
+import type { Coordinates } from "./routing";
 
 export interface TransitLeg {
   mode: string;
@@ -11,7 +12,6 @@ export interface TransitLeg {
   path: Coordinates[];
 }
 
-// Standard Google polyline decoder
 function decodePolyline(str: string, precision: number = 5): Coordinates[] {
   let index = 0;
   let lat = 0;
@@ -48,7 +48,6 @@ function decodePolyline(str: string, precision: number = 5): Coordinates[] {
 }
 
 export interface TransitRoute {
-
   departureTime: string;
   arrivalTime: string;
   durationMin: number;
@@ -98,7 +97,6 @@ export async function getTransitRoutes(
     }>;
   };
 
-
   if (!data.itineraries?.length) return [];
 
   return data.itineraries.map(it => ({
@@ -128,4 +126,3 @@ export async function getTransitRoutes(
     })),
   }));
 }
-

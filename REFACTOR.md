@@ -77,11 +77,11 @@ domain/                          store/  ── estado reactivo
 
 ### `infra/` (integrações externas)
 
-- [ ] `infra/firebase.ts` ← `lib/firebase.ts`
-- [ ] `infra/routing.ts` ← extrair de `utils/routing.ts` (só OSRM `getRoute` + tipos)
-- [ ] `infra/geocoding.ts` ← extrair de `utils/routing.ts` (Nominatim: `reverseGeocode`, `searchPlaces`, `forwardGeocode`)
-- [ ] `infra/transit.ts` ← `utils/transitRoutes.ts`
-- [ ] Apagar `lib/`, `utils/routing.ts`, `utils/transitRoutes.ts`
+- [x] `infra/firebase.ts` ← `lib/firebase.ts`
+- [x] `infra/routing.ts` ← extrair de `utils/routing.ts` (só OSRM `getRoute` + tipos)
+- [x] `infra/geocoding.ts` ← extrair de `utils/routing.ts` (Nominatim: `reverseGeocode`, `searchPlaces`, `forwardGeocode`)
+- [x] `infra/transit.ts` ← `utils/transitRoutes.ts`
+- [x] Apagar `lib/`, `utils/routing.ts`, `utils/transitRoutes.ts`
 
 ### `repositories/` (só Firestore, lançam erros)
 
@@ -143,10 +143,10 @@ domain/                          store/  ── estado reactivo
 - [ ] `canChangeCar` e `isRideStarted` — adiar para Fase 6 (precisam do contexto do service)
 - [ ] `myRidesFilters.ts` — adiar para Fase 8 (lógica acoplada ao estado React)
 
-### FASE 3 — Infra (≈1h, baixo risco)
-- [ ] Mover `lib/firebase` → `infra/firebase`
-- [ ] Dividir `utils/routing.ts` em `infra/routing.ts` (OSRM) + `infra/geocoding.ts` (Nominatim)
-- [ ] Mover `utils/transitRoutes.ts` → `infra/transit.ts`
+### FASE 3 — Infra ✅
+- [x] Mover `lib/firebase` → `infra/firebase`
+- [x] Dividir `utils/routing.ts` em `infra/routing.ts` (OSRM) + `infra/geocoding.ts` (Nominatim)
+- [x] Mover `utils/transitRoutes.ts` → `infra/transit.ts`
 
 ### FASE 4 — Repositories (≈4h, médio risco)
 - [ ] Criar `repositories/*.ts` em paralelo a `/data/` (ainda não ligar nada)
@@ -282,21 +282,31 @@ Todos os consumidores (screens, components, tests) a importar diretamente de `do
 
 `utils/` só tem agora: `date.ts`, `routing.ts`, `transitRoutes.ts` (vão para `infra/` na Fase 3).
 
+**Fase 3 ✅ — `infra/`**
+- `infra/firebase.ts` — app Firebase, auth, db, generateId
+- `infra/routing.ts` — OSRM: `getRoute`, `Coordinates`, `RouteResult`
+- `infra/geocoding.ts` — Nominatim: `reverseGeocode`, `searchPlaces`, `forwardGeocode`, `AddressSuggestion`
+- `infra/transit.ts` — Transitous: `getTransitRoutes`, `TransitRoute`, `TransitLeg`
+- `lib/` apagada; `utils/routing.ts` e `utils/transitRoutes.ts` apagados
+- `utils/` tem agora só `date.ts`
+
 ### O que falta — próxima fase a fazer
 
-**Fase 3 — `infra/` (≈1h, baixo risco)**
+**Fase 4 — `repositories/` (≈4h, médio risco)**
+
+Criar em paralelo a `/data/` (ainda não ligar nada). Cada repository só faz Firestore, lança erros, sem UI.
 
 ```
-lib/firebase.ts          →  infra/firebase.ts
-utils/routing.ts (OSRM)  →  infra/routing.ts      (getRoute, RouteResult, Coordinates)
-utils/routing.ts (Nomi.) →  infra/geocoding.ts    (reverseGeocode, searchPlaces, forwardGeocode)
-utils/transitRoutes.ts   →  infra/transit.ts
+repositories/AuthRepository.ts    — signIn, signUp, signOut, deleteAuthUser, onAuthChanged
+repositories/UserRepository.ts    — getById, getAll, create, update
+repositories/RideRepository.ts    — create, update, delete, subscribeAll
+repositories/CarRepository.ts     — create, delete, getById, subscribeByOwner
+repositories/MessageRepository.ts — send, subscribeByRide, deleteByRide
+repositories/ReviewRepository.ts  — create, fetchByReviewee, subscribeForUser
+repositories/ReportRepository.ts  — create, subscribeByReporter
 ```
 
-Depois apagar `lib/` e os 2 ficheiros `utils/`.
-Critério de fim: `npx tsc --noEmit` sem erros + `npm test` 68/68.
-
-**Fases seguintes (ver secções abaixo):** 4 Repositories → 5 Stores → 6 Services → 7 Hooks → 8 UI.
+**Fases seguintes:** 5 Stores → 6 Services → 7 Hooks → 8 UI.
 
 ### Convenções estabelecidas
 - Imports de tipos → sempre `import type { X }` (não `import { X }`)

@@ -4,7 +4,7 @@ import { getCurrentUser } from "../data/user";
 import { getUserCars, subscribeToCarsChanges } from "../data/cars";
 
 // Mock Firebase
-jest.mock("../lib/firebase", () => ({
+jest.mock("../infra/firebase", () => ({
   db: {},
   auth: {},
 }));

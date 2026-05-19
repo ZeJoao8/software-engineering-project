@@ -18,7 +18,7 @@ import {
  updateDoc,
 } from "firebase/firestore";
 
-import { auth, db } from "../lib/firebase";
+import { auth, db } from "../infra/firebase";
 import type { User } from "../domain/entities/User";
 
 let currentUser: User | null = null;

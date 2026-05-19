@@ -21,7 +21,7 @@ import {
   getUserCars,
   subscribeToCarsChanges
 } from "../../data/cars";
-import { generateId } from "../../lib/firebase";
+import { generateId } from "../../infra/firebase";
 import { isValidPlate } from "../../domain/rules/validation";
 
 import {
