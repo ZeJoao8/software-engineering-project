@@ -57,23 +57,23 @@ domain/                          store/  ── estado reactivo
 
 ### `domain/rules/` (lógica de negócio pura)
 
-- [ ] `domain/rules/rideRules.ts` — **novo**, extrair de `app/ride/[id].tsx`:
-  - `canReserveSeat(ride, user, now)`
-  - `canCancelSeat(ride, now)`
-  - `canCancelRide(ride, now)`
-  - `canCompleteRide(ride, user)`
-  - `canRemovePassenger(ride, now)`
-  - `canChangeCar(ride, newCar, currentPassengers)`
-  - `isRideStarted(ride, now)`
-  - `generateBoardingCode()`
-  - `shouldAutoDeleteRide(ride, user, now)`
-- [ ] `domain/rules/rideFilters.ts` ← `utils/rideFilters.ts`
-- [ ] `domain/rules/myRidesFilters.ts` — **novo**, extrair de `myRides.tsx:96-149`
-- [ ] `domain/rules/badges.ts` ← `utils/badges.ts` (sem `BadgeStatus`, já em entities)
-- [ ] `domain/rules/sustainability.ts` ← `utils/sustainability.ts`
-- [ ] `domain/rules/streaks.ts` ← `utils/streaks.ts`
-- [ ] `domain/rules/validation.ts` ← `utils/validation.ts`
-- [ ] `domain/rules/reviewRules.ts` — **novo**, `calculateAverageRating(reviews)` extraído de `data/reviews.ts:131-147`
+- [x] `domain/rules/rideRules.ts` — **novo**, extrair de `app/ride/[id].tsx`:
+  - [x] `canReserveSeat(ride, user, now)`
+  - [x] `canCancelSeat(ride, now)`
+  - [x] `canCancelRide(ride, now)`
+  - [x] `canCompleteRide(ride, userId)`
+  - [x] `canRemovePassenger(ride, now)`
+  - [ ] `canChangeCar(ride, newCar, currentPassengers)` — ⚠️ lógica ainda na screen, extrair na Fase 6
+  - [ ] `isRideStarted(ride, now)` — ⚠️ calculado inline na screen, extrair na Fase 6
+  - [x] `generateBoardingCode()`
+  - [x] `shouldAutoDeleteRide(ride, now)`
+- [x] `domain/rules/rideFilters.ts` ← `utils/rideFilters.ts` (apagado)
+- [ ] `domain/rules/myRidesFilters.ts` — **novo**, extrair de `myRides.tsx:96-149` — ⚠️ deixar para Fase 8 (envolve estado React)
+- [x] `domain/rules/badges.ts` ← `utils/badges.ts` (apagado)
+- [x] `domain/rules/sustainability.ts` ← `utils/sustainability.ts` (apagado)
+- [x] `domain/rules/streaks.ts` ← `utils/streaks.ts` (apagado)
+- [x] `domain/rules/validation.ts` ← `utils/validation.ts` (apagado)
+- [x] `domain/rules/reviewRules.ts` — **novo**, `calculateAverageRating(reviews)`
 
 ### `infra/` (integrações externas)
 
@@ -130,14 +130,18 @@ domain/                          store/  ── estado reactivo
 
 ## Ordem de Execução — 8 Fases
 
-### FASE 1 — Entidades (≈2h, baixo risco)
-- [ ] Mover todos os tipos para `domain/entities/`
-- [ ] Atualizar imports em todo o lado
-- [ ] **Critério de fim:** código compila, testes passam, `/types/` apagada
+### FASE 1 — Entidades ✅
+- [x] Mover todos os tipos para `domain/entities/`
+- [x] Atualizar imports em todo o lado
+- [x] **Critério de fim:** código compila, testes passam, `app/domain/` apagada
 
-### FASE 2 — Domain Rules (≈2h, baixo risco)
-- [ ] Mover `utils/badges`, `utils/streaks`, `utils/sustainability`, `utils/rideFilters`, `utils/validation` para `domain/rules/`
-- [ ] Corrigir `plateRegex` duplicado em `userProfile.tsx:220` — usar `isValidPlate`
+### FASE 2 — Domain Rules ✅ (exceto 2 itens adiados)
+- [x] Mover `utils/badges`, `utils/streaks`, `utils/sustainability`, `utils/rideFilters`, `utils/validation` para `domain/rules/` e apagar os originais
+- [x] Criar `domain/rules/rideRules.ts` com regras puras (canReserveSeat, canCancelSeat, canCancelRide, canCompleteRide, canRemovePassenger, shouldAutoDeleteRide, generateBoardingCode)
+- [x] Criar `domain/rules/reviewRules.ts` com `calculateAverageRating`
+- [x] Corrigir `plateRegex` duplicado em `userProfile.tsx` — usa `isValidPlate`
+- [ ] `canChangeCar` e `isRideStarted` — adiar para Fase 6 (precisam do contexto do service)
+- [ ] `myRidesFilters.ts` — adiar para Fase 8 (lógica acoplada ao estado React)
 
 ### FASE 3 — Infra (≈1h, baixo risco)
 - [ ] Mover `lib/firebase` → `infra/firebase`
@@ -255,11 +259,64 @@ export async function reserveSeat(rideId: string, user: User) {
 
 ---
 
+## Handoff — estado para a próxima sessão
+
+> Lê isto antes de continuar. Dá ao Claude Code context suficiente para não perder tempo a re-analisar.
+
+### O que já está feito (compilado + 68 testes a passar)
+
+**Fase 1 ✅ — `domain/entities/`**
+Todos os tipos movidos do `data/` e `utils/` para ficheiros próprios:
+`User.ts`, `Ride.ts`, `Car.ts`, `Message.ts`, `Review.ts`, `Report.ts`, `Badge.ts`
+Todos os consumidores (screens, components, tests) a importar diretamente de `domain/entities/`.
+
+**Fase 2 ✅ — `domain/rules/`**
+5 ficheiros `utils/` eliminados, lógica movida:
+- `domain/rules/sustainability.ts` — `calculateUserCO2Saved`, `CO2_PER_KM`, `formatCO2`
+- `domain/rules/streaks.ts` — `calculateWeeklyStreak`
+- `domain/rules/rideFilters.ts` — `filterRides`, `FilterCriteria`
+- `domain/rules/validation.ts` — `isValidEmail`, `isUniversityEmail`, `isPasswordStrong`, `doPasswordsMatch`, `areRequiredFieldsFilled`, `isValidPlate`
+- `domain/rules/badges.ts` — `getUserBadges`
+- `domain/rules/rideRules.ts` (**novo**) — `canReserveSeat`, `canCancelSeat`, `canCancelRide`, `canCompleteRide`, `canRemovePassenger`, `shouldAutoDeleteRide`, `generateBoardingCode`
+- `domain/rules/reviewRules.ts` (**novo**) — `calculateAverageRating`
+
+`utils/` só tem agora: `date.ts`, `routing.ts`, `transitRoutes.ts` (vão para `infra/` na Fase 3).
+
+### O que falta — próxima fase a fazer
+
+**Fase 3 — `infra/` (≈1h, baixo risco)**
+
+```
+lib/firebase.ts          →  infra/firebase.ts
+utils/routing.ts (OSRM)  →  infra/routing.ts      (getRoute, RouteResult, Coordinates)
+utils/routing.ts (Nomi.) →  infra/geocoding.ts    (reverseGeocode, searchPlaces, forwardGeocode)
+utils/transitRoutes.ts   →  infra/transit.ts
+```
+
+Depois apagar `lib/` e os 2 ficheiros `utils/`.
+Critério de fim: `npx tsc --noEmit` sem erros + `npm test` 68/68.
+
+**Fases seguintes (ver secções abaixo):** 4 Repositories → 5 Stores → 6 Services → 7 Hooks → 8 UI.
+
+### Convenções estabelecidas
+- Imports de tipos → sempre `import type { X }` (não `import { X }`)
+- Services devolvem `{ ok: boolean, error?: string, data?: T }`, **nunca** chamam `Alert`
+- `Alert.alert` fica **apenas** nas screens
+- Testes em `tests/*.test.js` — Jest + `@testing-library/react-native`
+- Stack: Expo / React Native + Firebase/Firestore (sem Node.js backend, sem MySQL)
+- APIs externas: OSRM (routing), Nominatim (geocoding), Transitous (trânsito)
+
+### Comandos úteis
+```bash
+npx tsc --noEmit        # type check
+npm test                # 68 testes
+```
+
 ## Notas / Decisões à medida que avançamos
 
-> Usa esta secção para registar decisões que vamos tomando durante o refactor (ex: "decidimos manter X assim porque…").
-
-- _(vazio — preencher à medida)_
+- `canChangeCar` e `isRideStarted` adiados para Fase 6 (precisam contexto do service)
+- `myRidesFilters.ts` adiado para Fase 8 (acoplado a estado React em `myRides.tsx:96-149`)
+- `utils/date.ts` fica em `utils/` até ao fim (helper genérico, não é domain logic)
 
 ---
 
