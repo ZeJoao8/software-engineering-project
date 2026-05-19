@@ -85,13 +85,13 @@ domain/                          store/  ── estado reactivo
 
 ### `repositories/` (só Firestore, lançam erros)
 
-- [ ] `repositories/AuthRepository.ts` — `signIn`, `signUp`, `signOut`, `deleteAuthUser`, `onAuthChanged`
-- [ ] `repositories/UserRepository.ts` — `getById`, `getAll`, `create`, `update`
-- [ ] `repositories/RideRepository.ts` — `create`, `update`, `delete`, `subscribeAll`
-- [ ] `repositories/CarRepository.ts` — `create`, `delete`, `getById`, `subscribeByOwner`
-- [ ] `repositories/MessageRepository.ts` — `send`, `subscribeByRide`, `deleteByRide`
-- [ ] `repositories/ReviewRepository.ts` — `create`, `fetchByReviewee`, `subscribeForUser`
-- [ ] `repositories/ReportRepository.ts` — `create`, `subscribeByReporter`
+- [x] `repositories/AuthRepository.ts` — `signIn`, `signUp`, `signOutUser`, `deleteAuthUser`, `onAuthChanged`
+- [x] `repositories/UserRepository.ts` — `getById`, `getAll`, `create`, `update`
+- [x] `repositories/RideRepository.ts` — `save`, `remove`, `subscribeAll`
+- [x] `repositories/CarRepository.ts` — `save`, `remove`, `getById`, `subscribeByOwner`
+- [x] `repositories/MessageRepository.ts` — `send`, `subscribeByRide`, `deleteByRide`
+- [x] `repositories/ReviewRepository.ts` — `save`, `fetchByReviewee`, `subscribeForUser`
+- [x] `repositories/ReportRepository.ts` — `save`, `subscribeByReporter`
 
 ### `store/` (estado reactivo — substitui parte de `/data/`)
 
@@ -148,9 +148,9 @@ domain/                          store/  ── estado reactivo
 - [x] Dividir `utils/routing.ts` em `infra/routing.ts` (OSRM) + `infra/geocoding.ts` (Nominatim)
 - [x] Mover `utils/transitRoutes.ts` → `infra/transit.ts`
 
-### FASE 4 — Repositories (≈4h, médio risco)
-- [ ] Criar `repositories/*.ts` em paralelo a `/data/` (ainda não ligar nada)
-- [ ] Cada repository SÓ faz Firestore, lança erros, sem UI
+### FASE 4 — Repositories ✅
+- [x] Criar `repositories/*.ts` em paralelo a `/data/` (ainda não ligar nada)
+- [x] Cada repository SÓ faz Firestore, lança erros, sem UI
 
 ### FASE 5 — Stores (≈3h, médio risco)
 - [ ] Criar `store/*.ts` que usam repositories e mantêm estado reactivo
@@ -292,21 +292,25 @@ Todos os consumidores (screens, components, tests) a importar diretamente de `do
 
 ### O que falta — próxima fase a fazer
 
-**Fase 4 — `repositories/` (≈4h, médio risco)**
+**Fase 4 ✅ — `repositories/`**
+7 ficheiros criados em paralelo a `/data/`. Só Firestore/Auth, sem Alert, lançam erros.
 
-Criar em paralelo a `/data/` (ainda não ligar nada). Cada repository só faz Firestore, lança erros, sem UI.
+### O que falta — próxima fase a fazer
+
+**Fase 5 — `store/` (≈3h, médio risco)**
+
+Criar stores reactivos que usam os repositories e mantêm estado em memória. Ainda em paralelo a `/data/`.
 
 ```
-repositories/AuthRepository.ts    — signIn, signUp, signOut, deleteAuthUser, onAuthChanged
-repositories/UserRepository.ts    — getById, getAll, create, update
-repositories/RideRepository.ts    — create, update, delete, subscribeAll
-repositories/CarRepository.ts     — create, delete, getById, subscribeByOwner
-repositories/MessageRepository.ts — send, subscribeByRide, deleteByRide
-repositories/ReviewRepository.ts  — create, fetchByReviewee, subscribeForUser
-repositories/ReportRepository.ts  — create, subscribeByReporter
+store/authStore.ts    — currentUser, users, authReady + subscribe()
+store/rideStore.ts    — rides[] + sync via RideRepository.subscribeAll
+store/carStore.ts     — cars[] (próprios do user)
+store/reviewStore.ts  — reviews[] (que o user vê, como reviewer e reviewee)
+store/reportStore.ts  — reports[] (do user como reporter)
+store/busRouteStore.ts ← data/busRoute.ts (mover estado simples)
 ```
 
-**Fases seguintes:** 5 Stores → 6 Services → 7 Hooks → 8 UI.
+**Fases seguintes:** 6 Services → 7 Hooks → 8 UI.
 
 ### Convenções estabelecidas
 - Imports de tipos → sempre `import type { X }` (não `import { X }`)
