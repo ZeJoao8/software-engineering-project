@@ -8,7 +8,7 @@ import { colors, spacing } from "../styles/theme";
 import { getCurrentUser, getUserById } from "../data/user";
 import { getReports } from "../data/reports";
 import { getReviewsForUser, getReviews } from "../data/reviews";
-import type { Ride } from "../types/Ride";
+import type { Ride } from "../domain/entities/Ride";
 
 function ratingBackground(rating: number) {
   if (rating >= 4) return colors.primaryLight;

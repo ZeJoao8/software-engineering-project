@@ -17,16 +17,9 @@ import {
   isAuthReady,
   subscribeToAuthChanges,
 } from "./user";
+import type { Review } from "../domain/entities/Review";
 
-export type Review = {
-  id: string;
-  rideId: string;
-  reviewerId: string;
-  revieweeId: string;
-  rating: number;
-  comment: string;
-  createdAt: string;
-};
+export type { Review };
 
 let reviews: Review[] = [];
 

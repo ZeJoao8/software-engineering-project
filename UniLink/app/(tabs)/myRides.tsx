@@ -14,7 +14,7 @@ import { getReviews, subscribeToReviewsChanges } from "../../data/reviews";
 import { getReports, subscribeToReportsChanges } from "../../data/reports";
 import { getCurrentUser } from "../../data/user";
 import { sortByDateDesc } from "../../utils/date";
-import type { Ride } from "../../types/Ride";
+import type { Ride } from "../../domain/entities/Ride";
 
 import RideCard from "../../components/rideCard";
 import { components } from "../../styles/components";

@@ -1,5 +1,5 @@
-import { Ride } from "../types/Ride";
-import { User } from "../types/User";
+import type { Ride } from "../domain/entities/Ride";
+import type { User } from "../domain/entities/User";
 import { formatDate } from "./date";
 
 export interface FilterCriteria {

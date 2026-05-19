@@ -13,7 +13,7 @@ import {
 } from "firebase/firestore";
 
 import { db } from "../lib/firebase";
-import { Car } from "../types/Car";
+import type { Car } from "../domain/entities/Car";
 import {
  getCurrentUser,
  isAuthReady,

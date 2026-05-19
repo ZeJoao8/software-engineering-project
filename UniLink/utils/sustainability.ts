@@ -1,4 +1,4 @@
-import { Ride } from "../types/Ride";
+import type { Ride } from "../domain/entities/Ride";
 
 export const CO2_PER_KM = 0.12; 
 

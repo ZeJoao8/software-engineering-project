@@ -13,7 +13,8 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 
 import { getRides } from "../../data/rides";
 import { getCurrentUser, getUserById } from "../../data/user";
-import { subscribeToRideChat, sendMessage, type Message } from "../../data/chat";
+import { subscribeToRideChat, sendMessage } from "../../data/chat";
+import type { Message } from "../../domain/entities/Message";
 import { generateId } from "../../lib/firebase";
 
 import { colors, spacing } from "../../styles/theme";

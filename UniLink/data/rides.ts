@@ -10,7 +10,7 @@ import {
 } from "firebase/firestore";
 
 import { db } from "../lib/firebase";
-import { Ride } from "../types/Ride";
+import type { Ride } from "../domain/entities/Ride";
 import {
  getCurrentUser,
  isAuthReady,

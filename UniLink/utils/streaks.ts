@@ -1,4 +1,4 @@
-import { Ride } from "../types/Ride";
+import type { Ride } from "../domain/entities/Ride";
 
 function isSameWeek(date1: Date, date2: Date) {
 

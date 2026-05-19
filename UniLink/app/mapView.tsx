@@ -46,7 +46,7 @@ import { colors } from "../styles/theme";
 import { layout } from "../styles/layout";
 import { mapStyles } from "../styles/map";
 
-import type { Ride } from "../types/Ride";
+import type { Ride } from "../domain/entities/Ride";
 import ZoomControls from "../components/ZoomControls";
 
 

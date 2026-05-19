@@ -12,7 +12,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 
 import { getUserById } from "../../data/user";
 import { fetchCarById } from "../../data/cars";
-import type { Car } from "../../types/Car";
+import type { Car } from "../../domain/entities/Car";
 import { getRides, subscribeToRidesChanges } from "../../data/rides";
 import {
   fetchReviewsForUser,

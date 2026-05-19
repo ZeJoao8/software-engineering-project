@@ -1,18 +1,8 @@
-import { Ride } from "../types/Ride";
+import { Ride } from "../domain/entities/Ride";
 import { calculateUserCO2Saved } from "./sustainability";
+import type { BadgeLevel, BadgeStatus } from "../domain/entities/Badge";
 
-export type BadgeLevel = "none" | "bronze" | "silver" | "gold" | "diamond";
-
-export interface BadgeStatus {
-  id: string;
-  title: string;
-  level: BadgeLevel;
-  icon: string;
-  description: string;
-  progress: number;
-  nextLevelThreshold: number | null;
-  currentLevelThreshold: number | null;
-}
+export type { BadgeLevel, BadgeStatus };
 
 const LEVEL_THRESHOLDS = {
   bronze: 0,

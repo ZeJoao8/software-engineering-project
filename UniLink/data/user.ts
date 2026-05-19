@@ -19,7 +19,7 @@ import {
 } from "firebase/firestore";
 
 import { auth, db } from "../lib/firebase";
-import { User } from "../types/User";
+import type { User } from "../domain/entities/User";
 
 let currentUser: User | null = null;
 let users: User[] = [];

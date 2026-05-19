@@ -17,7 +17,7 @@ import * as Contacts from "expo-contacts";
 import { getRides, updateRide, deleteRide } from "../../data/rides";
 import { getCurrentUser, getUserById } from "../../data/user";
 import { getCars, fetchCarById } from "../../data/cars";
-import type { Car } from "../../types/Car";
+import type { Car } from "../../domain/entities/Car";
 import { hasReviewForRide, getReviews } from "../../data/reviews";
 import { hasReportForRide, getReports, subscribeToReportsChanges } from "../../data/reports";
 import { subscribeToReviewsChanges } from "../../data/reviews";
@@ -26,7 +26,7 @@ import { formatDate } from "../../utils/date";
 import { getRoute } from "../../utils/routing";
 import type { RouteResult } from "../../utils/routing";
 import { CO2_PER_KM } from "../../utils/sustainability";
-import type { User } from "../../types/User";
+import type { User } from "../../domain/entities/User";
 
 import DropDownPicker from "react-native-dropdown-picker";
 

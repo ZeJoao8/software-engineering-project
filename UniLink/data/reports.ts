@@ -16,21 +16,9 @@ import {
   isAuthReady,
   subscribeToAuthChanges,
 } from "./user";
+import type { Report, ReportStatus } from "../domain/entities/Report";
 
-export type ReportStatus =
-  | "pending"
-  | "reviewed"
-  | "resolved";
-
-export type Report = {
-  id: string;
-  rideId: string;
-  reporterId: string;
-  reportedUserId: string;
-  reason: string;
-  createdAt: string;
-  status: ReportStatus;
-};
+export type { Report, ReportStatus };
 
 let reports: Report[] = [];
 

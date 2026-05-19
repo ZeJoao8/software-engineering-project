@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { View, Text, ScrollView, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { BadgeStatus, BadgeLevel } from "../utils/badges";
+import type { BadgeStatus, BadgeLevel } from "../domain/entities/Badge";
 import { colors, spacing } from "../styles/theme";
 import { components } from "../styles/components";
 

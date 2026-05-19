@@ -13,14 +13,7 @@ import {
 
 import { db } from "../lib/firebase";
 import { isAuthReady, getCurrentUser } from "./user";
-
-export type Message = {
-  id: string;
-  rideId: string;
-  senderId: string;
-  text: string;
-  createdAt: string;
-};
+import type { Message } from "../domain/entities/Message";
 
 /**
  * Subscribes to chat messages for a specific ride.
