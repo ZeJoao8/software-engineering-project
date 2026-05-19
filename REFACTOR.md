@@ -319,7 +319,7 @@ repositories/ReportRepository.ts  — create, subscribeByReporter
 ### Comandos úteis
 ```bash
 npx tsc --noEmit        # type check
-npm test                # 68 testes
+npm test                # 111 testes
 ```
 
 ## Notas / Decisões à medida que avançamos
