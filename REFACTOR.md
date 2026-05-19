@@ -115,16 +115,16 @@ domain/                          store/  ── estado reactivo
 
 ### `hooks/` (ponte React ↔ store)
 
-- [ ] `hooks/useAuth.ts` — `{ user, isReady }`
-- [ ] `hooks/useRides.ts`
-- [ ] `hooks/useCars.ts`
-- [ ] `hooks/useReviews.ts`
-- [ ] `hooks/useReports.ts`
-- [ ] manter `hooks/use-color-scheme.ts`
+- [x] `hooks/useAuth.ts` — `{ user, isReady }`
+- [x] `hooks/useRides.ts`
+- [x] `hooks/useCars.ts`
+- [x] `hooks/useReviews.ts`
+- [x] `hooks/useReports.ts`
+- [x] manter `hooks/use-color-scheme.ts`
 
 ### `utils/` (só helpers genéricos)
 
-- [ ] Manter apenas `utils/date.ts`
+- [x] Manter apenas `utils/date.ts`
 
 ---
 
@@ -161,9 +161,9 @@ domain/                          store/  ── estado reactivo
 - [x] Convenção: devolver `{ok: boolean, error?: string, data?: T }`
 - [x] **Marco crítico:** services nunca chamam `Alert`
 
-### FASE 7 — Hooks (≈1h, baixo risco)
-- [ ] Criar `hooks/use*.ts` que envolvem os stores
-- [ ] Substituem o padrão atual `useState + subscribeToXChanges`
+### FASE 7 — Hooks ✅
+- [x] Criar `hooks/use*.ts` que envolvem os stores
+- [x] Substituem o padrão atual `useState + subscribeToXChanges`
 
 ### FASE 8 — Migrar UI (≈5h, alto risco mas linear)
 Para cada screen:
