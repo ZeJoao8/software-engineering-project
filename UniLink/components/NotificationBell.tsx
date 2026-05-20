@@ -11,8 +11,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
 import { useNotifications } from "../hooks/useNotifications";
-import { markNotificationAsRead } from "../store/notifications";
 import { type Notification, type NotificationType } from "../domain/entities/Notification";
+import { formatRelativeTime } from "../utils/date";
 import { colors } from "../styles/theme";
 import { components } from "../styles/components";
 
@@ -25,26 +25,16 @@ const TYPE_ICON: Record<NotificationType, keyof typeof Ionicons.glyphMap> = {
   chat_message:       "chatbubble-ellipses-outline",
 };
 
-function formatRelativeTime(isoString: string): string {
-  const diffMs = Date.now() - new Date(isoString).getTime();
-  const diffMin = Math.floor(diffMs / 60_000);
-  if (diffMin < 1) return "Now";
-  if (diffMin < 60) return `${diffMin}m ago`;
-  const diffHours = Math.floor(diffMs / 3_600_000);
-  if (diffHours < 24) return `${diffHours}h ago`;
-  return `${Math.floor(diffMs / 86_400_000)}d ago`;
-}
-
 export function NotificationBell() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const notifications = useNotifications();
+  const { notifications, markAsRead } = useNotifications();
   const [panelVisible, setPanelVisible] = useState(false);
 
   const unreadCount = notifications.length;
 
   async function handlePress(notification: Notification) {
-    await markNotificationAsRead(notification.id);
+    await markAsRead(notification.id);
     setPanelVisible(false);
     router.push(notification.route as Parameters<typeof router.push>[0]);
   }

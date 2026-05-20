@@ -19,12 +19,7 @@ import { sendMessage } from "../../services/ChatService";
 import { isUserDriver, isUserPassenger } from "../../domain/rules/rideRules";
 import type { Message } from "../../domain/entities/Message";
 import { formatTime } from "../../utils/date";
-import {
-  createNotification,
-  getNotifications,
-  markNotificationAsRead,
-  subscribeToNotificationsChanges,
-} from "../../store/notifications";
+import { useNotifications } from "../../hooks/useNotifications";
 
 import { colors, spacing } from "../../styles/theme";
 import { chatStyles } from "../../styles/chat";
@@ -46,6 +41,7 @@ export default function RideChat() {
 
   const [inputText, setInputText] = useState("");
   const flatListRef = useRef<FlatList>(null);
+  const { notifications, markAsRead } = useNotifications();
 
   useEffect(() => {
     if (!ride || !activeUser) return;
@@ -56,19 +52,13 @@ export default function RideChat() {
 
   useEffect(() => {
     if (!ride) return;
-
-    function dismissChatNotifications() {
-      const toRead = getNotifications().filter(
-        n => n.type === "chat_message" && n.rideId === ride!.id
-      );
-      for (const n of toRead) {
-        void markNotificationAsRead(n.id);
-      }
+    const toRead = notifications.filter(
+      n => n.type === "chat_message" && n.rideId === ride.id
+    );
+    for (const n of toRead) {
+      void markAsRead(n.id);
     }
-
-    dismissChatNotifications();
-    return subscribeToNotificationsChanges(dismissChatNotifications);
-  }, [ride?.id]);
+  }, [notifications, ride?.id]);
 
   if (!ride || !activeUser) return null;
 
@@ -78,26 +68,14 @@ export default function RideChat() {
     if (!text) return;
     setInputText("");
 
-    const result = await sendMessage(ride.id, activeUser.uid, text);
+    const result = await sendMessage(ride.id, activeUser.uid, text, {
+      senderName: activeUser.name,
+      recipientIds: [ride.driverId, ...ride.passengers].filter(uid => uid !== activeUser.uid),
+      rideRoute: `${ride.origin} → ${ride.destination}`,
+    });
     if (!result.ok) {
       setInputText(text);
       Alert.alert("Error", result.error);
-      return;
-    }
-
-    const recipients = [ride.driverId, ...ride.passengers].filter(
-      uid => uid !== activeUser.uid
-    );
-    const preview = text.length > 60 ? text.slice(0, 57) + "…" : text;
-    for (const uid of recipients) {
-      void createNotification({
-        userId: uid,
-        type: "chat_message",
-        title: `${activeUser.name}: ${preview}`,
-        body: `${ride.origin} → ${ride.destination}`,
-        rideId: ride.id,
-        route: `/chat/${ride.id}`,
-      });
     }
   }
 

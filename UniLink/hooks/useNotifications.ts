@@ -2,11 +2,15 @@ import { useEffect, useState } from "react";
 
 import {
   getNotifications,
+  markNotificationAsRead,
   subscribeToNotificationsChanges,
 } from "../store/notifications";
 import type { Notification } from "../domain/entities/Notification";
 
-export function useNotifications(): Notification[] {
+export function useNotifications(): {
+  notifications: Notification[];
+  markAsRead: (id: string) => Promise<void>;
+} {
   const [notifications, setNotifications] = useState<Notification[]>(
     getNotifications
   );
@@ -17,5 +21,5 @@ export function useNotifications(): Notification[] {
     });
   }, []);
 
-  return notifications;
+  return { notifications, markAsRead: markNotificationAsRead };
 }
