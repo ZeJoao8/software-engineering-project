@@ -69,7 +69,7 @@ UniLink connects university students through safe, free and trusted ride-sharing
 
 ### Elevator Pitch
 <!-- 
-Draft a small text to help you quickly introduce and describe your product in a short time (lift travel time ~90 seconds) and a few words (~800 characters), a technique usually known as elevator pitch.
+Draft a small text to help you quickly introduce and describe your product in a short time (lift travel time ~90 seconds) and a few words (~800 characters), a technique usually known as elevator p[...]
 
 Take a look at the following links to learn some techniques:
 * [Crafting an Elevator Pitch](https://www.mindtools.com/pages/article/elevator-pitch.htm)
@@ -170,6 +170,148 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 - Only female users can reserve
 - System enforces restriction
 
+**9. Security Codes**
+> *As a user, I want to receive and validate a security code before a ride so that I can ensure I am entering the correct car.*
+
+**Acceptance Criteria:**
+- A unique security code is generated for each ride booking
+- Passenger must provide the correct code before the ride starts
+- Driver can validate the code on the app
+- The ride cannot start unless the code is confirmed
+- If the code is incorrect, the system shows an error and prevents validation
+
+**10. Better Navigation Menu**
+> *As a user, I want to easily navigate through the app's menus so that I can quickly access features like booking rides, viewing trips, and managing my profile.*
+
+**Acceptance Criteria:**
+- A persistent navigation bar is visible on main screens
+- Navigation options are clearly labeled and intuitive
+- Users can access key features within a maximum of 2–3 taps
+- The current active section is visually highlighted
+- Navigation flow is consistent across all screens
+- A back button or gesture is available to return to the previous screen
+- Important actions (e.g., booking a ride) are easily accessible from the main screen
+- The app avoids dead ends (users can always navigate to another section)
+
+**11. Bus Alternatives**
+> *As a user, I want bus alternatives so that I have backup transport.*
+
+**Acceptance Criteria:**
+- System displays available bus routes
+- Schedules are shown for selected route
+- Information is updated from external source
+
+**12. Map Integration**
+> *As a user, I want to see rides on a map so that I can understand routes.*
+
+**Acceptance Criteria:**
+- Map displays origin and destination
+- Route is visible
+- Map loads correctly
+
+**13. Rate Users**
+> *As a user, I want to rate others so that trust is built.*
+
+**Acceptance Criteria:**
+- User can rate after a ride
+- Rating is stored
+- Average rating is updated
+- Rating is visible on profile
+
+**14. Report User**
+> *As a user, I want to report others so that unsafe behavior is handled.*
+
+**Acceptance Criteria:**
+- User can submit a report
+- Report is stored
+- Report includes reason and user reference
+
+**15. Leaderboard**
+> *As a user, I want to see a leaderboard so that I can compare activity.*
+
+**Acceptance Criteria:**
+- Leaderboard displays carbon footprint of users
+- Rankings are updated dynamically
+- User can see their own position
+- Top users are clearly highlighted
+
+**16. Weekly Streaks**
+> *As a user, I want to maintain streaks so that I stay engaged.*
+
+**Acceptance Criteria:**
+- System tracks user activity per week
+- Streak increases if user completes at least one ride per week
+- Streak resets after inactivity
+- Current streak is visible in user profile
+
+**17. Medals / Achievements**
+> *As a user, I want to earn medals so that I feel rewarded.*
+
+**Acceptance Criteria:**
+- System defines achievement conditions (e.g. 10 rides given)
+- User earns achievement when condition is met
+- Achievements are stored in user profile
+- Achievements are visible to other users
+
+**18. Notifications**
+> *As a user, I want to receive notifications so that I stay updated on ride and message events.*
+
+**Acceptance Criteria:**
+- Push notifications are sent for new messages
+- Push notifications are sent for ride updates (driver accepted, ride starting, etc.)
+- User can enable/disable notifications
+- Notification preferences are saved
+- Notifications display relevant ride and user information
+
+**19. Friend List**
+> *As a user, I want to view a friend list so that I can easily communicate and coordinate rides with people I trust.*
+
+**Acceptance Criteria:**
+- User can add friends
+- User can view list of friends
+- Friend list includes friend information (name, university, average rating)
+- User can remove friends
+- Friend list is synchronized across sessions
+
+**20. Safety Contacts**
+> *As a user, I want to add emergency safety contacts so that others can know where I am in case of emergency.*
+
+**Acceptance Criteria:**
+- User can add emergency contacts
+- User can edit contact information
+- Safety contacts can receive ride details and location during active rides
+- Emergency contacts can be notified in case of issues
+- Contact list is stored securely
+
+**21. Driver Preferences**
+> *As a driver, I want to set personal preferences so that I can customize my ride experience.*
+
+**Acceptance Criteria:**
+- Driver can set preferred routes
+- Driver can set preferred passenger types (e.g., female only, quiet rides)
+- Driver can set working hours
+- Preferences are saved and used for ride matching
+- Driver can edit preferences at any time
+
+**22. Improve MyRides Accessibility**
+> *As a user, I want better accessibility in the MyRides section so that I can easily manage all my ride information.*
+
+**Acceptance Criteria:**
+- All ride information is clearly organized and easy to find
+- User can filter rides by status (upcoming, completed, cancelled)
+- User can view ride details quickly
+- Accessibility features are compliant with WCAG guidelines
+- Font sizes are adjustable for better readability
+
+**23. Better UI**
+> *As a user, I want a more polished and intuitive user interface so that the app is more enjoyable to use.*
+
+**Acceptance Criteria:**
+- Consistent design language across all screens
+- Improved visual hierarchy and spacing
+- Enhanced color scheme and typography
+- Smooth animations and transitions
+- Better feedback for user interactions (button clicks, form submissions, etc.)
 
 ### Domain model
 
