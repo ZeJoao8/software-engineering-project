@@ -46,6 +46,7 @@ describe("Chat Data Service", () => {
   });
 
   test("sendMessage does not call setDoc if senderId mismatches", async () => {
+    const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
     const mockUser = { uid: "user-123" };
     getCurrentUser.mockReturnValue(mockUser);
 
@@ -60,6 +61,7 @@ describe("Chat Data Service", () => {
     await sendMessage(message);
 
     expect(setDoc).not.toHaveBeenCalled();
+    consoleSpy.mockRestore();
   });
 
   test("deleteMessagesForRide calls deleteDoc for all messages found", async () => {

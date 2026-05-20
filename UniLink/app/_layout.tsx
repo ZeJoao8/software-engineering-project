@@ -46,10 +46,13 @@ export default function RootLayout() {
     <Stack.Screen name="ride/[id]" />
 
     <Stack.Screen name="review/[id]" />
-    
-    <Stack.Screen name="reviewComment/[id]" />
 
     <Stack.Screen name="reportUser/[id]" />
+
+    <Stack.Screen
+      name="mapView"
+      options={{ headerShown: false }}
+    />
 
    </Stack>
 

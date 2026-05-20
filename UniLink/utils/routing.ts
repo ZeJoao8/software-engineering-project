@@ -5,8 +5,11 @@ export interface NominatimAddress {
   house_number?: string;
   suburb?: string;
   neighbourhood?: string;
-  city?: string;
+  quarter?: string;
+  village?: string;
+  hamlet?: string;
   town?: string;
+  city?: string;
   [key: string]: string | undefined;
 }
 
@@ -113,11 +116,13 @@ export async function reverseGeocode(
     }
 
     if (addr.suburb) parts.push(addr.suburb);
-    else if (addr.neighbourhood)
-      parts.push(addr.neighbourhood);
+    else if (addr.neighbourhood) parts.push(addr.neighbourhood);
+    else if (addr.quarter) parts.push(addr.quarter);
 
-    if (addr.city) parts.push(addr.city);
+    if (addr.village) parts.push(addr.village);
+    else if (addr.hamlet) parts.push(addr.hamlet);
     else if (addr.town) parts.push(addr.town);
+    else if (addr.city) parts.push(addr.city);
 
     return parts.length > 0
       ? parts.join(", ")
@@ -174,11 +179,13 @@ export async function searchPlaces(
       }
 
       if (addr.suburb) parts.push(addr.suburb);
-      else if (addr.neighbourhood)
-        parts.push(addr.neighbourhood);
+      else if (addr.neighbourhood) parts.push(addr.neighbourhood);
+      else if (addr.quarter) parts.push(addr.quarter);
 
-      if (addr.city) parts.push(addr.city);
+      if (addr.village) parts.push(addr.village);
+      else if (addr.hamlet) parts.push(addr.hamlet);
       else if (addr.town) parts.push(addr.town);
+      else if (addr.city) parts.push(addr.city);
 
       const shortName =
         parts.length > 0
