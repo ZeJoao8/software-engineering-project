@@ -8,17 +8,7 @@ import type { Coordinates } from "../infra/routing";
 import { components } from "../styles/components";
 import { colors, spacing } from "../styles/theme";
 import { layout } from "../styles/layout";
-
-function modeEmoji(mode: string) {
-  switch (mode.toUpperCase()) {
-    case "BUS": return "🚌";
-    case "SUBWAY": return "🚇";
-    case "RAIL": return "🚆";
-    case "TRAM": return "🚃";
-    case "FERRY": return "⛴️";
-    default: return "🚌";
-  }
-}
+import { modeEmoji, isTransitLeg } from "../utils/transitDisplay";
 
 export default function BusAlternatives({
   origin,
@@ -99,7 +89,7 @@ export default function BusAlternatives({
 
           <View style={[components.tagRow, { marginBottom: spacing.xs }]}>
             {route.legs
-              .filter(leg => leg.mode.toUpperCase() !== "WALK")
+              .filter(isTransitLeg)
               .map((leg, j) => (
                 <View key={j} style={components.badgePrimary}>
                   <Text style={components.badgePrimaryText}>

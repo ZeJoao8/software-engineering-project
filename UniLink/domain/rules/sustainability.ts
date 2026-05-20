@@ -2,6 +2,10 @@ import type { Ride } from "../entities/Ride";
 
 export const CO2_PER_KM = 0.12;
 
+export function calculateCO2ForDistance(distanceKm: number): number {
+  return distanceKm * CO2_PER_KM;
+}
+
 export function calculateUserCO2Saved(rides: Ride[], userId: string | undefined): number {
   if (!userId) return 0;
 
@@ -24,4 +28,3 @@ export function calculateUserCO2Saved(rides: Ride[], userId: string | undefined)
 
   return totalCO2;
 }
-

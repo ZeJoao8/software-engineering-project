@@ -21,7 +21,7 @@ import {
 
 import { colors } from "../styles/theme";
 import { mapStyles } from "../styles/map";
-import { CO2_PER_KM } from "../domain/rules/sustainability";
+import { calculateCO2ForDistance } from "../domain/rules/sustainability";
 
 interface RouteMapProps {
   origin: Coordinates;
@@ -168,7 +168,7 @@ export default function RouteMap({
             ⏱~{route.durationMin}min
           </Text>
           <Text style={mapStyles.routeInfoText}>
-            🌳~{(route.distanceKm * CO2_PER_KM).toFixed(2)} kgCO₂/passenger
+            🌳~{calculateCO2ForDistance(route.distanceKm).toFixed(2)} kgCO₂/passenger
           </Text>
         </View>
       )}

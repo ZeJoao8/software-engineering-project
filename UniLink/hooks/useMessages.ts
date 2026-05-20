@@ -1,14 +1,26 @@
 import { useEffect, useState } from "react";
-import { subscribeByRide } from "../repositories/MessageRepository";
+
+import {
+  syncMessagesForRide,
+  stopMessagesSync,
+  getMessages,
+  subscribeToMessageChanges,
+} from "../store/messageStore";
 import type { Message } from "../domain/entities/Message";
 
 export function useMessages(rideId: string | null): Message[] {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(() => getMessages());
 
   useEffect(() => {
-    if (!rideId) return;
-    const unsub = subscribeByRide(rideId, msgs => setMessages(msgs), () => {});
-    return () => unsub();
+    if (!rideId) {
+      stopMessagesSync();
+      setMessages([]);
+      return;
+    }
+
+    syncMessagesForRide(rideId);
+    setMessages(getMessages());
+    return subscribeToMessageChanges(() => setMessages(getMessages()));
   }, [rideId]);
 
   return messages;

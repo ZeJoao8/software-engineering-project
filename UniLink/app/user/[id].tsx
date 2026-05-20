@@ -26,6 +26,7 @@ import { spacing } from "../../styles/theme";
 import { calculateUserCO2Saved } from "../../domain/rules/sustainability";
 import { calculateAverageRating } from "../../domain/rules/reviewRules";
 import { getUserBadges } from "../../domain/rules/badges";
+import { hasUserDrivenRide } from "../../domain/rules/rideRules";
 import { BadgeDisplay } from "../../components/BadgeDisplay";
 
 export default function PublicProfile() {
@@ -55,7 +56,7 @@ export default function PublicProfile() {
 
   if (!user || !currentUser) return null;
 
-  const hasDrivenRide = rides.some(ride => ride.driverId === user.uid);
+  const hasDrivenRide = hasUserDrivenRide(rides, user.uid);
 
   const averageRating = calculateAverageRating(userReviews);
   const showRating = hasDrivenRide && userReviews.length > 0;

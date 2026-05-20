@@ -16,6 +16,14 @@ export function validateReviewRating(rating: number): RuleResult {
   return { ok: true };
 }
 
+export function findPassengerReviewInRide(
+  reviews: Review[],
+  rideId: string,
+  passengerId: string
+): Review | undefined {
+  return reviews.find(r => r.rideId === rideId && r.reviewerId === passengerId);
+}
+
 export function getVisibleFeedback(
   reviews: Review[],
   rideId: string,

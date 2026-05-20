@@ -17,6 +17,7 @@ import { logout } from "../../services/AuthService";
 import { updateProfile } from "../../services/ProfileService";
 import { addCar, removeCarCascade } from "../../services/CarService";
 import { calculateAverageRating } from "../../domain/rules/reviewRules";
+import { hasUserDrivenRide } from "../../domain/rules/rideRules";
 
 import { useRouter } from "expo-router";
 
@@ -60,7 +61,7 @@ export default function Profile() {
   const userReviews = getReviewsForUser(currentUser.uid);
   const averageRating = calculateAverageRating(userReviews);
 
-  const hasDrivenRide = rides.some(ride => ride.driverId === currentUser.uid);
+  const hasDrivenRide = hasUserDrivenRide(rides, currentUser.uid);
   const showRating = hasDrivenRide && userReviews.length > 0;
 
   const weeklyStreak = calculateWeeklyStreak(rides, currentUser.uid);

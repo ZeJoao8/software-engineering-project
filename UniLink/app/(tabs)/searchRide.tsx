@@ -20,7 +20,6 @@ import {
 
 import { useAuth } from "../../hooks/useAuth";
 import { useRides } from "../../hooks/useRides";
-import { removeEmptyPastRides } from "../../services/RideService";
 
 import RideCard from "../../components/rideCard";
 import BusAlternatives from "../../components/BusAlternatives";
@@ -59,7 +58,6 @@ export default function Home() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      removeEmptyPastRides();
       setNow(new Date());
     }, 10000);
     return () => clearInterval(interval);

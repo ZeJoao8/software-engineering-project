@@ -6,14 +6,13 @@ import {
   View,
 } from "react-native";
 
-import { useRouter, useFocusEffect } from "expo-router";
-import { useState, useCallback, useEffect } from "react";
+import { useRouter } from "expo-router";
+import { useState } from "react";
 
 import { useAuth } from "../../hooks/useAuth";
 import { useRides } from "../../hooks/useRides";
 import { useReviews } from "../../hooks/useReviews";
 import { useReports } from "../../hooks/useReports";
-import { removeEmptyPastRides } from "../../services/RideService";
 import { sortByDateDesc } from "../../utils/date";
 
 import {
@@ -22,11 +21,13 @@ import {
   type ExtraFilter,
   type RatingFilter,
 } from "../../domain/rules/myRidesFilters";
+import { isUserDriver, isUserPassenger } from "../../domain/rules/rideRules";
 
 import RideCard from "../../components/rideCard";
 import { components } from "../../styles/components";
 import { layout } from "../../styles/layout";
-import { colors, spacing } from "../../styles/theme";
+import { spacing } from "../../styles/theme";
+import { RATING_ACTIVE_COLORS } from "../../utils/ratingStyle";
 
 const STATUS_FILTERS: { key: StatusFilter; label: string }[] = [
   { key: "all", label: "All" },
@@ -47,12 +48,6 @@ const RATING_FILTERS: { key: RatingFilter; label: string }[] = [
   { key: "4-5",  label: "⭐ 4-5" },
 ];
 
-const RATING_ACTIVE_COLORS: Record<RatingFilter, { bg: string; text: string }> = {
-  "none": { bg: colors.neutralDark,    text: colors.text },
-  "1-2":  { bg: colors.dangerSoft,   text: colors.danger },
-  "3":    { bg: colors.warning,      text: colors.text },
-  "4-5":  { bg: colors.primaryLight, text: colors.primaryDark },
-};
 
 export default function MyRides() {
   const router = useRouter();
@@ -68,19 +63,6 @@ export default function MyRides() {
   const [extraFilters, setExtraFilters] = useState(new Set<ExtraFilter>());
   const [ratingFilter, setRatingFilter] = useState<RatingFilter | null>(null);
 
-  useFocusEffect(
-    useCallback(() => {
-      removeEmptyPastRides();
-    }, [])
-  );
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      removeEmptyPastRides();
-    }, 10000);
-    return () => clearInterval(interval);
-  }, []);
-
   if (!user) return null;
   const activeUser = user;
 
@@ -94,7 +76,7 @@ export default function MyRides() {
   }
 
   const driverRides = applyMyRidesFilters(
-    sortByDateDesc(rides.filter(r => r.driverId === activeUser.uid)),
+    sortByDateDesc(rides.filter(r => isUserDriver(r, activeUser.uid))),
     "driver",
     activeUser.uid,
     reviews,
@@ -105,7 +87,7 @@ export default function MyRides() {
   );
 
   const passengerRides = applyMyRidesFilters(
-    sortByDateDesc(rides.filter(r => r.passengers.includes(activeUser.uid))),
+    sortByDateDesc(rides.filter(r => isUserPassenger(r, activeUser.uid))),
     "passenger",
     activeUser.uid,
     reviews,

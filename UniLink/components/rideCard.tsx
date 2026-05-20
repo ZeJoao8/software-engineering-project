@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 import { formatDate } from "../utils/date";
+import { ratingBackground } from "../utils/ratingStyle";
 import { components } from "../styles/components";
 import { layout } from "../styles/layout";
 import { colors } from "../styles/theme";
@@ -19,12 +20,6 @@ interface DisplayTag {
   emoji: string;
   description: string;
   bg: string;
-}
-
-function ratingBackground(rating: number) {
-  if (rating >= 4) return colors.primaryLight;
-  if (rating === 3) return colors.warning;
-  return colors.dangerSoft;
 }
 
 function toDisplayTag(tag: RideCardTag): DisplayTag {

@@ -25,13 +25,17 @@ import {
   canCompleteRide,
   canRateDriver,
   canReportUser,
+  isRideStarted,
+  isUserDriver,
+  isUserPassenger,
 } from "../../domain/rules/rideRules";
-import { getVisibleFeedback } from "../../domain/rules/reviewRules";
+import { getVisibleFeedback, findPassengerReviewInRide } from "../../domain/rules/reviewRules";
+import { getFeedbackStyle } from "../../utils/ratingStyle";
 import { hasUserReportedInRide } from "../../domain/rules/reportRules";
 import type { Car } from "../../domain/entities/Car";
 import { formatDate } from "../../utils/date";
 import type { RouteResult } from "../../infra/routing";
-import { CO2_PER_KM } from "../../domain/rules/sustainability";
+import { calculateCO2ForDistance } from "../../domain/rules/sustainability";
 import type { User } from "../../domain/entities/User";
 
 import DropDownPicker from "react-native-dropdown-picker";
@@ -89,30 +93,14 @@ export default function RideDetails() {
     .map(pid => getUserById(pid))
     .filter((p): p is User => p !== null);
 
-  const isDriver = r.driverId === activeUser.uid;
-  const joined = r.passengers.includes(activeUser.uid);
-
-  const rideDate = new Date(r.departureDateTime);
-  const now = new Date();
-  const rideStarted = rideDate < now;
+  const isDriver = isUserDriver(r, activeUser.uid);
+  const joined = isUserPassenger(r, activeUser.uid);
+  const rideStarted = isRideStarted(r, new Date());
 
   const canComplete = canCompleteRide(r, activeUser.uid).ok;
   const rateDriverOk = canRateDriver(r, activeUser.uid, allReviews);
 
   const allFeedbackComments = getVisibleFeedback(allReviews, r.id, isDriver, activeUser.uid);
-
-  function getFeedbackStyle(ratingValue: number) {
-    if (ratingValue >= 4) return { backgroundColor: colors.primarySoft, borderLeftColor: colors.primaryLight };
-    if (ratingValue === 3) return { backgroundColor: colors.warning, borderLeftColor: "#fde047" };
-    return { backgroundColor: colors.warningSoft, borderLeftColor: colors.dangerSoft };
-  }
-
-  function getPassengerRatingForThisRide(passengerId: string) {
-    return allReviews.find(
-      review => review.rideId === r.id && review.reviewerId === passengerId
-    );
-  }
-
 
   function reserveSeat() {
     Alert.alert("Reserve seat", "Confirm reservation?", [
@@ -295,7 +283,7 @@ export default function RideDetails() {
                 <Text style={components.miniTagText}>⏱ ~{routeStats.durationMin} min</Text>
               </View>
               <View style={components.miniTag}>
-                <Text style={components.miniTagText}>🌳 ~{(routeStats.distanceKm * CO2_PER_KM).toFixed(2)} kgCO₂/p</Text>
+                <Text style={components.miniTagText}>🌳 ~{calculateCO2ForDistance(routeStats.distanceKm).toFixed(2)} kgCO₂/p</Text>
               </View>
             </View>
           )}
@@ -434,7 +422,7 @@ export default function RideDetails() {
 
           {passengers.map((p, i) => {
             const passengerReview = isDriver
-              ? getPassengerRatingForThisRide(p.uid)
+              ? findPassengerReviewInRide(allReviews, r.id, p.uid)
               : undefined;
             return (
               <View key={p.uid} style={i > 0 ? components.mtSm : undefined}>

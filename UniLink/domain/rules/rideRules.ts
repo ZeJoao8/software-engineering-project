@@ -6,6 +6,18 @@ import { hasUserReportedInRide } from "./reportRules";
 
 type RuleResult = { ok: true } | { ok: false; error: string };
 
+export function isUserDriver(ride: Ride, userId: string): boolean {
+  return ride.driverId === userId;
+}
+
+export function isUserPassenger(ride: Ride, userId: string): boolean {
+  return ride.passengers.includes(userId);
+}
+
+export function hasUserDrivenRide(rides: Ride[], userId: string): boolean {
+  return rides.some(r => isUserDriver(r, userId));
+}
+
 export function generateBoardingCode(): string {
   return String(Math.floor(100000 + Math.random() * 900000));
 }

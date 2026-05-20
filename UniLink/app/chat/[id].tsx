@@ -7,6 +7,7 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -15,8 +16,9 @@ import { useAuth } from "../../hooks/useAuth";
 import { useRides } from "../../hooks/useRides";
 import { useMessages } from "../../hooks/useMessages";
 import { sendMessage } from "../../services/ChatService";
+import { isUserDriver, isUserPassenger } from "../../domain/rules/rideRules";
 import type { Message } from "../../domain/entities/Message";
-import { generateId } from "../../infra/firebase";
+import { formatTime } from "../../utils/date";
 
 
 import { colors, spacing } from "../../styles/theme";
@@ -33,8 +35,8 @@ export default function RideChat() {
 
   const ride = rides.find(r => r.id === id);
 
-  const joined = ride ? ride.passengers.includes(activeUser?.uid ?? "") : false;
-  const isDriver = ride ? ride.driverId === activeUser?.uid : false;
+  const joined = ride ? isUserPassenger(ride, activeUser?.uid ?? "") : false;
+  const isDriver = ride ? isUserDriver(ride, activeUser?.uid ?? "") : false;
   const messages = useMessages(joined || isDriver ? ride?.id ?? null : null);
 
   const [inputText, setInputText] = useState("");
@@ -53,30 +55,19 @@ export default function RideChat() {
     if (!ride || !activeUser) return;
     const text = inputText.trim();
     if (!text) return;
-
     setInputText("");
-
-    const newMessage: Message = {
-      id: generateId("chat_messages"),
-      rideId: ride.id,
-      senderId: activeUser.uid,
-      text,
-      createdAt: new Date().toISOString(),
-    };
-
-    await sendMessage(newMessage, activeUser.uid);
-  }
-
-  function formatTime(isoString: string) {
-    const date = new Date(isoString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const result = await sendMessage(ride.id, activeUser.uid, text);
+    if (!result.ok) {
+      setInputText(text);
+      Alert.alert("Error", result.error);
+    }
   }
 
   const renderMessage = ({ item }: { item: Message }) => {
     if (!ride || !activeUser) return null;
     const isMe = item.senderId === activeUser.uid;
     const sender = isMe ? activeUser : getUserById(item.senderId);
-    const isSenderDriver = item.senderId === ride.driverId;
+    const isSenderDriver = isUserDriver(ride, item.senderId);
 
     return (
       <View style={[chatStyles.messageContainer, isMe ? chatStyles.myMessage : chatStyles.otherMessage]}>
