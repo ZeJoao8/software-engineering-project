@@ -8,6 +8,8 @@ export interface FilterCriteria {
   date: string;
   womenOnly: boolean;
   minSeats: string;
+  friendsOnly?: boolean;
+  friendIds?: string[];
 }
 
 export function filterRides(
@@ -16,7 +18,7 @@ export function filterRides(
   filters: FilterCriteria,
   now: Date
 ): Ride[] {
-  const { origin, destination, date, womenOnly, minSeats } = filters;
+  const { origin, destination, date, womenOnly, minSeats, friendsOnly, friendIds } = filters;
 
   return rides.filter(r => {
     const rideDate = new Date(r.departureDateTime);
@@ -35,6 +37,7 @@ export function filterRides(
     const matchesMinSeats = !minSeats || r.availableSeats >= Number(minSeats);
     const canJoinGenderWise = user.gender === "Female" || !r.womenOnly;
     const matchesWomenOnlyFilter = !womenOnly || r.womenOnly;
+    const matchesFriendsOnly = !friendsOnly || (friendIds ?? []).includes(r.driverId);
 
     return (
       matchesOrigin &&
@@ -42,7 +45,8 @@ export function filterRides(
       matchesDate &&
       matchesMinSeats &&
       canJoinGenderWise &&
-      matchesWomenOnlyFilter
+      matchesWomenOnlyFilter &&
+      matchesFriendsOnly
     );
   });
 }

@@ -17,7 +17,12 @@ import { logout } from "../../services/AuthService";
 import { updateProfile } from "../../services/ProfileService";
 import { addCar, removeCarCascade } from "../../services/CarService";
 import { calculateAverageRating } from "../../domain/rules/reviewRules";
-import { hasUserDrivenRide } from "../../domain/rules/rideRules";
+import { hasUserDrivenRide, getActiveRidesForCar } from "../../domain/rules/rideRules";
+import { useFriends } from "../../hooks/useFriends";
+import {
+  acceptFriendRequest,
+  removeFriend,
+} from "../../services/FriendService";
 
 import { useRouter } from "expo-router";
 
@@ -36,10 +41,11 @@ export default function Profile() {
 
   const router = useRouter();
 
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, getUserById } = useAuth();
   const { cars } = useCars();
   const rides = useRides();
   const { getReviewsForUser } = useReviews();
+  const { getAcceptedFriendIds, getPendingReceivedRequests } = useFriends();
 
   const [editUser, setEditUser] = useState<User | null>(currentUser);
   const [editing, setEditing] = useState(false);
@@ -94,9 +100,7 @@ export default function Profile() {
   }
 
   function removeCar(carId: string) {
-    const ridesUsingCar = rides.filter(
-      r => r.carId === carId && !r.completed && new Date(r.departureDateTime) > new Date()
-    );
+    const ridesUsingCar = getActiveRidesForCar(rides, carId, new Date());
     const warningText = ridesUsingCar.length > 0
       ? `This will cancel ${ridesUsingCar.length} future ride(s) using this car.`
       : "Are you sure you want to remove this car?";
@@ -352,6 +356,113 @@ export default function Profile() {
         />
       </View>
 
+
+      {/* FRIENDS */}
+      {(() => {
+        const pendingRequests = getPendingReceivedRequests();
+        const friendIds = getAcceptedFriendIds();
+
+        return (
+          <View style={components.card}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: spacing.sm }}>
+              <Text style={layout.subtitle}>Friends</Text>
+              <Pressable
+                onPress={() => router.push("/findFriends")}
+                style={({ pressed }) => ({
+                  backgroundColor: colors.primary,
+                  paddingHorizontal: 12,
+                  paddingVertical: 5,
+                  borderRadius: 8,
+                  opacity: pressed ? 0.7 : 1,
+                })}
+              >
+                <Text style={{ color: "#fff", fontWeight: "600", fontSize: 13 }}>🔍 Find Friends</Text>
+              </Pressable>
+            </View>
+
+            {pendingRequests.length > 0 && (
+              <View style={{ marginBottom: spacing.md }}>
+                <Text style={{ color: colors.textLight, fontSize: 13, marginBottom: spacing.sm }}>
+                  Pending requests
+                </Text>
+                {pendingRequests.map(req => {
+                  const sender = getUserById(req.senderId);
+                  return (
+                    <View
+                      key={req.id}
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        marginBottom: spacing.sm,
+                      }}
+                    >
+                      <Pressable onPress={() => router.push(`/user/${req.senderId}`)}>
+                        <Text style={{ fontWeight: "600", color: colors.text }}>
+                          {sender?.name ?? "Unknown"}
+                        </Text>
+                      </Pressable>
+                      <View style={{ flexDirection: "row", gap: spacing.sm }}>
+                        <Pressable
+                          onPress={() => void acceptFriendRequest(req.id)}
+                          style={({ pressed }) => ({
+                            backgroundColor: colors.primary,
+                            paddingHorizontal: 10,
+                            paddingVertical: 4,
+                            borderRadius: 6,
+                            opacity: pressed ? 0.7 : 1,
+                          })}
+                        >
+                          <Text style={{ color: "#fff", fontWeight: "600", fontSize: 13 }}>Accept</Text>
+                        </Pressable>
+                        <Pressable
+                          onPress={() => void removeFriend(req.senderId)}
+                          style={({ pressed }) => ({
+                            borderWidth: 1,
+                            borderColor: colors.border,
+                            paddingHorizontal: 10,
+                            paddingVertical: 4,
+                            borderRadius: 6,
+                            opacity: pressed ? 0.7 : 1,
+                          })}
+                        >
+                          <Text style={{ color: colors.textLight, fontSize: 13 }}>Decline</Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+
+            {friendIds.length === 0 && pendingRequests.length === 0 && (
+              <Text style={{ color: colors.textLight }}>No friends yet</Text>
+            )}
+
+            {friendIds.map(friendId => {
+              const friend = getUserById(friendId);
+              return (
+                <Pressable
+                  key={friendId}
+                  onPress={() => router.push(`/user/${friendId}`)}
+                  style={({ pressed }) => ({
+                    flexDirection: "row" as const,
+                    alignItems: "center" as const,
+                    justifyContent: "space-between" as const,
+                    marginBottom: spacing.sm,
+                    opacity: pressed ? 0.7 : 1,
+                  })}
+                >
+                  <Text style={{ color: colors.text, fontWeight: "500" }}>
+                    {friend?.name ?? friendId}
+                  </Text>
+                  <Text style={{ color: colors.textLight, fontSize: 13 }}>→</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        );
+      })()}
 
       {/* LOGOUT */}
       <View style={components.card}>

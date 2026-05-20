@@ -31,6 +31,13 @@ function toDisplayTag(tag: RideCardTag): DisplayTag {
         description: "Women only ride",
         bg: colors.womenSoft,
       };
+    case "friendsOnly":
+      return {
+        key: "friendsOnly",
+        emoji: "👥",
+        description: "Friends only ride",
+        bg: colors.primarySoft,
+      };
     case "driverRating":
       return {
         key: "driverRating",

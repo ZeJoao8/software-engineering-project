@@ -1,16 +1,15 @@
 import type { Ride } from "../entities/Ride";
 
-function isSameWeek(date1: Date, date2: Date) {
-  const first = new Date(date1);
-  const second = new Date(date2);
+function getWeekStart(date: Date): number {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  const day = d.getDay(); // 0=Sun
+  d.setDate(d.getDate() - (day === 0 ? 6 : day - 1)); // rewind to Monday
+  return d.getTime();
+}
 
-  first.setHours(0, 0, 0, 0);
-  second.setHours(0, 0, 0, 0);
-
-  const diff = Math.abs(first.getTime() - second.getTime());
-  const days = diff / (1000 * 60 * 60 * 24);
-
-  return days < 7;
+function isSameWeek(date1: Date, date2: Date): boolean {
+  return getWeekStart(date1) === getWeekStart(date2);
 }
 
 export function calculateWeeklyStreak(rides: Ride[], userId: string): number {

@@ -5,6 +5,7 @@ import { hasReportedAnyoneInRide } from "./reportRules";
 
 export type RideCardTag =
   | { kind: "womenOnly" }
+  | { kind: "friendsOnly" }
   | { kind: "driverRating"; average: number; hasComments: boolean }
   | { kind: "driverNoRating" }
   | { kind: "reportedInRide" }
@@ -20,6 +21,7 @@ export function buildRideCardTags(
   const tags: RideCardTag[] = [];
 
   if (ride.womenOnly) tags.push({ kind: "womenOnly" });
+  if (ride.friendsOnly) tags.push({ kind: "friendsOnly" });
 
   const isPassenger = ride.passengers.includes(userId);
   const isDriver = ride.driverId === userId;

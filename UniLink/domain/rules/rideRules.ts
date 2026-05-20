@@ -67,6 +67,12 @@ export function canChangeCar(ride: Ride, newCarSeats: number, now: Date): RuleRe
   return { ok: true };
 }
 
+export function getActiveRidesForCar(rides: Ride[], carId: string, now: Date): Ride[] {
+  return rides.filter(
+    r => r.carId === carId && !r.completed && new Date(r.departureDateTime) > now
+  );
+}
+
 export function shouldAutoDeleteRide(ride: Ride, now: Date): boolean {
   return !ride.completed && ride.passengers.length === 0 && new Date(ride.departureDateTime) < now;
 }
