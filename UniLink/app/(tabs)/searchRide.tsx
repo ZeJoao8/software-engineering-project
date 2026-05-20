@@ -28,9 +28,8 @@ import {
 import { subscribeToReviewsChanges } from "../../data/reviews";
 import { subscribeToReportsChanges } from "../../data/reports";
 
-import {
-  getCurrentUser
-} from "../../data/user";
+import { getCurrentUser } from "../../data/user";
+import { getAcceptedFriendIds, subscribeToFriendshipsChanges } from "../../data/friends";
 
 import RideCard from "../../components/rideCard";
 import BusAlternatives from "../../components/BusAlternatives";
@@ -82,6 +81,9 @@ export default function Home() {
   const [showBusAlternatives, setShowBusAlternatives] =
     useState(false);
 
+  const [friendsOnlyFilter, setFriendsOnlyFilter] =
+    useState(false);
+
   useFocusEffect(
     useCallback(() => {
       setRides([...getRides()]);
@@ -98,6 +100,7 @@ export default function Home() {
     const unsubRides = subscribeToRidesChanges(triggerRender);
     const unsubReviews = subscribeToReviewsChanges(triggerRender);
     const unsubReports = subscribeToReportsChanges(triggerRender);
+    const unsubFriends = subscribeToFriendshipsChanges(triggerRender);
 
     const interval =
       setInterval(() => {
@@ -108,6 +111,7 @@ export default function Home() {
       unsubRides();
       unsubReviews();
       unsubReports();
+      unsubFriends();
       clearInterval(interval);
     };
   }, []);
@@ -119,7 +123,9 @@ export default function Home() {
     destination: destinationFilter,
     date: dateFilter,
     womenOnly: womenOnlyFilter,
-    minSeats: minSeats
+    minSeats: minSeats,
+    friendsOnly: friendsOnlyFilter,
+    friendIds: getAcceptedFriendIds(),
   };
 
   const availableRides = sortByDateAsc(
@@ -220,6 +226,22 @@ export default function Home() {
           </View>
 
         )}
+
+        <View style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginTop: spacing.sm
+        }}>
+          <Text style={layout.subtitle}>Friends only</Text>
+          <Switch
+            value={friendsOnlyFilter}
+            onValueChange={setFriendsOnlyFilter}
+            testID="searchFriendsOnlySwitch"
+            trackColor={{ false: "#bcbdc1", true: colors.primaryLight }}
+            thumbColor={friendsOnlyFilter ? colors.primary : "#8b8e91"}
+          />
+        </View>
 
       </View>
     </View>

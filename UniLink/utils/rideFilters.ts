@@ -8,6 +8,8 @@ export interface FilterCriteria {
   date: string;
   womenOnly: boolean;
   minSeats: string;
+  friendsOnly: boolean;
+  friendIds: string[];
 }
 
 /**
@@ -25,7 +27,9 @@ export function filterRides(
     destination,
     date,
     womenOnly,
-    minSeats
+    minSeats,
+    friendsOnly,
+    friendIds,
   } = filters;
 
   return rides.filter(r => {
@@ -106,6 +110,14 @@ export function filterRides(
       r.womenOnly;
 
 
+    const matchesFriendsOnly =
+      !friendsOnly ||
+      friendIds.includes(r.driverId);
+
+    const canSeeFriendsOnlyRide =
+      !r.friendsOnly ||
+      friendIds.includes(r.driverId);
+
     return (
 
       matchesOrigin &&
@@ -113,7 +125,9 @@ export function filterRides(
       matchesDate &&
       matchesMinSeats &&
       canJoinGenderWise &&
-      matchesWomenOnlyFilter
+      matchesWomenOnlyFilter &&
+      matchesFriendsOnly &&
+      canSeeFriendsOnlyRide
 
     );
 

@@ -47,6 +47,15 @@ export default function RideCard({
     });
   }
 
+  if (ride.friendsOnly) {
+    tags.push({
+      key: "friendsOnly",
+      emoji: "👥",
+      description: "Friends only ride",
+      bg: colors.primarySoft,
+    });
+  }
+
   if (user) {
     const isPassenger =
       ride.passengers.includes(user.uid)
