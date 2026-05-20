@@ -69,7 +69,7 @@ UniLink connects university students through safe, free and trusted ride-sharing
 
 ### Elevator Pitch
 <!-- 
-Draft a small text to help you quickly introduce and describe your product in a short time (lift travel time ~90 seconds) and a few words (~800 characters), a technique usually known as elevator p[...]
+Draft a small text to help you quickly introduce and describe your product in a short time (lift travel time ~90 seconds) and a few words (~800 characters), a technique usually known as elevator pitch.
 
 Take a look at the following links to learn some techniques:
 * [Crafting an Elevator Pitch](https://www.mindtools.com/pages/article/elevator-pitch.htm)
@@ -279,7 +279,6 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 **Acceptance Criteria:**
 - User can add emergency contacts
 - User can edit contact information
-- Safety contacts can receive ride details and location during active rides
 - Emergency contacts can be notified in case of issues
 - Contact list is stored securely
 
@@ -287,9 +286,7 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 > *As a driver, I want to set personal preferences so that I can customize my ride experience.*
 
 **Acceptance Criteria:**
-- Driver can set preferred routes
-- Driver can set preferred passenger types (e.g., female only, quiet rides)
-- Driver can set working hours
+- Driver can set preferred passenger types (e.g., quiet rides)
 - Preferences are saved and used for ride matching
 - Driver can edit preferences at any time
 
@@ -298,10 +295,8 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 
 **Acceptance Criteria:**
 - All ride information is clearly organized and easy to find
-- User can filter rides by status (upcoming, completed, cancelled)
+- User can filter rides by multiple parameters (active, completed, rating, ...)
 - User can view ride details quickly
-- Accessibility features are compliant with WCAG guidelines
-- Font sizes are adjustable for better readability
 
 **23. Better UI**
 > *As a user, I want a more polished and intuitive user interface so that the app is more enjoyable to use.*
