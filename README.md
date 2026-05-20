@@ -79,6 +79,16 @@ Take a look at the following links to learn some techniques:
 
 ## Requirements
 
+### Definition of Ready
+
+A backlog item is considered **Ready** to be moved from the Product Backlog into the Sprint Backlog when all of the following are true:
+
+- **User story** is written in the standard format: *As a [role], I want [feature], so that [benefit]*
+- **Acceptance criteria** are defined, testable, and unambiguous
+- **Not an epic** — the item is broken down into a task small enough to be completed within a single sprint (Small Items pattern)
+- **Estimated by the development team** — only those doing the work provide the estimate (Pigs Estimate pattern)
+- **Realistic for the sprint** — the Sprint Backlog as a whole fits within the team's capacity based on past velocity (Yesterday's Weather pattern)
+
 ### User Stories
 
 🚶 Passengers
@@ -92,6 +102,10 @@ Take a look at the following links to learn some techniques:
 - Available seats are shown
 - Ride route is visible
 
+<p align="center">
+  <img src="docs/mockups/DetalhesBoleia.svg" width="300"/>
+</p>
+
 **2. Search Rides**
 > *As a passenger, I want to search rides so that I can find transport.*
 
@@ -100,6 +114,10 @@ Take a look at the following links to learn some techniques:
 - User can filter by date
 - Only rides with available seats are shown
 - Results are displayed in a list
+
+<p align="center">
+  <img src="docs/mockups/Home.svg" width="300"/>
+</p>
 
 **3. Reserve a Seat**
 > *As a passenger, I want to reserve a seat so that I can join a ride.*
@@ -110,6 +128,10 @@ Take a look at the following links to learn some techniques:
 - Available seats decrease after reservation
 - Cannot reserve if ride is full
 - Confirmation message is displayed
+
+<p align="center">
+  <img src="docs/mockups/DetalhesBoleia.svg" width="300"/>
+</p>
 
 🚗 Drivers
 
@@ -124,6 +146,10 @@ Take a look at the following links to learn some techniques:
 - Ride is created successfully
 - Ride appears in search results
 
+<p align="center">
+  <img src="docs/mockups/CriacaoBoleia.svg" width="300"/>
+</p>
+
 **5. Add Car Details**
 > *As a driver, I want to add car details so that passengers can identify my vehicle.*
 
@@ -133,6 +159,10 @@ Take a look at the following links to learn some techniques:
 - Both fields are required
 - Car is linked to user profile
 
+<p align="center">
+  <img src="docs/mockups/CriacaoBoleia.svg" width="300"/>
+</p>
+
 **6. Manage Rides**
 > *As a driver, I want to manage my rides so that I can edit or cancel them.*
 
@@ -141,6 +171,10 @@ Take a look at the following links to learn some techniques:
 - Driver can cancel a ride
 - Changes are saved correctly
 - Cancelled rides are no longer visible
+
+<p align="center">
+  <img src="docs/mockups/MinhasBoleias.svg" width="300"/>
+</p>
 
 👤 General Profile & Safety
 
@@ -152,6 +186,13 @@ Take a look at the following links to learn some techniques:
 - Profile data is saved successfully
 - Profile is visible to other users
 
+<p align="center">
+  <img src="docs/mockups/Login.svg" width="300"/>
+  <img src="docs/mockups/Registo.svg" width="300"/>
+  <img src="docs/mockups/Profile.svg" width="300"/>
+  <img src="docs/mockups/PerfilPublico.svg" width="300"/>
+</p>
+
 **8. Women-Only Rides**
 > *As a female user, I want women-only rides so that I feel safer.*
 
@@ -160,23 +201,223 @@ Take a look at the following links to learn some techniques:
 - Only female users can reserve
 - System enforces restriction
 
+<p align="center">
+  <img src="docs/mockups/CriacaoBoleia.svg" width="300"/>
+</p>
+
+**9. Security Codes**
+> *As a user, I want to receive and validate a security code before a ride so that I can ensure I am entering the correct car.*
+
+**Acceptance Criteria:**
+- A unique security code is generated for each ride booking
+- Passenger must provide the correct code before the ride starts
+- Driver can validate the code on the app
+- The ride cannot start unless the code is confirmed
+- If the code is incorrect, the system shows an error and prevents validation
+
+<p align="center">
+  <img src="docs/mockups/CodigoSeguranca.svg" width="300"/>
+  <img src="docs/mockups/BoleiaEmCurso.svg" width="300"/>
+</p>
+
+**10. Better Navigation Menu**
+> *As a user, I want to easily navigate through the app's menus so that I can quickly access features like booking rides, viewing trips, and managing my profile.*
+
+**Acceptance Criteria:**
+- A persistent navigation bar is visible on main screens
+- Navigation options are clearly labeled and intuitive
+- Users can access key features within a maximum of 2–3 taps
+- The current active section is visually highlighted
+- Navigation flow is consistent across all screens
+- A back button or gesture is available to return to the previous screen
+- Important actions (e.g., booking a ride) are easily accessible from the main screen
+- The app avoids dead ends (users can always navigate to another section)
+
+<p align="center">
+  <img src="docs/mockups/Home.svg" width="300"/>
+</p>
+
+**11. Bus Alternatives**
+> *As a user, I want bus alternatives so that I have backup transport.*
+
+**Acceptance Criteria:**
+- System displays available bus routes
+- Schedules are shown for selected route
+- Information is updated from external source
+
+<p align="center">
+  <img src="docs/mockups/Autocarros.svg" width="300"/>
+</p>
+
+**12. Map Integration**
+> *As a user, I want to see rides on a map so that I can understand routes.*
+
+**Acceptance Criteria:**
+- Map displays origin and destination
+- Route is visible
+- Map loads correctly
+
+<p align="center">
+  <img src="docs/mockups/Mapa.svg" width="300"/>
+</p>
+
+**13. Rate Users**
+> *As a user, I want to rate others so that trust is built.*
+
+**Acceptance Criteria:**
+- User can rate after a ride
+- Rating is stored
+- Average rating is updated
+- Rating is visible on profile
+
+<p align="center">
+  <img src="docs/mockups/Avaliar.svg" width="300"/>
+</p>
+
+**14. Report User**
+> *As a user, I want to report others so that unsafe behavior is handled.*
+
+**Acceptance Criteria:**
+- User can submit a report
+- Report is stored
+- Report includes reason and user reference
+
+<p align="center">
+  <img src="docs/mockups/Reportar.svg" width="300"/>
+</p>
+
+**15. Leaderboard**
+> *As a user, I want to see a leaderboard so that I can compare activity.*
+
+**Acceptance Criteria:**
+- Leaderboard displays carbon footprint of users
+- Rankings are updated dynamically
+- User can see their own position
+- Top users are clearly highlighted
+
+<p align="center">
+  <img src="docs/mockups/Ranking.svg" width="300"/>
+</p>
+
+**16. Weekly Streaks**
+> *As a user, I want to maintain streaks so that I stay engaged.*
+
+**Acceptance Criteria:**
+- System tracks user activity per week
+- Streak increases if user completes at least one ride per week
+- Streak resets after inactivity
+- Current streak is visible in user profile
+
+<p align="center">
+  <img src="docs/mockups/Profile.svg" width="300"/>
+</p>
+
+**17. Medals / Achievements**
+> *As a user, I want to earn medals so that I feel rewarded.*
+
+**Acceptance Criteria:**
+- System defines achievement conditions (e.g. 10 rides given)
+- User earns achievement when condition is met
+- Achievements are stored in user profile
+- Achievements are visible to other users
+
+<p align="center">
+  <img src="docs/mockups/Medalhas.svg" width="300"/>
+</p>
+
+**18. Notifications**
+> *As a user, I want to receive notifications so that I stay updated on ride and message events.*
+
+**Acceptance Criteria:**
+- Push notifications are sent for new messages
+- Push notifications are sent for ride updates (driver accepted, ride starting, etc.)
+- User can enable/disable notifications
+- Notification preferences are saved
+- Notifications display relevant ride and user information
+
+<p align="center">
+  <img src="docs/mockups/Notificacoes.svg" width="300"/>
+</p>
+
+**19. Friend List**
+> *As a user, I want to view a friend list so that I can easily communicate and coordinate rides with people I trust.*
+
+**Acceptance Criteria:**
+- User can add friends
+- User can view list of friends
+- Friend list includes friend information (name, university, average rating)
+- User can remove friends
+- Friend list is synchronized across sessions
+
+<p align="center">
+  <img src="docs/mockups/Amigos.svg" width="300"/>
+</p>
+
+**20. Safety Contacts**
+> *As a user, I want to add emergency safety contacts so that others can know where I am in case of emergency.*
+
+**Acceptance Criteria:**
+- User can add emergency contacts
+- User can edit contact information
+- Emergency contacts can be notified in case of issues
+- Contact list is stored securely
+
+<p align="center">
+  <img src="docs/mockups/ContactosSeguranca.svg" width="300"/>
+</p>
+
+**21. Driver Preferences**
+> *As a driver, I want to set personal preferences so that I can customize my ride experience.*
+
+**Acceptance Criteria:**
+- Driver can set preferred passenger types (e.g., quiet rides)
+- Preferences are saved and used for ride matching
+- Driver can edit preferences at any time
+
+<p align="center">
+  <img src="docs/mockups/PreferenciasCondutor.svg" width="300"/>
+</p>
+
+**22. Improve MyRides Accessibility**
+> *As a user, I want better accessibility in the MyRides section so that I can easily manage all my ride information.*
+
+**Acceptance Criteria:**
+- All ride information is clearly organized and easy to find
+- User can filter rides by multiple parameters (active, completed, rating, ...)
+- User can view ride details quickly
+
+<p align="center">
+  <img src="docs/mockups/MinhasBoleias.svg" width="300"/>
+</p>
+
+**23. Better UI**
+> *As a user, I want a more polished and intuitive user interface so that the app is more enjoyable to use.*
+
+**Acceptance Criteria:**
+- Consistent design language across all screens
+- Improved visual hierarchy and spacing
+- Enhanced color scheme and typography
+- Smooth animations and transitions
+- Better feedback for user interactions (button clicks, form submissions, etc.)
+
+<p align="center">
+  <img src="docs/mockups/Home.svg" width="300"/>
+  <img src="docs/mockups/RideChat.svg" width="300"/>
+</p>
 
 ### Domain model
 
  <p align="center" justify="center">
-  <img src="UMLDomMod.png"/>
+  <img src="docs/uml/UMLDomMod.png"/>
 </p>
 
-- **University**: Academic institution associated with users and responsible for validating restricted registration.
 - **User**: Registered student who may act as driver, passenger or both.
 - **Car**: Vehicle registered by a driver for ride sharing.
-- **Ride**: Transportation offer created by a driver.
-- **Booking**: Reservation made by a passenger for a specific ride.
-- **Review**: Evaluation submitted after a completed ride.
-- **Chat**: Communication exchanged between users in the context of a booking.
-- **Badge**: Achievement that may be earned through platform activity.
-- **UserBadge**: Association between a user and a badge earned.
-- **Report**: Complaint submitted by a user regarding another user or a ride.
+- **Ride**: Transportation offer created by a driver. Passengers are stored as an embedded list of user IDs — no separate Booking entity.
+- **Message**: Chat message sent by a ride participant in a ride's group chat.
+- **Review**: Evaluation submitted by a ride participant after a completed ride.
+- **Report**: Complaint submitted by a user regarding another user's behaviour during a ride.
+- **Badges**: Achievements computed dynamically at runtime from ride history — not stored as domain entities.
 
 
 ## Architecture and Design
@@ -185,8 +426,8 @@ The **UniLink** system is organized into distinct components to ensure that the 
 
 To document our architecture, we decomposed the system into three main parts:
 
-* **The Frontend:** A mobile application that handles all user interactions and displays information.
-* **The Backend:** A central server that processes all the rules of the carpooling system, such as managing rides and user accounts.
+* **The Frontend:** A mobile application that handles all user interactions, displays information, and runs all business logic on-device.
+* **The Backend (BaaS):** Firebase, a Backend-as-a-Service platform, which provides authentication and a real-time cloud database — replacing a traditional dedicated server.
 * **The Persistence Layer:** Responsible for safely storing all the information generated by the users.
 
 In the following sections, we describe how these components interrelate and the specific technologies used to implement each part of the system.
@@ -195,32 +436,27 @@ In the following sections, we describe how these components interrelate and the 
 ### Logical architecture
 
 <p align="center" justify="center">
-  <img src="UMLlogical.png"/>
+  <img src="docs/uml/UMLlogical.png"/>
 </p>
 
 
 ### Physical Architecture
 
 <p align="center" justify="center">
-  <img src="UMLphysical.png"/>
+  <img src="docs/uml/UMLphysical.png"/>
 </p>
 
 
-The physical structure of the UniLink system is organized into three main hardware nodes:
+The physical structure of UniLink is a serverless, client-only architecture with no dedicated application server:
 
-* **Mobile Device (Node):** Represents the user's smartphone.
-    * **UniLink App (Artifact):** The mobile application client developed with React Native/Expo.
-* **Application Server (Node):** The central server responsible for the backend logic and data.
-    * **UniLink Backend (Artifact):** The server-side application running on Node.js.
-    * **Internal Services:** Logical modules for Ride, User, and Gamification management.
-    * **MySQL (Database):** The relational database used for persistent data storage (Schema: UniLink_DB).
-* **External Services Server (Node):** Third-party servers that provide additional functionality.
-    * **Google Maps API:** Used for geolocation and route visualization.
-    * **Bus Schedule Service:** Integration with external public transport data.
-
-**Connections:**
-* **Mobile Device <-> Application Server:** Standard internet connection for data exchange.
-* **Application Server <-> External Services:** Data exchange through external APIs.
+* **Mobile Device:** The user's smartphone running the UniLink app built with React Native / Expo.
+* **Google Cloud Platform (Firebase):**
+    * **Firebase Authentication:** Handles user registration and login, enforcing university email domain restrictions.
+    * **Cloud Firestore:** NoSQL cloud database storing all application data (users, rides, messages, reviews, reports).
+* **External Services:**
+    * **OSRM API:** Open-source routing engine used to calculate road routes and distances between coordinates.
+    * **Nominatim API:** OpenStreetMap geocoding service used to convert place names to coordinates.
+    * **Transitous API:** Open transit data service used to fetch public transport routes as a fallback when no rides are available.
 
 ## Vertical prototype
 
@@ -411,13 +647,13 @@ Link for Sprint 0 vertical prototype APK: https://expo.dev/artifacts/eas/oox2WQn
 ### Sprint Backlog
 
 <p align="center" justify="center">
-  <img src="SprintBacklog.png"/>
+  <img src="docs/sprints/Sprint1Start.png"/>
 </p>
 
 ### Done
 
 <p align="center" justify="center">
-  <img src="Sprint1Done.png"/>
+  <img src="docs/sprints/Sprint1Done.png"/>
 </p>
 
 #### Sprint goal
@@ -514,13 +750,13 @@ Next improvements:
 ### Sprint Backlog
 
 <p align="center" justify="center">
-  <img src="Sprint2Start.png"/>
+  <img src="docs/sprints/Sprint2Start.png"/>
 </p>
 
 ### Done
 
 <p align="center" justify="center">
-  <img src="Sprint2End.png"/>
+  <img src="docs/sprints/Sprint2End.png"/>
 </p>
 
 #### Sprint goal

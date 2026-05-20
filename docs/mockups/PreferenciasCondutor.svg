@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844">
+  <defs>
+    <style>text { font-family: -apple-system, 'Helvetica Neue', sans-serif; }</style>
+    <filter id="sh"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.08"/></filter>
+  </defs>
+
+  <rect width="390" height="844" fill="#f8fafc"/>
+
+  <!-- Green header -->
+  <rect width="390" height="110" fill="#10b981"/>
+  <text x="32" y="22" fill="#ecfdf5" font-size="13" font-weight="600">9:41</text>
+  <path d="M26 66 L16 56 L26 46" stroke="#ecfdf5" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="195" y="60" text-anchor="middle" fill="#ecfdf5" font-size="17" font-weight="700">Preferências de Condutor</text>
+  <text x="195" y="80" text-anchor="middle" fill="#d1fae5" font-size="13">Personaliza a tua experiência de condução</text>
+
+  <!-- Section: Passageiros -->
+  <text x="24" y="128" fill="#94a3b8" font-size="12" font-weight="600">PASSAGEIROS</text>
+  <rect x="16" y="136" width="358" height="112" fill="white" rx="12" filter="url(#sh)"/>
+
+  <!-- Toggle: Apenas mulheres -->
+  <text x="32" y="164" fill="#0f172a" font-size="14" font-weight="600">Apenas Mulheres</text>
+  <text x="32" y="182" fill="#64748b" font-size="12">Limitar passageiros a mulheres</text>
+  <rect x="318" y="154" width="42" height="24" fill="#bcbdc1" rx="12"/>
+  <circle cx="330" cy="166" r="10" fill="white"/>
+  <line x1="28" y1="196" x2="362" y2="196" stroke="#f1f5f9" stroke-width="1"/>
+
+  <!-- Toggle: Permitir fumadores -->
+  <text x="32" y="218" fill="#0f172a" font-size="14" font-weight="600">🚭  Não fumadores</text>
+  <text x="32" y="236" fill="#64748b" font-size="12">Apenas passageiros não fumadores</text>
+  <rect x="318" y="208" width="42" height="24" fill="#10b981" rx="12"/>
+  <circle cx="350" cy="220" r="10" fill="white"/>
+
+  <!-- Section: Viagem -->
+  <text x="24" y="272" fill="#94a3b8" font-size="12" font-weight="600">VIAGEM</text>
+  <rect x="16" y="280" width="358" height="168" fill="white" rx="12" filter="url(#sh)"/>
+
+  <!-- Toggle: Aceitar bagagem -->
+  <text x="32" y="308" fill="#0f172a" font-size="14" font-weight="600">🧳  Aceitar Bagagem</text>
+  <text x="32" y="326" fill="#64748b" font-size="12">Permitir bagagem de mão / malas</text>
+  <rect x="318" y="298" width="42" height="24" fill="#10b981" rx="12"/>
+  <circle cx="350" cy="310" r="10" fill="white"/>
+  <line x1="28" y1="340" x2="362" y2="340" stroke="#f1f5f9" stroke-width="1"/>
+
+  <!-- Toggle: Animais -->
+  <text x="32" y="362" fill="#0f172a" font-size="14" font-weight="600">🐾  Animais de estimação</text>
+  <text x="32" y="380" fill="#64748b" font-size="12">Permitir animais de pequeno porte</text>
+  <rect x="318" y="352" width="42" height="24" fill="#bcbdc1" rx="12"/>
+  <circle cx="330" cy="364" r="10" fill="white"/>
+  <line x1="28" y1="394" x2="362" y2="394" stroke="#f1f5f9" stroke-width="1"/>
+
+  <!-- Music preference -->
+  <text x="32" y="416" fill="#0f172a" font-size="14" font-weight="600">🎵  Música</text>
+  <text x="32" y="434" fill="#64748b" font-size="12">Preferência musical na viagem</text>
+  <text x="356" y="422" text-anchor="end" fill="#64748b" font-size="13">À escolha  ▾</text>
+
+  <!-- Section: Comunicação -->
+  <text x="24" y="470" fill="#94a3b8" font-size="12" font-weight="600">COMUNICAÇÃO</text>
+  <rect x="16" y="478" width="358" height="112" fill="white" rx="12" filter="url(#sh)"/>
+
+  <!-- Toggle: Chat da boleia -->
+  <text x="32" y="506" fill="#0f172a" font-size="14" font-weight="600">💬  Chat da Boleia</text>
+  <text x="32" y="524" fill="#64748b" font-size="12">Permitir mensagens no chat de grupo</text>
+  <rect x="318" y="496" width="42" height="24" fill="#10b981" rx="12"/>
+  <circle cx="350" cy="508" r="10" fill="white"/>
+  <line x1="28" y1="538" x2="362" y2="538" stroke="#f1f5f9" stroke-width="1"/>
+
+  <!-- Toggle: Notificações -->
+  <text x="32" y="560" fill="#0f172a" font-size="14" font-weight="600">🔔  Notificações push</text>
+  <text x="32" y="578" fill="#64748b" font-size="12">Alertas de reservas e mensagens</text>
+  <rect x="318" y="550" width="42" height="24" fill="#10b981" rx="12"/>
+  <circle cx="350" cy="562" r="10" fill="white"/>
+
+  <!-- Save button -->
+  <rect x="16" y="610" width="358" height="52" fill="#10b981" rx="28"/>
+  <text x="195" y="642" text-anchor="middle" fill="white" font-size="16" font-weight="700">Guardar Preferências</text>
+
+  <!-- 4-tab green nav bar (Perfil active) -->
+  <rect x="0" y="764" width="390" height="80" fill="#10b981"/>
+  <path d="M40 793 L40 800 L58 800 L58 793 L49 782 Z" fill="none" stroke="#064e3b" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="44" y="793" width="10" height="7" fill="none" stroke="#064e3b" stroke-width="2" rx="1"/>
+  <text x="49" y="822" text-anchor="middle" fill="#064e3b" font-size="11">Boleias</text>
+  <rect x="137" y="784" width="18" height="17" fill="none" stroke="#064e3b" stroke-width="1.8" rx="3"/>
+  <line x1="141" y1="789" x2="151" y2="789" stroke="#064e3b" stroke-width="1.4" stroke-linecap="round"/>
+  <line x1="141" y1="793" x2="151" y2="793" stroke="#064e3b" stroke-width="1.4" stroke-linecap="round"/>
+  <line x1="141" y1="797" x2="151" y2="797" stroke="#064e3b" stroke-width="1.4" stroke-linecap="round"/>
+  <text x="146" y="822" text-anchor="middle" fill="#064e3b" font-size="11">Minhas</text>
+  <path d="M237 783 L237 795 Q237 802 244 802 Q251 802 251 795 L251 783 Z" fill="none" stroke="#064e3b" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M237 787 Q233 787 233 791 Q233 795 237 795" fill="none" stroke="#064e3b" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M251 787 Q255 787 255 791 Q255 795 251 795" fill="none" stroke="#064e3b" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="244" y1="802" x2="244" y2="805" stroke="#064e3b" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="240" y1="805" x2="248" y2="805" stroke="#064e3b" stroke-width="1.8" stroke-linecap="round"/>
+  <text x="244" y="822" text-anchor="middle" fill="#064e3b" font-size="11">Ranking</text>
+  <circle cx="341" cy="789" r="6" fill="none" stroke="#ecfdf5" stroke-width="2"/>
+  <path d="M328 806 Q328 799 341 799 Q354 799 354 806" fill="none" stroke="#ecfdf5" stroke-width="2" stroke-linecap="round"/>
+  <text x="341" y="822" text-anchor="middle" fill="#ecfdf5" font-size="11" font-weight="700">Perfil</text>
+</svg>

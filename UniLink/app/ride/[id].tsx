@@ -14,19 +14,29 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Contacts from "expo-contacts";
 
-import { getRides, updateRide, deleteRide } from "../../data/rides";
-import { getCurrentUser, getUserById } from "../../data/user";
-import { getCars, fetchCarById } from "../../data/cars";
-import type { Car } from "../../types/Car";
-import { hasReviewForRide, getReviews } from "../../data/reviews";
-import { hasReportForRide, getReports, subscribeToReportsChanges } from "../../data/reports";
-import { subscribeToReviewsChanges } from "../../data/reviews";
-import { subscribeToRidesChanges } from "../../data/rides";
+import { useAuth } from "../../hooks/useAuth";
+import { useRides } from "../../hooks/useRides";
+import { useCars } from "../../hooks/useCars";
+import { useReviews } from "../../hooks/useReviews";
+import { useReports } from "../../hooks/useReports";
+import * as RideService from "../../services/RideService";
+import * as CarService from "../../services/CarService";
+import {
+  canCompleteRide,
+  canRateDriver,
+  canReportUser,
+  isRideStarted,
+  isUserDriver,
+  isUserPassenger,
+} from "../../domain/rules/rideRules";
+import { getVisibleFeedback, findPassengerReviewInRide } from "../../domain/rules/reviewRules";
+import { getFeedbackStyle } from "../../utils/ratingStyle";
+import { hasUserReportedInRide } from "../../domain/rules/reportRules";
+import type { Car } from "../../domain/entities/Car";
 import { formatDate } from "../../utils/date";
-import { getRoute } from "../../utils/routing";
-import type { RouteResult } from "../../utils/routing";
-import { CO2_PER_KM } from "../../utils/sustainability";
-import type { User } from "../../types/User";
+import type { RouteResult } from "../../infra/routing";
+import { calculateCO2ForDistance } from "../../domain/rules/sustainability";
+import type { User } from "../../domain/entities/User";
 
 import DropDownPicker from "react-native-dropdown-picker";
 
@@ -42,178 +52,67 @@ export default function RideDetails() {
   const router = useRouter();
   const params = useLocalSearchParams();
 
-  const id =
-    typeof params.id === "string" ? params.id : undefined;
+  const id = typeof params.id === "string" ? params.id : undefined;
 
-  const ride =
-    id ? getRides().find(r => r.id === id) : undefined;
+  const rides = useRides();
+  const { user: currentUser, getUserById } = useAuth();
+  const { cars: driverCars } = useCars();
+  const { reviews: allReviews } = useReviews();
+  const { reports: allReports } = useReports();
+
+  const ride = id ? rides.find(r => r.id === id) : undefined;
 
   const [editingCar, setEditingCar] = useState(false);
   const [selectedCarId, setSelectedCarId] = useState<string | null>(
     ride?.carId ?? null
   );
   const [carDropdownOpen, setCarDropdownOpen] = useState(false);
-  const [, setVersion] = useState(0);
   const [rideCar, setRideCar] = useState<Car | null>(null);
   const [verifyCode, setVerifyCode] = useState("");
   const [showFeedback, setShowFeedback] = useState(false);
   const [routeStats, setRouteStats] = useState<RouteResult | null>(null);
 
-  // Hooks must come before any conditional return (Rules of Hooks)
   useEffect(() => {
     setSelectedCarId(ride?.carId ?? null);
   }, [ride?.carId]);
 
-  // Fetch the ride's car on-demand (the local cache only holds own cars now)
   useEffect(() => {
     if (!ride?.carId) return;
-    fetchCarById(ride.carId).then(setRideCar);
+    CarService.getById(ride.carId).then(car => setRideCar(car ?? null));
   }, [ride?.carId]);
 
-  useEffect(() => {
-    const rerender = () => setVersion(v => v + 1);
-    const unsubReports = subscribeToReportsChanges(rerender);
-    const unsubReviews = subscribeToReviewsChanges(rerender);
-    const unsubRides = subscribeToRidesChanges(rerender);
-    return () => {
-      unsubReports();
-      unsubReviews();
-      unsubRides();
-    };
-  }, []);
-
-  // Early returns AFTER all hooks
-  if (!ride) return null;
+  if (!ride || !currentUser) return null;
 
   const r = ride;
-  const user = getCurrentUser();
-  if (!user) return null;
-
-  const activeUser = user;
-  // getCars() now only contains the current user's own cars (filtered subscription)
-  const driverCars = getCars();
+  const activeUser = currentUser;
 
   const driver = getUserById(r.driverId);
-  const car = rideCar; // fetched on-demand via fetchCarById
+  const car = rideCar;
 
-  // Properly narrowed — no more non-null assertions on passenger items
   const passengers = ride.passengers
     .map(pid => getUserById(pid))
     .filter((p): p is User => p !== null);
 
-  const isDriver = r.driverId === activeUser.uid;
+  const isDriver = isUserDriver(r, activeUser.uid);
+  const joined = isUserPassenger(r, activeUser.uid);
+  const rideStarted = isRideStarted(r, new Date());
 
-  const joined = r.passengers.includes(activeUser.uid);
+  const canComplete = canCompleteRide(r, activeUser.uid).ok;
+  const rateDriverOk = canRateDriver(r, activeUser.uid, allReviews);
 
-  const rideDate = new Date(r.departureDateTime);
-  const now = new Date();
-  const rideStarted = rideDate < now;
-
-  const allPassengersVerified =
-    r.passengers.length != 0 &&
-    r.passengers.every(pid => (r.verifiedPassengers ?? []).includes(pid));
-
-  const canComplete = isDriver && !r.completed && allPassengersVerified;
-
-  const canRateDriver =
-    joined &&
-    !isDriver &&
-    r.completed &&
-    !hasReviewForRide(
-      r.id,
-      activeUser.uid,
-      driver?.uid ?? r.driverId
-    );
-
-
-
-  const allReviews = getReviews();
-
-  const allFeedbackComments = allReviews.filter(review =>
-    review.rideId === r.id &&
-    review.comment.trim().length > 0 &&
-    (
-      (isDriver && review.revieweeId === activeUser.uid) ||
-      (joined && review.reviewerId === activeUser.uid)
-    )
-  );
-
-  function getFeedbackStyle(ratingValue: number) {
-    if (ratingValue >= 4) {
-      return {
-        backgroundColor: colors.primarySoft,
-        borderLeftColor: colors.primaryLight,
-      };
-    }
-    if (ratingValue === 3) {
-      return {
-        backgroundColor: colors.warning,
-        borderLeftColor: "#fde047", // yellow-400
-      };
-    }
-    return {
-      backgroundColor: colors.warningSoft,
-      borderLeftColor: colors.dangerSoft,
-    };
-  }
-
-  function getPassengerRatingForThisRide(passengerId: string) {
-    return allReviews.find(
-      review =>
-        review.rideId === r.id &&
-        review.reviewerId === passengerId
-    );
-  }
-
-  const allReports = getReports();
-
-  function hasEverReportedUser(targetId: string) {
-    return allReports.some(
-      report =>
-        report.reporterId === activeUser.uid &&
-        report.reportedUserId === targetId
-    );
-  }
-
-  function canReportUser(targetId: string) {
-    return (
-      r.completed &&
-      (isDriver || joined) &&
-      targetId !== activeUser.uid &&
-      !hasReportForRide(r.id, activeUser.uid, targetId)
-    );
-  }
-
-  function generateBoardingCode(): string {
-    return String(Math.floor(100000 + Math.random() * 900000));
-  }
+  const allFeedbackComments = getVisibleFeedback(allReviews, r.id, isDriver, activeUser.uid);
 
   function reserveSeat() {
-    if (r.completed)
-      return Alert.alert("Cannot reserve", "Ride already completed.");
-    if (rideStarted)
-      return Alert.alert("Cannot reserve", "Ride already started.");
-    if (r.womenOnly && activeUser.gender !== "Female")
-      return Alert.alert("Not allowed", "Ride restricted to women.");
-    if (r.availableSeats <= 0)
-      return Alert.alert("Ride full", "No seats available.");
-
     Alert.alert("Reserve seat", "Confirm reservation?", [
       { text: "No", style: "cancel" },
       {
         text: "Yes",
         onPress: async () => {
-          const code = generateBoardingCode();
-          const updatedCodes = { ...(r.passengerCodes ?? {}), [activeUser.uid]: code };
-          await updateRide({
-            ...r,
-            availableSeats: r.availableSeats - 1,
-            passengers: [...r.passengers, activeUser.uid],
-            passengerCodes: updatedCodes,
-          });
+          const result = await RideService.reserveSeat(r.id, activeUser);
+          if (!result.ok) { Alert.alert("Cannot reserve", result.error); return; }
           Alert.alert(
             "Seat reserved! 🎉",
-            `Your boarding code is:\n\n${code}\n\nShow this code to the driver before the ride starts.`
+            `Your boarding code is:\n\n${result.data!.boardingCode}\n\nShow this code to the driver before the ride starts.`
           );
         },
       },
@@ -221,23 +120,14 @@ export default function RideDetails() {
   }
 
   function cancelSeat() {
-    if (rideStarted || r.completed)
-      return Alert.alert("Cannot cancel", "Ride already started.");
-
     Alert.alert("Cancel reservation", "Cancel your seat?", [
       { text: "No", style: "cancel" },
       {
         text: "Yes",
         style: "destructive",
         onPress: async () => {
-          const updatedCodes = { ...(r.passengerCodes ?? {}) };
-          delete updatedCodes[activeUser.uid];
-          await updateRide({
-            ...r,
-            availableSeats: Math.min(r.availableSeats + 1, r.totalSeats),
-            passengers: r.passengers.filter(p => p !== activeUser.uid),
-            passengerCodes: updatedCodes,
-          });
+          const result = await RideService.cancelSeat(r.id, activeUser.uid);
+          if (!result.ok) { Alert.alert("Cannot cancel", result.error); return; }
           router.replace("/(tabs)/myRides");
         },
       },
@@ -245,16 +135,14 @@ export default function RideDetails() {
   }
 
   function cancelRide() {
-    if (rideStarted || r.completed)
-      return Alert.alert("Cannot cancel", "Ride already started.");
-
     Alert.alert("Cancel ride", "Are you sure?", [
       { text: "No", style: "cancel" },
       {
         text: "Yes",
         style: "destructive",
         onPress: async () => {
-          await deleteRide(r.id);
+          const result = await RideService.cancelRide(r.id);
+          if (!result.ok) { Alert.alert("Cannot cancel", result.error); return; }
           router.replace("/(tabs)/myRides");
         },
       },
@@ -262,28 +150,13 @@ export default function RideDetails() {
   }
 
   function completeRide() {
-    if (!canComplete)
-      return Alert.alert("Cannot complete", "Ride cannot be completed yet.");
-
     Alert.alert("Complete ride", "Mark as completed?", [
       { text: "No", style: "cancel" },
       {
         text: "Yes",
         onPress: async () => {
-          let distanceKm = r.distanceKm;
-
-          if (!distanceKm && r.originCoords && r.destinationCoords) {
-            const route = await getRoute(r.originCoords, r.destinationCoords);
-            if (route) {
-              distanceKm = route.distanceKm;
-            }
-          }
-
-          await updateRide({ 
-            ...r, 
-            completed: true,
-            distanceKm 
-          });
+          const result = await RideService.completeRide(r.id, activeUser.uid);
+          if (!result.ok) { Alert.alert("Cannot complete", result.error); return; }
           router.replace("/(tabs)/myRides");
         },
       },
@@ -291,25 +164,32 @@ export default function RideDetails() {
   }
 
   function removePassenger(passengerId: string) {
-    if (rideStarted || r.completed)
-      return Alert.alert("Cannot remove", "Ride already started.");
-
     Alert.alert("Remove passenger", "Remove passenger?", [
       { text: "No", style: "cancel" },
       {
         text: "Yes",
         style: "destructive",
         onPress: async () => {
-          const updatedCodes = { ...(r.passengerCodes ?? {}) };
-          delete updatedCodes[passengerId];
-          const updatedVerified = (r.verifiedPassengers ?? []).filter(pid => pid !== passengerId);
-          await updateRide({
-            ...r,
-            passengers: r.passengers.filter(pid => pid !== passengerId),
-            availableSeats: Math.min(r.availableSeats + 1, r.totalSeats),
-            passengerCodes: updatedCodes,
-            verifiedPassengers: updatedVerified,
-          });
+          const result = await RideService.removePassenger(r.id, passengerId);
+          if (!result.ok) { Alert.alert("Cannot remove", result.error); return; }
+          router.replace(`/ride/${r.id}`);
+        },
+      },
+    ]);
+  }
+
+  function changeCar() {
+    const newCar = driverCars.find(c => c.id === selectedCarId);
+    if (!newCar) return;
+
+    Alert.alert("Change car", "Confirm?", [
+      { text: "No", style: "cancel" },
+      {
+        text: "Yes",
+        onPress: async () => {
+          const result = await RideService.changeCar(r.id, newCar.id, newCar.seatCapacity);
+          if (!result.ok) { Alert.alert("Cannot change car", result.error); return; }
+          setEditingCar(false);
           router.replace(`/ride/${r.id}`);
         },
       },
@@ -321,15 +201,8 @@ export default function RideDetails() {
       "Call 112",
       "This will open your phone app to call emergency services.",
       [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Call 112",
-          style: "destructive",
-          onPress: () => Linking.openURL("tel:112"),
-        },
+        { text: "Cancel", style: "cancel" },
+        { text: "Call 112", style: "destructive", onPress: () => Linking.openURL("tel:112") },
       ]
     );
   }
@@ -339,26 +212,18 @@ export default function RideDetails() {
       const { status } = await Contacts.requestPermissionsAsync();
 
       if (status !== "granted") {
-        Alert.alert(
-          "Permission needed",
-          "UniLink needs access to your contacts so you can choose an emergency contact."
-        );
+        Alert.alert("Permission needed", "UniLink needs access to your contacts so you can choose an emergency contact.");
         return;
       }
 
       const contact = await Contacts.presentContactPickerAsync();
 
-      if (!contact) {
-        return;
-      }
+      if (!contact) return;
 
       const phoneNumber = contact.phoneNumbers?.[0]?.number;
 
       if (!phoneNumber) {
-        Alert.alert(
-          "No phone number",
-          "The selected contact does not have a phone number."
-        );
+        Alert.alert("No phone number", "The selected contact does not have a phone number.");
         return;
       }
 
@@ -366,21 +231,12 @@ export default function RideDetails() {
         "Call contact",
         `Do you want to call ${contact.name ?? "this contact"}?\n\n${phoneNumber}`,
         [
-          {
-            text: "Cancel",
-            style: "cancel",
-          },
-          {
-            text: "Call",
-            onPress: () => Linking.openURL(`tel:${phoneNumber.replace(/\s/g, "")}`),
-          },
+          { text: "Cancel", style: "cancel" },
+          { text: "Call", onPress: () => Linking.openURL(`tel:${phoneNumber.replace(/\s/g, "")}`) },
         ]
       );
     } catch {
-      Alert.alert(
-        "Contacts unavailable",
-        "Could not open your phone contacts."
-      );
+      Alert.alert("Contacts unavailable", "Could not open your phone contacts.");
     }
   }
 
@@ -389,48 +245,11 @@ export default function RideDetails() {
       "Emergency contact",
       "Choose an emergency option.",
       [
-        {
-          text: "Call 112",
-          style: "destructive",
-          onPress: callEmergencyNumber,
-        },
-        {
-          text: "Choose phone contact",
-          onPress: openPhoneContacts,
-        },
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
+        { text: "Call 112", style: "destructive", onPress: callEmergencyNumber },
+        { text: "Choose phone contact", onPress: openPhoneContacts },
+        { text: "Cancel", style: "cancel" },
       ]
     );
-  }
-
-  function changeCar() {
-    const newCar = driverCars.find(c => c.id === selectedCarId);
-    if (!newCar) return;
-
-    const newLimit = Math.min(r.totalSeats, newCar.seatCapacity - 1);
-
-    if (passengers.length > newLimit)
-      return Alert.alert("Car too small");
-
-    Alert.alert("Change car", "Confirm?", [
-      { text: "No", style: "cancel" },
-      {
-        text: "Yes",
-        onPress: async () => {
-          await updateRide({
-            ...r,
-            carId: newCar.id,
-            totalSeats: newLimit,
-            availableSeats: newLimit - passengers.length,
-          });
-          setEditingCar(false);
-          router.replace(`/ride/${r.id}`);
-        },
-      },
-    ]);
   }
 
   return (
@@ -464,7 +283,7 @@ export default function RideDetails() {
                 <Text style={components.miniTagText}>⏱ ~{routeStats.durationMin} min</Text>
               </View>
               <View style={components.miniTag}>
-                <Text style={components.miniTagText}>🌳 ~{(routeStats.distanceKm * CO2_PER_KM).toFixed(2)} kgCO₂/p</Text>
+                <Text style={components.miniTagText}>🌳 ~{calculateCO2ForDistance(routeStats.distanceKm).toFixed(2)} kgCO₂/p</Text>
               </View>
             </View>
           )}
@@ -503,27 +322,22 @@ export default function RideDetails() {
               >
                 {driver?.name}
               </Text>
-              {hasEverReportedUser(driver?.uid ?? r.driverId) && (
+              {hasUserReportedInRide(allReports, r.id, activeUser.uid, driver?.uid ?? r.driverId) && (
                 <Text>⚠️</Text>
               )}
             </View>
 
-            {canReportUser(driver?.uid ?? r.driverId) && !isDriver && (
+            {canReportUser(r, activeUser.uid, driver?.uid ?? r.driverId, allReports) && !isDriver && (
               <Pressable
                 style={components.dangerTag}
                 onPress={() =>
                   router.push({
                     pathname: "/reportUser/[id]",
-                    params: {
-                      id: r.id,
-                      targetUserId: driver?.uid ?? r.driverId,
-                    },
+                    params: { id: r.id, targetUserId: driver?.uid ?? r.driverId },
                   })
                 }
               >
-                <Text style={components.dangerTagText}>
-                  Report
-                </Text>
+                <Text style={components.dangerTagText}>Report</Text>
               </Pressable>
             )}
           </View>
@@ -581,9 +395,7 @@ export default function RideDetails() {
 
               <Pressable
                 style={components.button}
-                onPress={() => {
-                  if (selectedCarId) changeCar();
-                }}
+                onPress={() => { if (selectedCarId) changeCar(); }}
               >
                 <Text style={components.buttonText}>Save car</Text>
               </Pressable>
@@ -610,7 +422,7 @@ export default function RideDetails() {
 
           {passengers.map((p, i) => {
             const passengerReview = isDriver
-              ? getPassengerRatingForThisRide(p.uid)
+              ? findPassengerReviewInRide(allReviews, r.id, p.uid)
               : undefined;
             return (
               <View key={p.uid} style={i > 0 ? components.mtSm : undefined}>
@@ -634,7 +446,7 @@ export default function RideDetails() {
                       </View>
                     )}
 
-                    {hasEverReportedUser(p.uid) && <Text>⚠️</Text>}
+                    {hasUserReportedInRide(allReports, r.id, activeUser.uid, p.uid) && <Text>⚠️</Text>}
 
                     {isDriver && r.completed && (
                       passengerReview ? (
@@ -653,7 +465,7 @@ export default function RideDetails() {
                   </View>
 
                   <View style={components.rowGap}>
-                    {canReportUser(p.uid) && (
+                    {canReportUser(r, activeUser.uid, p.uid, allReports) && (
                       <Pressable
                         style={components.dangerTag}
                         onPress={() => router.push({ pathname: "/reportUser/[id]", params: { id: r.id, targetUserId: p.uid } })}
@@ -668,7 +480,6 @@ export default function RideDetails() {
                     )}
                   </View>
                 </View>
-
               </View>
             );
           })}
@@ -689,16 +500,11 @@ export default function RideDetails() {
                 style={components.primaryTag}
                 onPress={async () => {
                   const entered = verifyCode.trim();
-                  const match = passengers.find(
-                    p => r.passengerCodes?.[p.uid] === entered &&
-                         !(r.verifiedPassengers ?? []).includes(p.uid)
-                  );
-                  if (!match) {
-                    Alert.alert("Wrong code", "No unverified passenger matches this code.");
+                  const result = await RideService.verifyPassengerCode(r.id, entered);
+                  if (!result.ok) {
+                    Alert.alert("Wrong code", result.error);
                     return;
                   }
-                  const updatedVerified = [...(r.verifiedPassengers ?? []), match.uid];
-                  await updateRide({ ...r, verifiedPassengers: updatedVerified });
                   setVerifyCode("");
                 }}
               >
@@ -745,10 +551,7 @@ export default function RideDetails() {
                   return (
                     <View
                       key={review.id}
-                      style={[
-                        components.feedbackCard,
-                        getFeedbackStyle(review.rating)
-                      ]}
+                      style={[components.feedbackCard, getFeedbackStyle(review.rating)]}
                     >
                       {isDriver && (
                         <Text style={[layout.headingSm, { marginBottom: 2 }]}>
@@ -781,15 +584,12 @@ export default function RideDetails() {
               testID="emergencyContactButton"
               onPress={openEmergencyOptions}
               label="Emergency contact"
-              style={{
-                borderColor: colors.danger,
-              }}
-              textStyle={{
-                color: colors.danger,
-              }}
+              style={{ borderColor: colors.danger }}
+              textStyle={{ color: colors.danger }}
             />
           </View>
         )}
+
         {/* ACTIONS */}
         {(isDriver || joined) && (
           <Pressable
@@ -801,22 +601,22 @@ export default function RideDetails() {
         )}
 
         {!isDriver && !joined && !rideStarted && !r.completed && (
-          <Button onPress={reserveSeat} style={[components.button, components.mtMd]}  label="Reserve seat" />
+          <Button onPress={reserveSeat} style={[components.button, components.mtMd]} label="Reserve seat" />
         )}
 
         {joined && !isDriver && !rideStarted && !r.completed && (
-          <Button onPress={cancelSeat} style={[components.button, components.mtMd]}  label="Cancel reservation" />
+          <Button onPress={cancelSeat} style={[components.button, components.mtMd]} label="Cancel reservation" />
         )}
 
         {isDriver && !rideStarted && !r.completed && !editingCar && (
-          <Button onPress={cancelRide} style={[components.button, components.mtMd]}  label="Cancel ride" />
+          <Button onPress={cancelRide} style={[components.button, components.mtMd]} label="Cancel ride" />
         )}
 
         {canComplete && (
-          <Button onPress={completeRide} style={[components.button, components.mtMd]}  label="Complete ride" />
+          <Button onPress={completeRide} style={[components.button, components.mtMd]} label="Complete ride" />
         )}
 
-        {canRateDriver && (
+        {rateDriverOk && (
           <Pressable
             style={[components.button, components.mtMd]}
             onPress={() =>

@@ -16,10 +16,8 @@ import MapView, {
 
 import * as Location from "expo-location";
 
-import {
-  reverseGeocode,
-  type Coordinates,
-} from "../utils/routing";
+import { reverseGeocode } from "../infra/geocoding";
+import type { Coordinates } from "../infra/routing";
 
 import { colors } from "../styles/theme";
 import { mapStyles } from "../styles/map";

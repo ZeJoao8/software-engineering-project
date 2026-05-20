@@ -15,8 +15,8 @@ import {
   getNotifications,
   markNotificationAsRead,
   subscribeToNotificationsChanges,
-} from "../data/notifications";
-import { type Notification, type NotificationType } from "../types/Notification";
+} from "../store/notifications";
+import { type Notification, type NotificationType } from "../domain/entities/Notification";
 import { colors, radius, spacing } from "../styles/theme";
 
 const TYPE_ICON: Record<NotificationType, keyof typeof Ionicons.glyphMap> = {

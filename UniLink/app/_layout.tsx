@@ -11,7 +11,6 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { colors } from '../styles/theme';
 
 export default function RootLayout() {
 

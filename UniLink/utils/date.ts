@@ -13,24 +13,20 @@ export function formatDate(iso:string){
  return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
 
-export function sortByDateAsc(
- array:any[]
-){
- return [...array].sort(
-  (a,b)=>
-   new Date(a.departureDateTime).getTime()
-   -
-   new Date(b.departureDateTime).getTime()
- );
+export function formatTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-export function sortByDateDesc(
- array:any[]
-){
- return [...array].sort(
-  (a,b)=>
-   new Date(b.departureDateTime).getTime()
-   -
-   new Date(a.departureDateTime).getTime()
- );
+import type { Ride } from "../domain/entities/Ride";
+
+export function sortByDateAsc(array: Ride[]): Ride[] {
+  return [...array].sort(
+    (a, b) => new Date(a.departureDateTime).getTime() - new Date(b.departureDateTime).getTime()
+  );
+}
+
+export function sortByDateDesc(array: Ride[]): Ride[] {
+  return [...array].sort(
+    (a, b) => new Date(b.departureDateTime).getTime() - new Date(a.departureDateTime).getTime()
+  );
 }

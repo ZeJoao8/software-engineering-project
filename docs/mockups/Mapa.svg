@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844">
+  <defs>
+    <style>text { font-family: -apple-system, 'Helvetica Neue', sans-serif; }</style>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.08"/></filter>
+    <filter id="pinshadow"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.25"/></filter>
+  </defs>
+
+  <!-- Map background (full screen) -->
+  <rect width="390" height="844" fill="#e8eedc"/>
+
+  <!-- Map road network (simplified) -->
+  <!-- Main horizontal roads -->
+  <line x1="0" y1="200" x2="390" y2="200" stroke="#ffffff" stroke-width="14"/>
+  <line x1="0" y1="350" x2="390" y2="350" stroke="#ffffff" stroke-width="10"/>
+  <line x1="0" y1="480" x2="390" y2="480" stroke="#ffffff" stroke-width="18"/>
+  <line x1="0" y1="580" x2="390" y2="580" stroke="#ffffff" stroke-width="8"/>
+  <!-- Main vertical roads -->
+  <line x1="80" y1="100" x2="80" y2="700" stroke="#ffffff" stroke-width="10"/>
+  <line x1="190" y1="100" x2="190" y2="700" stroke="#ffffff" stroke-width="14"/>
+  <line x1="300" y1="100" x2="300" y2="700" stroke="#ffffff" stroke-width="8"/>
+  <!-- Secondary roads -->
+  <line x1="0" y1="280" x2="390" y2="280" stroke="#f5f5f0" stroke-width="6"/>
+  <line x1="140" y1="100" x2="140" y2="700" stroke="#f5f5f0" stroke-width="5"/>
+  <line x1="250" y1="100" x2="250" y2="700" stroke="#f5f5f0" stroke-width="5"/>
+  <!-- City blocks (green park areas) -->
+  <rect x="90" y="210" width="40" height="60" fill="#d1fae5" rx="4"/>
+  <rect x="205" y="290" width="35" height="50" fill="#d1fae5" rx="4"/>
+  <rect x="155" y="360" width="25" height="40" fill="#d1fae5" rx="4"/>
+  <rect x="310" y="210" width="50" height="50" fill="#d1fae5" rx="4"/>
+
+  <!-- Active route polyline -->
+  <path d="M 100 530 Q 130 490 160 460 Q 185 440 200 410 Q 215 380 220 350 Q 230 310 255 280 Q 270 260 280 240" stroke="#10b981" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Route glow -->
+  <path d="M 100 530 Q 130 490 160 460 Q 185 440 200 410 Q 215 380 220 350 Q 230 310 255 280 Q 270 260 280 240" stroke="#10b981" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.2"/>
+
+  <!-- Origin pin (green, bottom of route) -->
+  <g filter="url(#pinshadow)">
+    <circle cx="100" cy="530" r="14" fill="#10b981"/>
+    <circle cx="100" cy="530" r="8" fill="white"/>
+    <circle cx="100" cy="530" r="4" fill="#10b981"/>
+    <polygon points="100,549 92,533 108,533" fill="#10b981"/>
+  </g>
+  <!-- Origin label -->
+  <rect x="116" y="520" width="120" height="24" fill="white" rx="6" filter="url(#shadow)"/>
+  <text x="176" y="537" text-anchor="middle" fill="#0f172a" font-size="12" font-weight="600">Lisboa – Marquês</text>
+
+  <!-- Dest pin (red, top of route) -->
+  <g filter="url(#pinshadow)">
+    <circle cx="280" cy="240" r="14" fill="#ef4444"/>
+    <circle cx="280" cy="240" r="8" fill="white"/>
+    <circle cx="280" cy="240" r="4" fill="#ef4444"/>
+    <polygon points="280,259 272,243 288,243" fill="#ef4444"/>
+  </g>
+  <!-- Dest label -->
+  <rect x="156" y="228" width="98" height="24" fill="white" rx="6" filter="url(#shadow)"/>
+  <text x="205" y="245" text-anchor="middle" fill="#0f172a" font-size="12" font-weight="600">FEUP – Porto</text>
+
+  <!-- Other available ride markers -->
+  <circle cx="160" cy="420" r="24" fill="#10b981" opacity="0.9" filter="url(#pinshadow)"/>
+  <text x="160" y="426" text-anchor="middle" fill="white" font-size="13" font-weight="700">2</text>
+  <circle cx="230" cy="350" r="20" fill="#10b981" opacity="0.85" filter="url(#pinshadow)"/>
+  <text x="230" y="356" text-anchor="middle" fill="white" font-size="12" font-weight="700">1</text>
+
+  <!-- Status bar overlay -->
+  <rect width="390" height="48" fill="white" opacity="0.92"/>
+  <text x="32" y="21" fill="#0f172a" font-size="13" font-weight="600">9:41</text>
+  <!-- Search bar -->
+  <rect x="16" y="56" width="310" height="40" fill="white" rx="20" filter="url(#shadow)"/>
+  <text x="42" y="81" fill="#94a3b8" font-size="15">🔍  De onde partes?  →  Para onde?</text>
+  <!-- Filter button -->
+  <rect x="338" y="56" width="40" height="40" fill="white" rx="20" filter="url(#shadow)"/>
+  <text x="358" y="81" text-anchor="middle" fill="#0f172a" font-size="18">⚙</text>
+
+  <!-- Bottom sheet -->
+  <rect x="0" y="614" width="390" height="230" fill="white" rx="20" filter="url(#shadow)"/>
+  <!-- Handle -->
+  <rect x="173" y="622" width="44" height="4" fill="#e2e8f0" rx="2"/>
+  <!-- Title -->
+  <text x="24" y="648" fill="#0f172a" font-size="15" font-weight="700">3 Boleias Disponíveis</text>
+  <text x="342" y="648" text-anchor="end" fill="#10b981" font-size="13" font-weight="600">Ver todas</text>
+
+  <!-- Ride card 1 in sheet -->
+  <rect x="16" y="658" width="358" height="68" fill="#f8fafc" rx="10"/>
+  <circle cx="42" cy="692" r="16" fill="#e2e8f0"/>
+  <text x="42" y="698" text-anchor="middle" fill="#64748b" font-size="12">AC</text>
+  <text x="66" y="680" fill="#0f172a" font-size="14" font-weight="600">Ana Costa</text>
+  <text x="66" y="698" fill="#64748b" font-size="12">⭐ 4.9  ·  Renault Clio  ·  45-AB-23</text>
+  <text x="66" y="714" fill="#64748b" font-size="12">📅  08:30  ·  👥  2 lugares</text>
+  <rect x="308" y="678" width="54" height="24" fill="#ecfdf5" rx="12"/>
+  <text x="335" y="695" text-anchor="middle" fill="#047857" font-size="12" font-weight="600">Grátis</text>
+
+  <!-- Ride card 2 in sheet -->
+  <rect x="16" y="734" width="358" height="68" fill="#f8fafc" rx="10"/>
+  <circle cx="42" cy="768" r="16" fill="#e2e8f0"/>
+  <text x="42" y="774" text-anchor="middle" fill="#64748b" font-size="12">JS</text>
+  <text x="66" y="756" fill="#0f172a" font-size="14" font-weight="600">João Silva</text>
+  <text x="66" y="774" fill="#64748b" font-size="12">⭐ 4.7  ·  Seat Ibiza  ·  12-XY-99</text>
+  <text x="66" y="790" fill="#64748b" font-size="12">📅  08:45  ·  👥  3 lugares</text>
+  <rect x="308" y="754" width="54" height="24" fill="#ecfdf5" rx="12"/>
+  <text x="335" y="771" text-anchor="middle" fill="#047857" font-size="12" font-weight="600">Grátis</text>
+</svg>

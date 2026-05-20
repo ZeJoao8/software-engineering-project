@@ -9,31 +9,15 @@ import {
   View
 } from "react-native";
 
-import {
-  getCurrentUser,
-  logoutUser,
-  updateUser
-} from "../../data/user";
-
-import {
-  addCar,
-  deleteCar,
-  getUserCars,
-  subscribeToCarsChanges
-} from "../../data/cars";
-import { generateId } from "../../lib/firebase";
-
-import {
-  deleteRide,
-  getRides,
-  subscribeToRidesChanges
-} from "../../data/rides";
-
-import {
-  getAverageRatingForUser,
-  getReviewsForUser,
-  subscribeToReviewsChanges
-} from "../../data/reviews";
+import { useAuth } from "../../hooks/useAuth";
+import { useCars } from "../../hooks/useCars";
+import { useRides } from "../../hooks/useRides";
+import { useReviews } from "../../hooks/useReviews";
+import { logout } from "../../services/AuthService";
+import { updateProfile } from "../../services/ProfileService";
+import { addCar, removeCarCascade } from "../../services/CarService";
+import { calculateAverageRating } from "../../domain/rules/reviewRules";
+import { hasUserDrivenRide } from "../../domain/rules/rideRules";
 
 import { useRouter } from "expo-router";
 
@@ -43,99 +27,53 @@ import { components } from "../../styles/components";
 import { forms } from "../../styles/forms";
 import { layout } from "../../styles/layout";
 import { colors, spacing, radius } from "../../styles/theme";
-import { getUserBadges } from "../../utils/badges";
-import { calculateWeeklyStreak } from "../../utils/streaks";
-import { calculateUserCO2Saved } from "../../utils/sustainability";
+import { getUserBadges } from "../../domain/rules/badges";
+import { calculateWeeklyStreak } from "../../domain/rules/streaks";
+import { calculateUserCO2Saved } from "../../domain/rules/sustainability";
+import type { User } from "../../domain/entities/User";
 
 export default function Profile() {
 
   const router = useRouter();
 
-  const [user, setUser] =
-    useState(getCurrentUser());
+  const { user: currentUser } = useAuth();
+  const { cars } = useCars();
+  const rides = useRides();
+  const { getReviewsForUser } = useReviews();
 
-  const [editing, setEditing] =
-    useState(false);
+  const [editUser, setEditUser] = useState<User | null>(currentUser);
+  const [editing, setEditing] = useState(false);
+  const [showCarForm, setShowCarForm] = useState(false);
+  const [model, setModel] = useState("");
+  const [color, setColor] = useState("");
+  const [plate, setPlate] = useState("");
+  const [seats, setSeats] = useState("");
 
-  const [showCarForm, setShowCarForm] =
-    useState(false);
-
-  const [model, setModel] =
-    useState("");
-
-  const [color, setColor] =
-    useState("");
-
-  const [plate, setPlate] =
-    useState("");
-
-  const [seats, setSeats] =
-    useState("");
-
-  const [, setVersion] =
-    useState(0);
-
+  // Sync editUser with store when not editing
   useEffect(() => {
-    const rerender = () => {
-      setVersion(value => value + 1);
-    };
+    if (!editing) setEditUser(currentUser);
+  }, [currentUser, editing]);
 
-    const unsubscribeCars =
-      subscribeToCarsChanges(rerender);
+  if (!currentUser) return null;
 
-    const unsubscribeRides =
-      subscribeToRidesChanges(rerender);
+  const activeUser = editing ? (editUser ?? currentUser) : currentUser;
 
-    const unsubscribeReviews =
-      subscribeToReviewsChanges(rerender);
+  const userReviews = getReviewsForUser(currentUser.uid);
+  const averageRating = calculateAverageRating(userReviews);
 
-    return () => {
-      unsubscribeCars();
-      unsubscribeRides();
-      unsubscribeReviews();
-    };
-  }, []);
+  const hasDrivenRide = hasUserDrivenRide(rides, currentUser.uid);
+  const showRating = hasDrivenRide && userReviews.length > 0;
 
-  if (!user) {
-    return null;
-  }
-
-  const activeUser = user;
-
-  const userCars = getUserCars(activeUser.uid);
-
-  const hasDrivenRide =
-    getRides().some(
-    ride => ride.driverId === activeUser.uid
-    );
-
-  const userReviews = getReviewsForUser(activeUser.uid);
-
-  const averageRating = getAverageRatingForUser(activeUser.uid);
-
-  // Show rating if has driven a ride AND has reviews (same logic as public profile)
-  const showRating =
-    hasDrivenRide &&
-    userReviews.length > 0;
-
-  const weeklyStreak =
-  calculateWeeklyStreak(
-    getRides(),
-    activeUser.uid
-  );
+  const weeklyStreak = calculateWeeklyStreak(rides, currentUser.uid);
+  const co2Saved = calculateUserCO2Saved(rides, currentUser.uid);
 
   function startEdit() {
+    setEditUser(currentUser);
     setEditing(true);
   }
 
   function cancelEdit() {
-    const current =
-      getCurrentUser();
-
-    if (current) {
-      setUser(current);
-    }
-
+    setEditUser(currentUser);
     setEditing(false);
     setShowCarForm(false);
     setModel("");
@@ -145,101 +83,46 @@ export default function Profile() {
   }
 
   async function saveProfile() {
-    await updateUser(activeUser);
-    setUser({ ...activeUser });
+    if (!editUser) return;
+    const result = await updateProfile(editUser);
+    if (!result.ok) {
+      Alert.alert("Error", result.error);
+      return;
+    }
     setEditing(false);
     Alert.alert("Saved");
   }
 
   function removeCar(carId: string) {
-    const ridesUsingCar =
-      getRides().filter(
-        r =>
-          r.carId === carId &&
-          !r.completed &&
-          new Date(r.departureDateTime) > new Date()
-      );
-    const warningText =
-      ridesUsingCar.length > 0
-        ? `This will cancel ${ridesUsingCar.length} future ride(s) using this car.`
-        : "Are you sure you want to remove this car?";
-    Alert.alert(
-      "Remove car",
-      warningText,
-      [
-        {
-          text: "No",
-          style: "cancel"
-        },
-        {
-          text: "Yes",
-          style: "destructive",
-          onPress: async () => {
-            await Promise.all(
-              ridesUsingCar.map(
-                ride => deleteRide(ride.id)
-              )
-            );
-            await deleteCar(carId);
-            const current =
-              getCurrentUser();
+    const ridesUsingCar = rides.filter(
+      r => r.carId === carId && !r.completed && new Date(r.departureDateTime) > new Date()
+    );
+    const warningText = ridesUsingCar.length > 0
+      ? `This will cancel ${ridesUsingCar.length} future ride(s) using this car.`
+      : "Are you sure you want to remove this car?";
 
-            if (current) {
-              setUser({ ...current });
-            }
+    Alert.alert("Remove car", warningText, [
+      { text: "No", style: "cancel" },
+      {
+        text: "Yes",
+        style: "destructive",
+        onPress: async () => {
+          const result = await removeCarCascade(carId);
+          if (!result.ok) {
+            Alert.alert("Error", result.error);
           }
         }
-      ]
-    );
+      }
+    ]);
   }
 
   async function addNewCar() {
-    if (
-      !model.trim() ||
-      !color.trim() ||
-      !plate.trim() ||
-      !seats.trim()
-    ) {
-      Alert.alert("Fill all fields");
+    if (!currentUser) return;
+    const result = await addCar(model, color, plate, seats, currentUser.uid);
+    if (!result.ok) {
+      Alert.alert("Error", result.error);
       return;
     }
-    if (model.length > 40) {
-      Alert.alert("Model max 40 chars");
-      return;
-    }
-    const seatsNumber = Number(seats);
-    if (
-      !Number.isInteger(seatsNumber) ||
-      seatsNumber < 2 || seatsNumber > 9
-    ) {
-      Alert.alert("Invalid seat number","Seats must be integer between 2 and 9");
-      return;
-    }
-    const formattedPlate =
-      plate.toUpperCase().replace(/\s/g, "");
-    const plateRegex = /^[A-Z0-9-]{6,8}$/;
-    if (!plateRegex.test(formattedPlate)) {
-      Alert.alert("Invalid plate format");
-      return;
-    }
-    const duplicate = getUserCars(activeUser.uid)
-        .some(
-          c =>
-            c.licensePlate ===
-            formattedPlate
-        );
-    if (duplicate) {
-      Alert.alert("Plate already exists");
-      return;
-    }
-    await addCar({
-      id: generateId("cars"),
-      model: model.trim(),
-      color: color.trim(),
-      licensePlate: formattedPlate,
-      seatCapacity: seatsNumber,
-      ownerId: activeUser.uid
-    });
     setModel("");
     setColor("");
     setPlate("");
@@ -259,12 +142,12 @@ export default function Profile() {
         Profile
       </Text>
 
-      {/* OWN RATING — same display as public profile */}
       {showRating && (
         <Text style={layout.ratingText}>
           ⭐ {averageRating} ({userReviews.length} {userReviews.length === 1 ? "rating" : "ratings"})
         </Text>
       )}
+
       {/* USER INFO */}
       <View style={components.card}>
 
@@ -279,9 +162,7 @@ export default function Profile() {
         {editing ? (
           <TextInput
             value={activeUser.name}
-            onChangeText={t =>
-              setUser({ ...activeUser, name: t })
-            }
+            onChangeText={t => setEditUser(prev => prev ? { ...prev, name: t } : prev)}
             style={forms.input}
             testID="profileNameInput"
           />
@@ -291,7 +172,7 @@ export default function Profile() {
 
 
         <View style={components.spacerSm} />
-        
+
         <Text style={forms.label}>
           E-mail
         </Text>
@@ -301,7 +182,7 @@ export default function Profile() {
         </Text>
 
         <View style={components.spacerSm} />
-        
+
         <Text style={forms.label}>
           Gender
         </Text>
@@ -331,9 +212,7 @@ export default function Profile() {
         {editing ? (
           <TextInput
             value={activeUser.course}
-            onChangeText={t =>
-              setUser({ ...activeUser, course: t })
-            }
+            onChangeText={t => setEditUser(prev => prev ? { ...prev, course: t } : prev)}
             style={forms.input}
             testID="profileCourseInput"
           />
@@ -350,11 +229,11 @@ export default function Profile() {
           My cars
         </Text>
 
-        {userCars.length === 0 && (
+        {cars.length === 0 && (
           <Text style={layout.textLight}>No cars yet</Text>
         )}
 
-        {userCars.map(car => (
+        {cars.map(car => (
           <View key={car.id} style={[components.rowSpaceBetween, components.mbSm]}>
             <Text>
               {car.model} • {car.color} • {car.licensePlate}
@@ -420,7 +299,7 @@ export default function Profile() {
           <>
             <Button
               testID="saveProfileButton"
-              onPress={saveProfile}
+              onPress={() => void saveProfile()}
               label="Save profile"
             />
 
@@ -437,6 +316,7 @@ export default function Profile() {
         )}
 
       </View>
+
       <View style={components.card}>
         <Text style={layout.subtitle}>Weekly Streak</Text>
         <View style={components.statRow}>
@@ -456,7 +336,7 @@ export default function Profile() {
           <Text style={layout.emojiLg}>🌳</Text>
           <View>
             <Text style={layout.statValue}>
-              {calculateUserCO2Saved(getRides(), activeUser.uid).toFixed(2)} kg
+              {co2Saved.toFixed(2)} kg
             </Text>
             <Text style={layout.statLabel}>Total CO₂ saved</Text>
           </View>
@@ -466,18 +346,11 @@ export default function Profile() {
       {/* BADGES & ACHIEVEMENTS */}
       <View style={components.card}>
         <Text style={layout.subtitle}>Achievements</Text>
-        <BadgeDisplay 
+        <BadgeDisplay
           showProgress={true}
-          badges={getUserBadges(
-            activeUser.uid,
-            getRides(),
-            calculateUserCO2Saved(getRides(), activeUser.uid)
-          )} 
+          badges={getUserBadges(currentUser.uid, rides, co2Saved)}
         />
       </View>
-
-
-
 
 
       {/* LOGOUT */}
@@ -486,7 +359,6 @@ export default function Profile() {
         <Text style={layout.subtitle}>
           Session
         </Text>
-
 
         <Button
           testID="logoutButton"
@@ -499,9 +371,8 @@ export default function Profile() {
                 {
                   text: "Logout",
                   style: "destructive",
-
                   onPress: async () => {
-                    await logoutUser();
+                    await logout();
                     router.replace("/login");
                   }
                 }
