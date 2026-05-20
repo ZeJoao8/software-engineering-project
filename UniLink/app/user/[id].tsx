@@ -13,6 +13,13 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { getPublicProfile } from "../../services/ProfileService";
 import type { Car } from "../../domain/entities/Car";
 import type { Review } from "../../domain/entities/Review";
+import { useFriends } from "../../hooks/useFriends";
+import {
+  sendFriendRequest,
+  acceptFriendRequest,
+  removeFriend,
+} from "../../services/FriendService";
+import { colors } from "../../styles/theme";
 import { formatDate } from "../../utils/date";
 
 import { useAuth } from "../../hooks/useAuth";
@@ -38,13 +45,14 @@ export default function PublicProfile() {
 
   const { user: currentUser, getUserById } = useAuth();
   const rides = useRides();
-  const { reports } = useReports();
+  const { getReportsForUser } = useReports();
 
   const user = id ? getUserById(id) : undefined;
 
   const [showReports, setShowReports] = useState(false);
   const [userReviews, setUserReviews] = useState<Review[]>([]);
   const [userCars, setUserCars] = useState<Car[]>([]);
+  const { getFriendshipStatus, getFriendshipWith } = useFriends();
 
   useEffect(() => {
     if (!id) return;
@@ -61,11 +69,10 @@ export default function PublicProfile() {
   const averageRating = calculateAverageRating(userReviews);
   const showRating = hasDrivenRide && userReviews.length > 0;
 
-  const myReportsOnUser = reports.filter(
-    report => report.reportedUserId === user.uid
-  );
-
+  const myReportsOnUser = getReportsForUser(user.uid);
   const hasReportedThisUser = myReportsOnUser.length > 0;
+
+  const friendStatus = getFriendshipStatus(user.uid);
 
   function getRideForReport(rideId: string) {
     return rides.find(r => r.id === rideId) ?? null;
@@ -89,6 +96,79 @@ export default function PublicProfile() {
             <Text style={layout.title}>⚠️</Text>
           )}
         </View>
+
+        {currentUser.uid !== user.uid && (
+          <View style={[components.card, { marginBottom: spacing.md }]}>
+            {friendStatus === "none" && (
+              <Pressable
+                onPress={() => void sendFriendRequest(user.uid)}
+                style={({ pressed }) => ({
+                  backgroundColor: colors.primary,
+                  padding: spacing.sm,
+                  borderRadius: 8,
+                  alignItems: "center" as const,
+                  opacity: pressed ? 0.7 : 1,
+                })}
+              >
+                <Text style={{ color: "#fff", fontWeight: "700" }}>Add Friend</Text>
+              </Pressable>
+            )}
+
+            {friendStatus === "pending_sent" && (
+              <Text style={{ color: colors.textLight, textAlign: "center" }}>
+                Friend request sent
+              </Text>
+            )}
+
+            {friendStatus === "pending_received" && (
+              <View style={{ gap: spacing.sm }}>
+                <Text style={{ color: colors.text, fontWeight: "600" }}>
+                  {user.name} sent you a friend request
+                </Text>
+                <Pressable
+                  onPress={() => {
+                    const f = getFriendshipWith(user.uid);
+                    if (f) void acceptFriendRequest(f.id);
+                  }}
+                  style={({ pressed }) => ({
+                    backgroundColor: colors.primary,
+                    padding: spacing.sm,
+                    borderRadius: 8,
+                    alignItems: "center" as const,
+                    opacity: pressed ? 0.7 : 1,
+                  })}
+                >
+                  <Text style={{ color: "#fff", fontWeight: "700" }}>Accept</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => void removeFriend(user.uid)}
+                  style={({ pressed }) => ({
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                    padding: spacing.sm,
+                    borderRadius: 8,
+                    alignItems: "center" as const,
+                    opacity: pressed ? 0.7 : 1,
+                  })}
+                >
+                  <Text style={{ color: colors.textLight }}>Decline</Text>
+                </Pressable>
+              </View>
+            )}
+
+            {friendStatus === "friends" && (
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                <Text style={{ color: colors.primary, fontWeight: "700" }}>✓ Friends</Text>
+                <Text
+                  style={{ color: colors.danger, fontSize: 13 }}
+                  onPress={() => void removeFriend(user.uid)}
+                >
+                  Remove
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
 
         {showRating && (
           <Text style={layout.ratingText}>

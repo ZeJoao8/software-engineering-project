@@ -18,6 +18,8 @@ export interface Ride {
 
   womenOnly: boolean;
 
+  friendsOnly: boolean;
+
   passengers: string[];
 
   completed: boolean;

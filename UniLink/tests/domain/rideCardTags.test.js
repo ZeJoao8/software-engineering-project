@@ -7,6 +7,7 @@ function makeRide(overrides = {}) {
     passengers: [],
     completed: false,
     womenOnly: false,
+    friendsOnly: false,
     ...overrides,
   };
 }
@@ -32,6 +33,16 @@ describe("buildRideCardTags", () => {
   test("no womenOnly tag when ride is not women-only", () => {
     const tags = buildRideCardTags(makeRide({ womenOnly: false }), "p1", [], []);
     expect(tags.some(t => t.kind === "womenOnly")).toBe(false);
+  });
+
+  test("adds friendsOnly tag when ride is friends-only", () => {
+    const tags = buildRideCardTags(makeRide({ friendsOnly: true }), "p1", [], []);
+    expect(tags.some(t => t.kind === "friendsOnly")).toBe(true);
+  });
+
+  test("no friendsOnly tag when ride is not friends-only", () => {
+    const tags = buildRideCardTags(makeRide({ friendsOnly: false }), "p1", [], []);
+    expect(tags.some(t => t.kind === "friendsOnly")).toBe(false);
   });
 
   describe("driver tags", () => {

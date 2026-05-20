@@ -34,7 +34,7 @@ const mockRides = [
 ];
 
 const mockUser = { uid: "currentUser", email: "current@test.com", gender: "Male" };
-const defaultFilters = { origin: "", destination: "", date: "", womenOnly: false, minSeats: "" };
+const defaultFilters = { origin: "", destination: "", date: "", womenOnly: false, minSeats: "", friendsOnly: false, friendIds: [] };
 const mockNow = new Date("2026-04-04T12:00:00.000Z");
 
 describe("Ride Filtering Logic", () => {
@@ -83,5 +83,37 @@ describe("Ride Filtering Logic", () => {
     expect(results.every(r => r.womenOnly)).toBe(true);
     expect(results.length).toBe(1);
     expect(results[0].id).toBe("2");
+  });
+
+  test("friendsOnly filter shows only rides driven by friends", () => {
+    const results = filterRides(
+      mockRides,
+      mockUser,
+      { ...defaultFilters, friendsOnly: true, friendIds: ["user2"] },
+      mockNow
+    );
+    expect(results.every(r => r.driverId === "user2")).toBe(true);
+  });
+
+  test("friendsOnly filter with no friends returns no rides", () => {
+    const results = filterRides(
+      mockRides,
+      mockUser,
+      { ...defaultFilters, friendsOnly: true, friendIds: [] },
+      mockNow
+    );
+    expect(results.length).toBe(0);
+  });
+
+  test("friendsOnly: false shows all eligible rides regardless of friendIds", () => {
+    const femaleUser = { ...mockUser, gender: "Female" };
+    const results = filterRides(
+      mockRides,
+      femaleUser,
+      { ...defaultFilters, friendsOnly: false, friendIds: ["user2"] },
+      mockNow
+    );
+    // female user sees ride 1 (user1) and ride 2 (user2, womenOnly) — both pass even though only user2 is a friend
+    expect(results.length).toBeGreaterThan(1);
   });
 });

@@ -20,6 +20,7 @@ import {
 
 import { useAuth } from "../../hooks/useAuth";
 import { useRides } from "../../hooks/useRides";
+import { useFriends } from "../../hooks/useFriends";
 
 import RideCard from "../../components/rideCard";
 import BusAlternatives from "../../components/BusAlternatives";
@@ -39,6 +40,7 @@ export default function Home() {
   const router = useRouter();
   const rides = useRides();
   const { user } = useAuth();
+  const { getAcceptedFriendIds } = useFriends();
 
   const [originFilter, setOriginFilter] = useState("");
   const [originCoords, setOriginCoords] = useState<Coordinates | null>(null);
@@ -49,6 +51,9 @@ export default function Home() {
   const [minSeats, setMinSeats] = useState("");
   const [now, setNow] = useState(new Date());
   const [showBusAlternatives, setShowBusAlternatives] = useState(false);
+
+  const [friendsOnlyFilter, setFriendsOnlyFilter] =
+    useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -70,7 +75,9 @@ export default function Home() {
     destination: destinationFilter,
     date: dateFilter,
     womenOnly: womenOnlyFilter,
-    minSeats: minSeats
+    minSeats: minSeats,
+    friendsOnly: friendsOnlyFilter,
+    friendIds: getAcceptedFriendIds(),
   };
 
   const availableRides = sortByDateAsc(
@@ -171,6 +178,22 @@ export default function Home() {
           </View>
 
         )}
+
+        <View style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginTop: spacing.sm
+        }}>
+          <Text style={layout.subtitle}>Friends only</Text>
+          <Switch
+            value={friendsOnlyFilter}
+            onValueChange={setFriendsOnlyFilter}
+            testID="searchFriendsOnlySwitch"
+            trackColor={{ false: "#bcbdc1", true: colors.primaryLight }}
+            thumbColor={friendsOnlyFilter ? colors.primary : "#8b8e91"}
+          />
+        </View>
 
       </View>
     </View>

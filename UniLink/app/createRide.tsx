@@ -54,6 +54,9 @@ export default function CreateRide() {
   const [seats, setSeats] = useState("");
   const [womenOnly, setWomenOnly] = useState(false);
 
+  const [friendsOnly, setFriendsOnly] =
+    useState(false);
+
   const defaultDeparture = new Date();
   defaultDeparture.setMinutes(defaultDeparture.getMinutes() + 60);
 
@@ -83,6 +86,7 @@ export default function CreateRide() {
       setDestinationCoords(null);
       setSeats("");
       setWomenOnly(false);
+      setFriendsOnly(false);
     }, [])
   );
 
@@ -122,6 +126,7 @@ export default function CreateRide() {
       availableSeats: check.seats,
       totalSeats: check.seats,
       womenOnly,
+      friendsOnly,
       passengers: [],
       completed: false,
       ...(originCoords && { originCoords }),
@@ -390,6 +395,19 @@ export default function CreateRide() {
             </View>
           </View>
         )}
+
+        <View style={components.card}>
+          <View style={components.rowSpaceBetween}>
+            <Text style={layout.subtitle}>Friends only</Text>
+            <Switch
+              value={friendsOnly}
+              onValueChange={setFriendsOnly}
+              testID="createRideFriendsOnlySwitch"
+              trackColor={{ false: colors.switchTrackOff, true: colors.primaryLight }}
+              thumbColor={friendsOnly ? colors.primary : colors.switchThumbOff}
+            />
+          </View>
+        </View>
 
         <Button
           testID="createRideButton"
