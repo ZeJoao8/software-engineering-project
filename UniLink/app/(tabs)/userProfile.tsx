@@ -11,9 +11,18 @@ import {
 
 import {
   getCurrentUser,
+  getUserById,
   logoutUser,
   updateUser
 } from "../../data/user";
+
+import {
+  acceptFriendRequest,
+  getAcceptedFriendIds,
+  getPendingReceivedRequests,
+  removeFriend,
+  subscribeToFriendshipsChanges,
+} from "../../data/friends";
 
 import {
   addCar,
@@ -89,10 +98,14 @@ export default function Profile() {
     const unsubscribeReviews =
       subscribeToReviewsChanges(rerender);
 
+    const unsubscribeFriends =
+      subscribeToFriendshipsChanges(rerender);
+
     return () => {
       unsubscribeCars();
       unsubscribeRides();
       unsubscribeReviews();
+      unsubscribeFriends();
     };
   }, []);
 
@@ -479,6 +492,113 @@ export default function Profile() {
 
 
 
+
+      {/* FRIENDS */}
+      {(() => {
+        const pendingRequests = getPendingReceivedRequests();
+        const friendIds = getAcceptedFriendIds();
+
+        return (
+          <View style={components.card}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: spacing.sm }}>
+              <Text style={layout.subtitle}>Friends</Text>
+              <Pressable
+                onPress={() => router.push("/findFriends")}
+                style={({ pressed }) => ({
+                  backgroundColor: colors.primary,
+                  paddingHorizontal: 12,
+                  paddingVertical: 5,
+                  borderRadius: 8,
+                  opacity: pressed ? 0.7 : 1,
+                })}
+              >
+                <Text style={{ color: "#fff", fontWeight: "600", fontSize: 13 }}>🔍 Find Friends</Text>
+              </Pressable>
+            </View>
+
+            {pendingRequests.length > 0 && (
+              <View style={{ marginBottom: spacing.md }}>
+                <Text style={{ color: colors.textLight, fontSize: 13, marginBottom: spacing.sm }}>
+                  Pending requests
+                </Text>
+                {pendingRequests.map(req => {
+                  const sender = getUserById(req.senderId);
+                  return (
+                    <View
+                      key={req.id}
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        marginBottom: spacing.sm,
+                      }}
+                    >
+                      <Pressable onPress={() => router.push(`/user/${req.senderId}`)}>
+                        <Text style={{ fontWeight: "600", color: colors.text }}>
+                          {sender?.name ?? "Unknown"}
+                        </Text>
+                      </Pressable>
+                      <View style={{ flexDirection: "row", gap: spacing.sm }}>
+                        <Pressable
+                          onPress={() => void acceptFriendRequest(req.id)}
+                          style={({ pressed }) => ({
+                            backgroundColor: colors.primary,
+                            paddingHorizontal: 10,
+                            paddingVertical: 4,
+                            borderRadius: 6,
+                            opacity: pressed ? 0.7 : 1,
+                          })}
+                        >
+                          <Text style={{ color: "#fff", fontWeight: "600", fontSize: 13 }}>Accept</Text>
+                        </Pressable>
+                        <Pressable
+                          onPress={() => void removeFriend(req.senderId)}
+                          style={({ pressed }) => ({
+                            borderWidth: 1,
+                            borderColor: colors.border,
+                            paddingHorizontal: 10,
+                            paddingVertical: 4,
+                            borderRadius: 6,
+                            opacity: pressed ? 0.7 : 1,
+                          })}
+                        >
+                          <Text style={{ color: colors.textLight, fontSize: 13 }}>Decline</Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+
+            {friendIds.length === 0 && pendingRequests.length === 0 && (
+              <Text style={{ color: colors.textLight }}>No friends yet</Text>
+            )}
+
+            {friendIds.map(friendId => {
+              const friend = getUserById(friendId);
+              return (
+                <Pressable
+                  key={friendId}
+                  onPress={() => router.push(`/user/${friendId}`)}
+                  style={({ pressed }) => ({
+                    flexDirection: "row" as const,
+                    alignItems: "center" as const,
+                    justifyContent: "space-between" as const,
+                    marginBottom: spacing.sm,
+                    opacity: pressed ? 0.7 : 1,
+                  })}
+                >
+                  <Text style={{ color: colors.text, fontWeight: "500" }}>
+                    {friend?.name ?? friendId}
+                  </Text>
+                  <Text style={{ color: colors.textLight, fontSize: 13 }}>→</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        );
+      })()}
 
       {/* LOGOUT */}
       <View style={components.card}>
