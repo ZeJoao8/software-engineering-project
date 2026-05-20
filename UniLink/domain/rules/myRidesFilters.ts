@@ -1,6 +1,7 @@
 import type { Ride } from "../entities/Ride";
 import type { Review } from "../entities/Review";
 import type { Report } from "../entities/Report";
+import { hasReportedAnyoneInRide } from "./reportRules";
 
 export type StatusFilter = "all" | "active" | "completed";
 export type ExtraFilter = "womenOnly" | "hasFeedback" | "hasReport";
@@ -56,10 +57,7 @@ export function applyMyRidesFilters(
       if (!hasFeedback) return false;
     }
     if (extraFilters.has("hasReport")) {
-      const reported = [...r.passengers, r.driverId].some(
-        uid => uid !== userId &&
-          reports.some(rep => rep.reporterId === userId && rep.reportedUserId === uid)
-      );
+      const reported = hasReportedAnyoneInRide(r, reports, userId);
       if (!reported) return false;
     }
     if (!matchesRating(r, role, userId, reviews, ratingFilter)) return false;

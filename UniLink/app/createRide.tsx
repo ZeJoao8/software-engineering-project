@@ -112,8 +112,6 @@ export default function CreateRide() {
     const check = canCreateRide({ origin, destination, originCoords, destinationCoords, seats, car, departure });
     if (!check.ok) { Alert.alert("Error", check.error); return; }
 
-    const seatsNumber = Number(seats);
-
     const result = await createRide({
       id: generateId("rides"),
       driverId: activeUser.uid,
@@ -121,8 +119,8 @@ export default function CreateRide() {
       origin: origin.trim(),
       destination: destination.trim(),
       departureDateTime: departure.toISOString(),
-      availableSeats: seatsNumber,
-      totalSeats: seatsNumber,
+      availableSeats: check.seats,
+      totalSeats: check.seats,
       womenOnly,
       passengers: [],
       completed: false,

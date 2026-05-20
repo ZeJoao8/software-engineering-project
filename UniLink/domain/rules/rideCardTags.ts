@@ -1,7 +1,7 @@
 import type { Ride } from "../entities/Ride";
 import type { Review } from "../entities/Review";
 import type { Report } from "../entities/Report";
-import { hasUserReported } from "./reportRules";
+import { hasReportedAnyoneInRide } from "./reportRules";
 
 export type RideCardTag =
   | { kind: "womenOnly" }
@@ -41,9 +41,7 @@ export function buildRideCardTags(
     }
   }
 
-  const reportedInRide = [...ride.passengers, ride.driverId].some(
-    targetId => targetId !== userId && hasUserReported(reports, userId, targetId)
-  );
+  const reportedInRide = hasReportedAnyoneInRide(ride, reports, userId);
   if (reportedInRide) tags.push({ kind: "reportedInRide" });
 
   if (isPassenger && !isDriver && ride.completed) {

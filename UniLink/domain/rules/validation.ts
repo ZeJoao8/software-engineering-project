@@ -1,6 +1,6 @@
-export const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-export const universityEmailRegex = /^[^\s@]+@([a-z]+\.)?up\.pt$/i;
-export const plateRegex = /^[A-Z0-9-]{6,8}$/;
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const universityEmailRegex = /^[^\s@]+@([a-z]+\.)?up\.pt$/i;
+const plateRegex = /^[A-Z0-9-]{6,8}$/;
 
 export function isValidEmail(email: string): boolean {
   return emailRegex.test(email.trim());

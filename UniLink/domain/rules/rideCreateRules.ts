@@ -1,6 +1,9 @@
 import type { Car } from "../entities/Car";
+import { areRequiredFieldsFilled, isValidSeatCount } from "./validation";
 
-type RuleResult = { ok: true } | { ok: false; error: string };
+type RuleResult =
+  | { ok: true; seats: number }
+  | { ok: false; error: string };
 
 export interface RideCreateInput {
   origin: string;
@@ -15,7 +18,7 @@ export interface RideCreateInput {
 export function canCreateRide(input: RideCreateInput): RuleResult {
   const { origin, destination, originCoords, destinationCoords, seats, car, departure } = input;
 
-  if (!origin.trim() || !destination.trim())
+  if (!areRequiredFieldsFilled({ origin, destination, seats }))
     return { ok: false, error: "Fill all fields" };
 
   if (!originCoords || !destinationCoords)
@@ -24,18 +27,12 @@ export function canCreateRide(input: RideCreateInput): RuleResult {
   if (origin.trim().toLowerCase() === destination.trim().toLowerCase())
     return { ok: false, error: "Origin and destination must differ" };
 
-  const seatsNumber = Number(seats);
-  if (!Number.isInteger(seatsNumber))
-    return { ok: false, error: "Seats must be integer" };
-
-  if (seatsNumber < 1)
-    return { ok: false, error: "Must allow at least 1 passenger" };
-
-  if (seatsNumber > car.seatCapacity - 1)
-    return { ok: false, error: `Max passengers ${car.seatCapacity - 1}` };
+  const seatCheck = isValidSeatCount(seats, car.seatCapacity - 1);
+  if (!seatCheck.ok)
+    return { ok: false, error: seatCheck.error ?? "Invalid seat count" };
 
   if (departure < new Date())
     return { ok: false, error: "Cannot create ride in past" };
 
-  return { ok: true };
+  return { ok: true, seats: seatCheck.seats };
 }

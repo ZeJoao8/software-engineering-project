@@ -6,6 +6,9 @@ import {
   canCompleteRide,
   canRemovePassenger,
   shouldAutoDeleteRide,
+  canAccessRideReview,
+  canAccessRideReport,
+  canReportUser,
 } from "../domain/rules/rideRules";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -259,5 +262,82 @@ describe("shouldAutoDeleteRide", () => {
   test("returns false when completed, has passengers, and is past", () => {
     const ride = makeRide({ departureDateTime: PAST, completed: true, passengers: ["p1"] });
     expect(shouldAutoDeleteRide(ride, NOW)).toBe(false);
+  });
+});
+
+describe("canAccessRideReview", () => {
+  test("allows a passenger to review the driver after completion", () => {
+    const ride = makeRide({
+      completed: true,
+      driverId: "driver-1",
+      passengers: ["user-1"],
+    });
+    expect(canAccessRideReview(ride, "user-1", "driver-1")).toBe(true);
+  });
+
+  test("blocks review access for non-driver targets", () => {
+    const ride = makeRide({
+      completed: true,
+      driverId: "driver-1",
+      passengers: ["user-1", "user-2"],
+    });
+    expect(canAccessRideReview(ride, "user-1", "user-2")).toBe(false);
+  });
+});
+
+describe("canAccessRideReport", () => {
+  test("allows a participant to report another participant after completion", () => {
+    const ride = makeRide({
+      completed: true,
+      driverId: "driver-1",
+      passengers: ["user-1", "user-2"],
+    });
+    expect(canAccessRideReport(ride, "user-1", "user-2")).toBe(true);
+  });
+
+  test("blocks report access for users outside the ride", () => {
+    const ride = makeRide({
+      completed: true,
+      driverId: "driver-1",
+      passengers: ["user-1"],
+    });
+    expect(canAccessRideReport(ride, "user-1", "outsider")).toBe(false);
+  });
+});
+
+describe("canReportUser", () => {
+  test("blocks duplicate reports for the same ride/user pair", () => {
+    const ride = makeRide({
+      completed: true,
+      driverId: "driver-1",
+      passengers: ["user-1"],
+    });
+    const reports = [
+      {
+        id: "rep-1",
+        rideId: "ride-1",
+        reporterId: "user-1",
+        reportedUserId: "driver-1",
+      },
+    ];
+    expect(canReportUser(ride, "user-1", "driver-1", reports)).toBe(false);
+  });
+
+  test("allows reporting the same user again on a different ride", () => {
+    const ride = makeRide({
+      id: "ride-1",
+      completed: true,
+      driverId: "driver-1",
+      passengers: ["user-1"],
+    });
+    const reports = [
+      {
+        id: "rep-1",
+        rideId: "ride-2",
+        reporterId: "user-1",
+        reportedUserId: "driver-1",
+      },
+    ];
+    expect(canReportUser(ride, "user-1", "driver-1", reports)).toBe(true);
   });
 });

@@ -1,15 +1,7 @@
 import type { Ride } from "../entities/Ride";
-import { calculateUserCO2Saved } from "./sustainability";
 import type { BadgeLevel, BadgeStatus } from "../entities/Badge";
 
 export type { BadgeLevel, BadgeStatus };
-
-const LEVEL_THRESHOLDS = {
-  bronze: 0,
-  silver: 1,
-  gold: 2,
-  diamond: 3,
-};
 
 function determineLevel(value: number, thresholds: number[]): BadgeLevel {
   if (value >= thresholds[3]) return "diamond";

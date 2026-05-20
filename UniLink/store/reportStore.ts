@@ -3,6 +3,7 @@ import type { Unsubscribe } from "firebase/firestore";
 import * as ReportRepo from "../repositories/ReportRepository";
 import { getCurrentUser, isAuthReady, subscribeToAuthChanges } from "./authStore";
 import type { Report } from "../domain/entities/Report";
+import { hasUserReportedInRide } from "../domain/rules/reportRules";
 
 let reports: Report[] = [];
 const listeners = new Set<() => void>();
@@ -54,9 +55,7 @@ export function hasReportForRide(
   reporterId: string,
   reportedUserId: string
 ): boolean {
-  return reports.some(
-    r => r.rideId === rideId && r.reporterId === reporterId && r.reportedUserId === reportedUserId
-  );
+  return hasUserReportedInRide(reports, rideId, reporterId, reportedUserId);
 }
 
 export function subscribeToReportsChanges(listener: () => void): () => void {

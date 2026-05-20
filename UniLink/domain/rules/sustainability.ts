@@ -25,6 +25,3 @@ export function calculateUserCO2Saved(rides: Ride[], userId: string | undefined)
   return totalCO2;
 }
 
-export function formatCO2(value: number): string {
-  return `${value.toFixed(2)} kg`;
-}

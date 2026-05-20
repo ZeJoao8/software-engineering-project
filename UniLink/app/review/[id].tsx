@@ -22,6 +22,8 @@ import { useRides } from "../../hooks/useRides";
 import { useReviews } from "../../hooks/useReviews";
 import { addReview } from "../../services/ReviewService";
 import { generateId } from "../../infra/firebase";
+import { canAccessRideReview } from "../../domain/rules/rideRules";
+import { validateReviewRating } from "../../domain/rules/reviewRules";
 
 import { components } from "../../styles/components";
 import { Button } from "../../components/Button";
@@ -48,9 +50,8 @@ export default function ReviewRide() {
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const joined = ride && activeUser ? ride.passengers.includes(activeUser.uid) : false;
-  const isDriver = ride && activeUser ? ride.driverId === activeUser.uid : false;
-  const canAccess = !!ride && !!activeUser && !!targetUser && joined && !isDriver && ride.completed;
+  const canAccess = !!ride && !!activeUser && !!targetUser &&
+    canAccessRideReview(ride, activeUser.uid, targetUser.uid);
 
   const alreadyReviewed = ride && activeUser && targetUser
     ? hasReviewForRide(ride.id, activeUser.uid, targetUser.uid)
@@ -71,8 +72,9 @@ export default function ReviewRide() {
     if (!ride || !activeUser || !targetUser) return;
     if (submitting) return;
 
-    if (rating < 1 || rating > 5) {
-      Alert.alert("Select rating", "Choose a rating between 1 and 5 stars.");
+    const ratingCheck = validateReviewRating(rating);
+    if (!ratingCheck.ok) {
+      Alert.alert("Select rating", ratingCheck.error);
       return;
     }
 

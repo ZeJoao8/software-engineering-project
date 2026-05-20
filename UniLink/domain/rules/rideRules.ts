@@ -2,6 +2,7 @@ import type { Ride } from "../entities/Ride";
 import type { User } from "../entities/User";
 import type { Review } from "../entities/Review";
 import type { Report } from "../entities/Report";
+import { hasUserReportedInRide } from "./reportRules";
 
 type RuleResult = { ok: true } | { ok: false; error: string };
 
@@ -67,20 +68,40 @@ export function canRateDriver(ride: Ride, userId: string, reviews: Review[]): bo
   );
 }
 
+export function canAccessRideReview(
+  ride: Ride,
+  currentUserId: string,
+  targetUserId: string
+): boolean {
+  const isPassenger = ride.passengers.includes(currentUserId);
+  const isDriver = ride.driverId === currentUserId;
+  return ride.completed && isPassenger && !isDriver && targetUserId === ride.driverId;
+}
+
+export function canAccessRideReport(
+  ride: Ride,
+  currentUserId: string,
+  targetUserId: string
+): boolean {
+  const isDriver = ride.driverId === currentUserId;
+  const joined = ride.passengers.includes(currentUserId);
+  const targetIsPassenger = ride.passengers.includes(targetUserId);
+  const targetIsDriver = ride.driverId === targetUserId;
+
+  return (
+    ride.completed &&
+    (isDriver || joined) &&
+    (targetIsPassenger || targetIsDriver) &&
+    targetUserId !== currentUserId
+  );
+}
+
 export function canReportUser(
   ride: Ride,
   currentUserId: string,
   targetId: string,
   reports: Report[]
 ): boolean {
-  const isDriver = ride.driverId === currentUserId;
-  const joined = ride.passengers.includes(currentUserId);
-  return (
-    ride.completed &&
-    (isDriver || joined) &&
-    targetId !== currentUserId &&
-    !reports.some(
-      rep => rep.rideId === ride.id && rep.reporterId === currentUserId && rep.reportedUserId === targetId
-    )
-  );
+  if (!canAccessRideReport(ride, currentUserId, targetId)) return false;
+  return !hasUserReportedInRide(reports, ride.id, currentUserId, targetId);
 }

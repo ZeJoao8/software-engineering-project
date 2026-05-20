@@ -9,11 +9,6 @@ let pendingProfileUid: string | null = null;
 
 const listeners = new Set<() => void>();
 
-let resolveAuthReady: (() => void) | null = null;
-const authReadyPromise = new Promise<void>(resolve => {
-  resolveAuthReady = resolve;
-});
-
 function notifyListeners() {
   listeners.forEach(l => l());
 }
@@ -21,8 +16,6 @@ function notifyListeners() {
 function finishAuthBoot() {
   if (!authReady) {
     authReady = true;
-    resolveAuthReady?.();
-    resolveAuthReady = null;
   }
   notifyListeners();
 }
@@ -84,9 +77,6 @@ export function subscribeToAuthChanges(listener: () => void): () => void {
   return () => { listeners.delete(listener); };
 }
 
-export async function waitForAuthReady(): Promise<void> {
-  await authReadyPromise;
-}
 
 export function setPendingProfileUid(uid: string | null): void {
   pendingProfileUid = uid;

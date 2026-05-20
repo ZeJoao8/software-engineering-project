@@ -18,6 +18,8 @@ import { useRides } from "../../hooks/useRides";
 import { useReports } from "../../hooks/useReports";
 import { addReport } from "../../services/ReportService";
 import { generateId } from "../../infra/firebase";
+import { canAccessRideReport } from "../../domain/rules/rideRules";
+import { validateReportReason } from "../../domain/rules/reportRules";
 
 import { Button } from "../../components/Button";
 import { forms } from "../../styles/forms";
@@ -41,16 +43,8 @@ export default function ReportUser() {
   const [reason, setReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const isDriver = ride && activeUser ? ride.driverId === activeUser.uid : false;
-  const isPassenger = ride && activeUser ? ride.passengers.includes(activeUser.uid) : false;
-  const targetIsPassenger = ride && targetUser ? ride.passengers.includes(targetUser.uid) : false;
-  const targetIsDriver = ride && targetUser ? ride.driverId === targetUser.uid : false;
-
   const canAccess = !!ride && !!activeUser && !!targetUser &&
-    ride.completed &&
-    (isDriver || isPassenger) &&
-    (targetIsPassenger || targetIsDriver) &&
-    targetUser.uid !== activeUser.uid;
+    canAccessRideReport(ride, activeUser.uid, targetUser.uid);
 
   const alreadyReported = ride && activeUser && targetUser
     ? hasReportForRide(ride.id, activeUser.uid, targetUser.uid)
@@ -77,8 +71,9 @@ export default function ReportUser() {
       return;
     }
 
-    if (trimmedReason.length < 15) {
-      Alert.alert("Reason too short", "Please write at least 15 characters.");
+    const reasonCheck = validateReportReason(trimmedReason);
+    if (!reasonCheck.ok) {
+      Alert.alert("Reason too short", reasonCheck.error);
       return;
     }
 
@@ -91,7 +86,6 @@ export default function ReportUser() {
       reportedUserId: targetUser.uid,
       reason: trimmedReason,
       createdAt: new Date().toISOString(),
-      status: "pending",
     });
 
     setSubmitting(false);

@@ -1,4 +1,7 @@
-import { calculateAverageRating } from "../domain/rules/reviewRules";
+import {
+  calculateAverageRating,
+  validateReviewRating,
+} from "../domain/rules/reviewRules";
 
 describe("calculateAverageRating", () => {
   test("returns 0 for empty reviews", () => {
@@ -30,5 +33,19 @@ describe("calculateAverageRating", () => {
   test("handles all 1-star reviews", () => {
     const reviews = [{ rating: 1 }, { rating: 1 }];
     expect(calculateAverageRating(reviews)).toBe(1.0);
+  });
+
+  test("validates rating boundaries", () => {
+    expect(validateReviewRating(0)).toEqual({
+      ok: false,
+      error: "Choose a rating between 1 and 5 stars.",
+    });
+
+    expect(validateReviewRating(6)).toEqual({
+      ok: false,
+      error: "Choose a rating between 1 and 5 stars.",
+    });
+
+    expect(validateReviewRating(4)).toEqual({ ok: true });
   });
 });

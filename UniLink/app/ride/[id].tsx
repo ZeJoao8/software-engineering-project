@@ -26,7 +26,8 @@ import {
   canRateDriver,
   canReportUser,
 } from "../../domain/rules/rideRules";
-import { hasUserReported } from "../../domain/rules/reportRules";
+import { getVisibleFeedback } from "../../domain/rules/reviewRules";
+import { hasUserReportedInRide } from "../../domain/rules/reportRules";
 import type { Car } from "../../domain/entities/Car";
 import { formatDate } from "../../utils/date";
 import type { RouteResult } from "../../infra/routing";
@@ -98,14 +99,7 @@ export default function RideDetails() {
   const canComplete = canCompleteRide(r, activeUser.uid).ok;
   const rateDriverOk = canRateDriver(r, activeUser.uid, allReviews);
 
-  const allFeedbackComments = allReviews.filter(review =>
-    review.rideId === r.id &&
-    review.comment.trim().length > 0 &&
-    (
-      (isDriver && review.revieweeId === activeUser.uid) ||
-      (joined && review.reviewerId === activeUser.uid)
-    )
-  );
+  const allFeedbackComments = getVisibleFeedback(allReviews, r.id, isDriver, activeUser.uid);
 
   function getFeedbackStyle(ratingValue: number) {
     if (ratingValue >= 4) return { backgroundColor: colors.primarySoft, borderLeftColor: colors.primaryLight };
@@ -340,7 +334,7 @@ export default function RideDetails() {
               >
                 {driver?.name}
               </Text>
-              {hasUserReported(allReports, activeUser.uid, driver?.uid ?? r.driverId) && (
+              {hasUserReportedInRide(allReports, r.id, activeUser.uid, driver?.uid ?? r.driverId) && (
                 <Text>⚠️</Text>
               )}
             </View>
@@ -464,7 +458,7 @@ export default function RideDetails() {
                       </View>
                     )}
 
-                    {hasUserReported(allReports, activeUser.uid, p.uid) && <Text>⚠️</Text>}
+                    {hasUserReportedInRide(allReports, r.id, activeUser.uid, p.uid) && <Text>⚠️</Text>}
 
                     {isDriver && r.completed && (
                       passengerReview ? (
