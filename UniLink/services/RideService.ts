@@ -53,10 +53,10 @@ export async function reserveSeat(
     void createNotification({
       userId: ride.driverId,
       type: "ride_join",
-      title: "Novo passageiro",
-      body: `${user.name} reservou um lugar na tua boleia.`,
+      title: "New passenger",
+      body: `${user.name} reserved a seat on your ride.`,
       rideId: ride.id,
-      route: `${ride.origin} → ${ride.destination}`,
+      route: `/ride/${ride.id}`,
     });
     return { ok: true, data: { boardingCode } };
   } catch {
@@ -87,10 +87,10 @@ export async function cancelSeat(
     void createNotification({
       userId: ride.driverId,
       type: "ride_cancel",
-      title: "Passageiro cancelou",
-      body: `${cancellingUser?.name ?? "Um passageiro"} cancelou a reserva.`,
+      title: "Passenger cancelled",
+      body: `${cancellingUser?.name ?? "A passenger"} cancelled their reservation.`,
       rideId: ride.id,
-      route: `${ride.origin} → ${ride.destination}`,
+      route: `/ride/${ride.id}`,
     });
     return { ok: true };
   } catch {
@@ -110,10 +110,10 @@ export async function cancelRide(rideId: string): Promise<Result> {
       void createNotification({
         userId: passengerId,
         type: "ride_cancelled",
-        title: "Boleia cancelada",
-        body: "O condutor cancelou a boleia.",
+        title: "Ride cancelled",
+        body: "The driver cancelled the ride.",
         rideId: ride.id,
-        route: `${ride.origin} → ${ride.destination}`,
+        route: "/(tabs)/myRides",
       });
     }
     await MessageRepo.deleteByRide(rideId);
@@ -146,10 +146,10 @@ export async function completeRide(
       void createNotification({
         userId: passengerId,
         type: "ride_completed",
-        title: "Boleia concluída",
-        body: "A tua boleia foi concluída. Não te esqueças de avaliar!",
+        title: "Ride completed",
+        body: "Your ride is complete. Don't forget to rate your driver!",
         rideId: ride.id,
-        route: `${ride.origin} → ${ride.destination}`,
+        route: `/ride/${ride.id}`,
       });
     }
     return { ok: true };
@@ -182,10 +182,10 @@ export async function removePassenger(
     void createNotification({
       userId: passengerId,
       type: "passenger_removed",
-      title: "Removido da boleia",
-      body: "Foste removido da boleia pelo condutor.",
+      title: "Removed from ride",
+      body: "You were removed from the ride by the driver.",
       rideId: ride.id,
-      route: `${ride.origin} → ${ride.destination}`,
+      route: "/(tabs)/myRides",
     });
     return { ok: true };
   } catch {
