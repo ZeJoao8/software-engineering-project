@@ -14,7 +14,12 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { getRides } from "../../data/rides";
 import { getCurrentUser, getUserById } from "../../data/user";
 import { subscribeToRideChat, sendMessage, type Message } from "../../data/chat";
-import { createNotification } from "../../data/notifications";
+import {
+  createNotification,
+  getNotifications,
+  markNotificationAsRead,
+  subscribeToNotificationsChanges,
+} from "../../data/notifications";
 import { generateId } from "../../lib/firebase";
 
 import { colors, spacing } from "../../styles/theme";
@@ -49,6 +54,22 @@ export default function RideChat() {
       if (unsub) unsub();
     };
   }, [ride?.id, activeUser?.uid]);
+
+  useEffect(() => {
+    if (!ride) return;
+
+    function dismissChatNotifications() {
+      const toRead = getNotifications().filter(
+        n => n.type === "chat_message" && n.rideId === ride!.id
+      );
+      for (const n of toRead) {
+        void markNotificationAsRead(n.id);
+      }
+    }
+
+    dismissChatNotifications();
+    return subscribeToNotificationsChanges(dismissChatNotifications);
+  }, [ride?.id]);
 
   if (!ride || !activeUser) return null;
 
