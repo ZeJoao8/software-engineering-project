@@ -6,6 +6,7 @@ import {
 } from "expo-router";
 
 import { colors, radius } from "../../styles/theme";
+import { NotificationBell } from "../../components/NotificationBell";
 
 function CreateRideHeaderButton() {
   const router = useRouter();
@@ -50,6 +51,8 @@ export default function TabsLayout() {
         },
 
         headerTintColor: colors.primarySoft,
+
+        headerLeft: () => <NotificationBell />,
 
         tabBarStyle: {
           backgroundColor: colors.primary,

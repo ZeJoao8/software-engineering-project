@@ -88,6 +88,12 @@ service cloud.firestore {
         isParticipant(request.resource.data.rideId);
     }
 
+    match /notifications/{notificationId} {
+      // Only the recipient can read or mark as read; any signed-in user can create (cross-user delivery)
+      allow read, update: if signedIn() && matchesCurrentUser(resource.data.userId);
+      allow create: if signedIn();
+    }
+
     match /chat_messages/{messageId} {
       allow read: if signedIn() && isParticipant(resource.data.rideId);
       allow create: if signedIn() &&

@@ -17,6 +17,7 @@ import {
  subscribeToAuthChanges,
 } from "./user";
 import { deleteMessagesForRide } from "./chat";
+import { createNotification } from "./notifications";
 
 let rides: Ride[] = [];
 
@@ -103,12 +104,70 @@ export async function addRide(ride: Ride) {
 
 export async function updateRide(updatedRide: Ride) {
  const previousRides = rides;
+ const oldRide = rides.find(r => r.id === updatedRide.id);
+
  rides = rides.map(ride =>
   ride.id === updatedRide.id
    ? updatedRide
    : ride
  );
  notifyListeners();
+
+ if (oldRide) {
+  const currentUser = getCurrentUser();
+  const oldPassengerSet = new Set(oldRide.passengers);
+  const newPassengerSet = new Set(updatedRide.passengers);
+
+  for (const pid of updatedRide.passengers) {
+   if (!oldPassengerSet.has(pid)) {
+    void createNotification({
+     userId: updatedRide.driverId,
+     type: "ride_join",
+     title: "Novo passageiro",
+     body: `Alguém reservou um lugar: ${updatedRide.origin} → ${updatedRide.destination}`,
+     rideId: updatedRide.id,
+     route: `/ride/${updatedRide.id}`,
+    });
+   }
+  }
+
+  for (const pid of oldRide.passengers) {
+   if (!newPassengerSet.has(pid)) {
+    if (currentUser?.uid === pid) {
+     void createNotification({
+      userId: updatedRide.driverId,
+      type: "ride_cancel",
+      title: "Passageiro cancelou",
+      body: `Um passageiro cancelou a reserva: ${updatedRide.origin} → ${updatedRide.destination}`,
+      rideId: updatedRide.id,
+      route: `/ride/${updatedRide.id}`,
+     });
+    } else if (currentUser?.uid === updatedRide.driverId) {
+     void createNotification({
+      userId: pid,
+      type: "passenger_removed",
+      title: "Foste removido",
+      body: `O condutor removeu-te da viagem: ${updatedRide.origin} → ${updatedRide.destination}`,
+      rideId: updatedRide.id,
+      route: "/(tabs)/myRides",
+     });
+    }
+   }
+  }
+
+  if (!oldRide.completed && updatedRide.completed) {
+   for (const pid of updatedRide.passengers) {
+    void createNotification({
+     userId: pid,
+     type: "ride_completed",
+     title: "Viagem concluída",
+     body: `A tua viagem ${updatedRide.origin} → ${updatedRide.destination} foi concluída`,
+     rideId: updatedRide.id,
+     route: `/ride/${updatedRide.id}`,
+    });
+   }
+  }
+ }
 
  try {
   await setDoc(
@@ -128,10 +187,24 @@ export async function updateRide(updatedRide: Ride) {
 
 export async function deleteRide(id: string) {
  const previousRides = rides;
- rides = rides.filter(
-  ride => ride.id !== id
- );
+ const rideToDelete = rides.find(r => r.id === id);
+ const currentUser = getCurrentUser();
+
+ rides = rides.filter(ride => ride.id !== id);
  notifyListeners();
+
+ if (rideToDelete && currentUser?.uid === rideToDelete.driverId) {
+  for (const pid of rideToDelete.passengers) {
+   void createNotification({
+    userId: pid,
+    type: "ride_cancelled",
+    title: "Viagem cancelada",
+    body: `O condutor cancelou a viagem: ${rideToDelete.origin} → ${rideToDelete.destination}`,
+    rideId: id,
+    route: "/(tabs)/myRides",
+   });
+  }
+ }
 
  try {
   await deleteMessagesForRide(id);
