@@ -13,6 +13,7 @@ import { useRouter } from "expo-router";
 import { useNotifications } from "../hooks/useNotifications";
 import { type Notification, type NotificationType } from "../domain/entities/Notification";
 import { formatRelativeTime } from "../utils/date";
+import { getNotificationRoute } from "../utils/notificationRoute";
 import { colors } from "../styles/theme";
 import { components } from "../styles/components";
 
@@ -36,7 +37,7 @@ export function NotificationBell() {
   async function handlePress(notification: Notification) {
     await markAsRead(notification.id);
     setPanelVisible(false);
-    router.push(notification.route as Parameters<typeof router.push>[0]);
+    router.push(getNotificationRoute(notification) as Parameters<typeof router.push>[0]);
   }
 
   return (

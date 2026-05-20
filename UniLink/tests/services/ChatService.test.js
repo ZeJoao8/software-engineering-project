@@ -8,7 +8,7 @@ jest.mock("../../infra/firebase", () => ({
   generateId: jest.fn(() => "msg-generated-id"),
 }));
 
-jest.mock("../../store/notifications", () => ({
+jest.mock("../../services/NotificationService", () => ({
   createNotification: jest.fn(),
 }));
 

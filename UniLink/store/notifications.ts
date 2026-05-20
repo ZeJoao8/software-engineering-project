@@ -1,16 +1,9 @@
 import {
-  collection,
-  doc,
-  onSnapshot,
-  query,
-  setDoc,
-  updateDoc,
-  where,
   type Unsubscribe,
 } from "firebase/firestore";
 
-import { db, generateId } from "../infra/firebase";
-import { type Notification, type NotificationType } from "../domain/entities/Notification";
+import * as NotificationRepo from "../repositories/NotificationRepository";
+import type { Notification } from "../domain/entities/Notification";
 import {
   getCurrentUser,
   isAuthReady,
@@ -43,20 +36,10 @@ function syncWithAuth() {
 
   if (unsubscribeSnapshot) return;
 
-  const q = query(
-    collection(db, "notifications"),
-    where("userId", "==", user.uid),
-    where("read", "==", false)
-  );
-
-  unsubscribeSnapshot = onSnapshot(
-    q,
-    snapshot => {
-      notifications = snapshot.docs.map(d => d.data() as Notification);
-      notifications.sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
+  unsubscribeSnapshot = NotificationRepo.subscribeUnreadByUser(
+    user.uid,
+    next => {
+      notifications = next;
       notifyListeners();
     },
     error => {
@@ -79,35 +62,7 @@ export function subscribeToNotificationsChanges(listener: () => void) {
   return () => { listeners.delete(listener); };
 }
 
-export async function createNotification(params: {
-  userId: string;
-  type: NotificationType;
-  title: string;
-  body: string;
-  rideId: string;
-  route: string;
-}) {
-  const notification: Notification = {
-    ...params,
-    id: generateId("notifications"),
-    read: false,
-    createdAt: new Date().toISOString(),
-  };
-
-  try {
-    await setDoc(doc(db, "notifications", notification.id), notification);
-  } catch (error) {
-    console.error("Failed to create notification", error);
-  }
-}
-
-export async function markNotificationAsRead(notificationId: string) {
+export function removeNotificationLocally(notificationId: string): void {
   notifications = notifications.filter(n => n.id !== notificationId);
   notifyListeners();
-
-  try {
-    await updateDoc(doc(db, "notifications", notificationId), { read: true });
-  } catch (error) {
-    console.error("Failed to mark notification as read", error);
-  }
 }

@@ -11,6 +11,14 @@ All notable changes to UniLink since the Sprint 2 release are documented here.
 #### Emergency Contact
 - Added emergency contact options directly in the ride detail screen, allowing passengers to quickly access emergency services or contacts during a ride.
 
+#### Notifications Architecture
+- Refactored notifications to follow the same layered architecture as the rest of the app:
+  - `domain/entities/Notification.ts` keeps the persisted notification model
+  - `repositories/NotificationRepository.ts` handles Firestore reads/writes
+  - `services/NotificationService.ts` creates and marks notifications as read
+  - `store/notifications.ts` now only manages reactive unread notification state
+  - `utils/notificationRoute.ts` resolves app navigation targets locally instead of persisting router paths in Firestore
+
 #### Architecture — 5-Layer Refactor
 The entire codebase was restructured into a clean 5-layer architecture to eliminate business logic from the UI layer:
 

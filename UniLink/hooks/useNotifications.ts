@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 
 import {
   getNotifications,
-  markNotificationAsRead,
   subscribeToNotificationsChanges,
 } from "../store/notifications";
+import { markNotificationAsRead } from "../services/NotificationService";
 import type { Notification } from "../domain/entities/Notification";
 
 export function useNotifications(): {

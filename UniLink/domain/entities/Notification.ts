@@ -13,7 +13,6 @@ export interface Notification {
   title: string;
   body: string;
   rideId: string;
-  route: string;
   read: boolean;
   createdAt: string;
 }

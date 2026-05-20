@@ -2,7 +2,7 @@ import * as RideRepo from "../repositories/RideRepository";
 import * as MessageRepo from "../repositories/MessageRepository";
 import { getRides } from "../store/rideStore";
 import { getCurrentUser, getUserById } from "../store/authStore";
-import { createNotification } from "../store/notifications";
+import { createNotification } from "./NotificationService";
 import {
   canReserveSeat,
   canCancelSeat,
@@ -56,7 +56,6 @@ export async function reserveSeat(
       title: "New passenger",
       body: `${user.name} reserved a seat on your ride.`,
       rideId: ride.id,
-      route: `/ride/${ride.id}`,
     });
     return { ok: true, data: { boardingCode } };
   } catch {
@@ -90,7 +89,6 @@ export async function cancelSeat(
       title: "Passenger cancelled",
       body: `${cancellingUser?.name ?? "A passenger"} cancelled their reservation.`,
       rideId: ride.id,
-      route: `/ride/${ride.id}`,
     });
     return { ok: true };
   } catch {
@@ -113,7 +111,6 @@ export async function cancelRide(rideId: string): Promise<Result> {
         title: "Ride cancelled",
         body: "The driver cancelled the ride.",
         rideId: ride.id,
-        route: "/(tabs)/myRides",
       });
     }
     await MessageRepo.deleteByRide(rideId);
@@ -149,7 +146,6 @@ export async function completeRide(
         title: "Ride completed",
         body: "Your ride is complete. Don't forget to rate your driver!",
         rideId: ride.id,
-        route: `/ride/${ride.id}`,
       });
     }
     return { ok: true };
@@ -185,7 +181,6 @@ export async function removePassenger(
       title: "Removed from ride",
       body: "You were removed from the ride by the driver.",
       rideId: ride.id,
-      route: "/(tabs)/myRides",
     });
     return { ok: true };
   } catch {

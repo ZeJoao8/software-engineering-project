@@ -14,7 +14,7 @@ jest.mock("../../repositories/MessageRepository", () => ({ deleteByRide: jest.fn
 jest.mock("../../store/rideStore", () => ({ getRides: jest.fn() }));
 jest.mock("../../store/authStore", () => ({ getCurrentUser: jest.fn(), getUserById: jest.fn() }));
 jest.mock("../../infra/routing", () => ({ getRoute: jest.fn() }));
-jest.mock("../../store/notifications", () => ({ createNotification: jest.fn() }));
+jest.mock("../../services/NotificationService", () => ({ createNotification: jest.fn() }));
 
 import * as RideRepo from "../../repositories/RideRepository";
 import * as MessageRepo from "../../repositories/MessageRepository";

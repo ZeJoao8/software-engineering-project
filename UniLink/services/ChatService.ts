@@ -1,6 +1,6 @@
 import * as MessageRepo from "../repositories/MessageRepository";
 import { generateId } from "../infra/firebase";
-import { createNotification } from "../store/notifications";
+import { createNotification } from "./NotificationService";
 
 type Result<T = void> = { ok: true; data?: T } | { ok: false; error: string };
 
@@ -34,7 +34,6 @@ export async function sendMessage(
         title: `${notify.senderName}: ${preview}`,
         body: notify.rideRoute,
         rideId,
-        route: `/chat/${rideId}`,
       });
     }
   }
