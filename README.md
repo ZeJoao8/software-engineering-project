@@ -102,6 +102,10 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 - Available seats are shown
 - Ride route is visible
 
+<p align="center">
+  <img src="docs/mockups/DetalhesBoleia.svg" width="300"/>
+</p>
+
 **2. Search Rides**
 > *As a passenger, I want to search rides so that I can find transport.*
 
@@ -110,6 +114,10 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 - User can filter by date
 - Only rides with available seats are shown
 - Results are displayed in a list
+
+<p align="center">
+  <img src="docs/mockups/Home.svg" width="300"/>
+</p>
 
 **3. Reserve a Seat**
 > *As a passenger, I want to reserve a seat so that I can join a ride.*
@@ -120,6 +128,10 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 - Available seats decrease after reservation
 - Cannot reserve if ride is full
 - Confirmation message is displayed
+
+<p align="center">
+  <img src="docs/mockups/DetalhesBoleia.svg" width="300"/>
+</p>
 
 🚗 Drivers
 
@@ -134,6 +146,10 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 - Ride is created successfully
 - Ride appears in search results
 
+<p align="center">
+  <img src="docs/mockups/CriacaoBoleia.svg" width="300"/>
+</p>
+
 **5. Add Car Details**
 > *As a driver, I want to add car details so that passengers can identify my vehicle.*
 
@@ -143,6 +159,10 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 - Both fields are required
 - Car is linked to user profile
 
+<p align="center">
+  <img src="docs/mockups/CriacaoBoleia.svg" width="300"/>
+</p>
+
 **6. Manage Rides**
 > *As a driver, I want to manage my rides so that I can edit or cancel them.*
 
@@ -151,6 +171,10 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 - Driver can cancel a ride
 - Changes are saved correctly
 - Cancelled rides are no longer visible
+
+<p align="center">
+  <img src="docs/mockups/MinhasBoleias.svg" width="300"/>
+</p>
 
 👤 General Profile & Safety
 
@@ -162,6 +186,13 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 - Profile data is saved successfully
 - Profile is visible to other users
 
+<p align="center">
+  <img src="docs/mockups/Login.svg" width="300"/>
+  <img src="docs/mockups/Registo.svg" width="300"/>
+  <img src="docs/mockups/Profile.svg" width="300"/>
+  <img src="docs/mockups/PerfilPublico.svg" width="300"/>
+</p>
+
 **8. Women-Only Rides**
 > *As a female user, I want women-only rides so that I feel safer.*
 
@@ -169,6 +200,10 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 - Female driver can enable women-only option
 - Only female users can reserve
 - System enforces restriction
+
+<p align="center">
+  <img src="docs/mockups/CriacaoBoleia.svg" width="300"/>
+</p>
 
 **9. Security Codes**
 > *As a user, I want to receive and validate a security code before a ride so that I can ensure I am entering the correct car.*
@@ -179,6 +214,11 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 - Driver can validate the code on the app
 - The ride cannot start unless the code is confirmed
 - If the code is incorrect, the system shows an error and prevents validation
+
+<p align="center">
+  <img src="docs/mockups/CodigoSeguranca.svg" width="300"/>
+  <img src="docs/mockups/BoleiaEmCurso.svg" width="300"/>
+</p>
 
 **10. Better Navigation Menu**
 > *As a user, I want to easily navigate through the app's menus so that I can quickly access features like booking rides, viewing trips, and managing my profile.*
@@ -193,6 +233,10 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 - Important actions (e.g., booking a ride) are easily accessible from the main screen
 - The app avoids dead ends (users can always navigate to another section)
 
+<p align="center">
+  <img src="docs/mockups/Home.svg" width="300"/>
+</p>
+
 **11. Bus Alternatives**
 > *As a user, I want bus alternatives so that I have backup transport.*
 
@@ -201,6 +245,10 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 - Schedules are shown for selected route
 - Information is updated from external source
 
+<p align="center">
+  <img src="docs/mockups/Autocarros.svg" width="300"/>
+</p>
+
 **12. Map Integration**
 > *As a user, I want to see rides on a map so that I can understand routes.*
 
@@ -208,6 +256,10 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 - Map displays origin and destination
 - Route is visible
 - Map loads correctly
+
+<p align="center">
+  <img src="docs/mockups/Mapa.svg" width="300"/>
+</p>
 
 **13. Rate Users**
 > *As a user, I want to rate others so that trust is built.*
@@ -218,6 +270,10 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 - Average rating is updated
 - Rating is visible on profile
 
+<p align="center">
+  <img src="docs/mockups/Avaliar.svg" width="300"/>
+</p>
+
 **14. Report User**
 > *As a user, I want to report others so that unsafe behavior is handled.*
 
@@ -225,6 +281,10 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 - User can submit a report
 - Report is stored
 - Report includes reason and user reference
+
+<p align="center">
+  <img src="docs/mockups/Reportar.svg" width="300"/>
+</p>
 
 **15. Leaderboard**
 > *As a user, I want to see a leaderboard so that I can compare activity.*
@@ -235,6 +295,10 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 - User can see their own position
 - Top users are clearly highlighted
 
+<p align="center">
+  <img src="docs/mockups/Ranking.svg" width="300"/>
+</p>
+
 **16. Weekly Streaks**
 > *As a user, I want to maintain streaks so that I stay engaged.*
 
@@ -244,6 +308,10 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 - Streak resets after inactivity
 - Current streak is visible in user profile
 
+<p align="center">
+  <img src="docs/mockups/Profile.svg" width="300"/>
+</p>
+
 **17. Medals / Achievements**
 > *As a user, I want to earn medals so that I feel rewarded.*
 
@@ -252,6 +320,10 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 - User earns achievement when condition is met
 - Achievements are stored in user profile
 - Achievements are visible to other users
+
+<p align="center">
+  <img src="docs/mockups/Medalhas.svg" width="300"/>
+</p>
 
 **18. Notifications**
 > *As a user, I want to receive notifications so that I stay updated on ride and message events.*
@@ -263,6 +335,10 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 - Notification preferences are saved
 - Notifications display relevant ride and user information
 
+<p align="center">
+  <img src="docs/mockups/Notificacoes.svg" width="300"/>
+</p>
+
 **19. Friend List**
 > *As a user, I want to view a friend list so that I can easily communicate and coordinate rides with people I trust.*
 
@@ -273,6 +349,10 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 - User can remove friends
 - Friend list is synchronized across sessions
 
+<p align="center">
+  <img src="docs/mockups/Amigos.svg" width="300"/>
+</p>
+
 **20. Safety Contacts**
 > *As a user, I want to add emergency safety contacts so that others can know where I am in case of emergency.*
 
@@ -282,6 +362,10 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 - Emergency contacts can be notified in case of issues
 - Contact list is stored securely
 
+<p align="center">
+  <img src="docs/mockups/ContactosSeguranca.svg" width="300"/>
+</p>
+
 **21. Driver Preferences**
 > *As a driver, I want to set personal preferences so that I can customize my ride experience.*
 
@@ -290,6 +374,10 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 - Preferences are saved and used for ride matching
 - Driver can edit preferences at any time
 
+<p align="center">
+  <img src="docs/mockups/PreferenciasCondutor.svg" width="300"/>
+</p>
+
 **22. Improve MyRides Accessibility**
 > *As a user, I want better accessibility in the MyRides section so that I can easily manage all my ride information.*
 
@@ -297,6 +385,10 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 - All ride information is clearly organized and easy to find
 - User can filter rides by multiple parameters (active, completed, rating, ...)
 - User can view ride details quickly
+
+<p align="center">
+  <img src="docs/mockups/MinhasBoleias.svg" width="300"/>
+</p>
 
 **23. Better UI**
 > *As a user, I want a more polished and intuitive user interface so that the app is more enjoyable to use.*
@@ -307,6 +399,11 @@ A backlog item is considered **Ready** to be moved from the Product Backlog into
 - Enhanced color scheme and typography
 - Smooth animations and transitions
 - Better feedback for user interactions (button clicks, form submissions, etc.)
+
+<p align="center">
+  <img src="docs/mockups/Home.svg" width="300"/>
+  <img src="docs/mockups/RideChat.svg" width="300"/>
+</p>
 
 ### Domain model
 
