@@ -1,7 +1,8 @@
 import * as RideRepo from "../repositories/RideRepository";
 import * as MessageRepo from "../repositories/MessageRepository";
 import { getRides } from "../store/rideStore";
-import { getCurrentUser } from "../store/authStore";
+import { getCurrentUser, getUserById } from "../store/authStore";
+import { createNotification } from "../store/notifications";
 import {
   canReserveSeat,
   canCancelSeat,
@@ -49,6 +50,14 @@ export async function reserveSeat(
       passengers: [...ride.passengers, user.uid],
       passengerCodes: { ...(ride.passengerCodes ?? {}), [user.uid]: boardingCode },
     });
+    void createNotification({
+      userId: ride.driverId,
+      type: "ride_join",
+      title: "New passenger",
+      body: `${user.name} reserved a seat on your ride.`,
+      rideId: ride.id,
+      route: `/ride/${ride.id}`,
+    });
     return { ok: true, data: { boardingCode } };
   } catch {
     return { ok: false, error: "Could not reserve the seat. Please try again." };
@@ -74,6 +83,15 @@ export async function cancelSeat(
       passengers: ride.passengers.filter(p => p !== userId),
       passengerCodes: updatedCodes,
     });
+    const cancellingUser = getUserById(userId);
+    void createNotification({
+      userId: ride.driverId,
+      type: "ride_cancel",
+      title: "Passenger cancelled",
+      body: `${cancellingUser?.name ?? "A passenger"} cancelled their reservation.`,
+      rideId: ride.id,
+      route: `/ride/${ride.id}`,
+    });
     return { ok: true };
   } catch {
     return { ok: false, error: "Could not cancel the reservation. Please try again." };
@@ -88,6 +106,16 @@ export async function cancelRide(rideId: string): Promise<Result> {
   if (!check.ok) return check;
 
   try {
+    for (const passengerId of ride.passengers) {
+      void createNotification({
+        userId: passengerId,
+        type: "ride_cancelled",
+        title: "Ride cancelled",
+        body: "The driver cancelled the ride.",
+        rideId: ride.id,
+        route: "/(tabs)/myRides",
+      });
+    }
     await MessageRepo.deleteByRide(rideId);
     await RideRepo.remove(rideId);
     return { ok: true };
@@ -114,6 +142,16 @@ export async function completeRide(
 
   try {
     await RideRepo.save({ ...ride, completed: true, distanceKm });
+    for (const passengerId of ride.passengers) {
+      void createNotification({
+        userId: passengerId,
+        type: "ride_completed",
+        title: "Ride completed",
+        body: "Your ride is complete. Don't forget to rate your driver!",
+        rideId: ride.id,
+        route: `/ride/${ride.id}`,
+      });
+    }
     return { ok: true };
   } catch {
     return { ok: false, error: "Could not complete the ride. Please try again." };
@@ -140,6 +178,14 @@ export async function removePassenger(
       availableSeats: Math.min(ride.availableSeats + 1, ride.totalSeats),
       passengerCodes: updatedCodes,
       verifiedPassengers: updatedVerified,
+    });
+    void createNotification({
+      userId: passengerId,
+      type: "passenger_removed",
+      title: "Removed from ride",
+      body: "You were removed from the ride by the driver.",
+      rideId: ride.id,
+      route: "/(tabs)/myRides",
     });
     return { ok: true };
   } catch {

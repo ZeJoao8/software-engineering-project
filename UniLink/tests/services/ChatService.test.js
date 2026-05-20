@@ -8,6 +8,10 @@ jest.mock("../../infra/firebase", () => ({
   generateId: jest.fn(() => "msg-generated-id"),
 }));
 
+jest.mock("../../store/notifications", () => ({
+  createNotification: jest.fn(),
+}));
+
 import * as MessageRepo from "../../repositories/MessageRepository";
 
 beforeEach(() => jest.clearAllMocks());

@@ -611,4 +611,126 @@ export const components = StyleSheet.create({
   marginBottom: spacing.sm,
  },
 
+ // ─── NotificationBell ─────────────────────────────────────────────────────
+
+ notifBellButton: {
+  marginLeft: 14,
+  padding: 4,
+ },
+
+ notifBadge: {
+  position: "absolute",
+  top: 0,
+  right: 0,
+  backgroundColor: colors.danger,
+  borderRadius: 8,
+  minWidth: 16,
+  height: 16,
+  alignItems: "center",
+  justifyContent: "center",
+  paddingHorizontal: 3,
+ },
+
+ notifBadgeText: {
+  color: "#fff",
+  fontSize: 10,
+  fontWeight: "700",
+  lineHeight: 14,
+ },
+
+ notifOverlay: {
+  flex: 1,
+  backgroundColor: "rgba(0,0,0,0.35)",
+ },
+
+ notifPanel: {
+  position: "absolute",
+  left: 8,
+  width: 310,
+  maxHeight: 400,
+  backgroundColor: colors.card,
+  borderRadius: radius.md,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.15,
+  shadowRadius: 8,
+  elevation: 8,
+  overflow: "hidden",
+ },
+
+ notifPanelHeader: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  paddingHorizontal: spacing.md,
+  paddingVertical: spacing.sm + 2,
+  borderBottomWidth: 1,
+  borderBottomColor: colors.border,
+ },
+
+ notifPanelTitle: {
+  fontSize: 15,
+  fontWeight: "700",
+  color: colors.text,
+ },
+
+ notifEmpty: {
+  padding: spacing.md,
+  color: colors.textLight,
+  fontSize: 14,
+  textAlign: "center",
+ },
+
+ notifItem: {
+  flexDirection: "row",
+  alignItems: "flex-start",
+  paddingHorizontal: spacing.md,
+  paddingVertical: spacing.sm + 2,
+  gap: spacing.sm,
+ },
+
+ notifItemPressed: {
+  backgroundColor: colors.background,
+ },
+
+ notifItemIcon: {
+  width: 32,
+  height: 32,
+  borderRadius: 16,
+  backgroundColor: colors.primaryLight,
+  alignItems: "center",
+  justifyContent: "center",
+  flexShrink: 0,
+  marginTop: 1,
+ },
+
+ notifItemContent: {
+  flex: 1,
+  gap: 2,
+ },
+
+ notifItemTitle: {
+  fontSize: 13,
+  fontWeight: "600",
+  color: colors.text,
+ },
+
+ notifItemBody: {
+  fontSize: 12,
+  color: colors.textLight,
+  lineHeight: 17,
+ },
+
+ notifItemTime: {
+  fontSize: 11,
+  color: colors.textFaint,
+  marginTop: 1,
+ },
+
+ notifSeparator: {
+  height: 1,
+  backgroundColor: colors.border,
+  marginLeft: spacing.md + 32 + spacing.sm,
+ },
+
 });
