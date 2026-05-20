@@ -37,7 +37,7 @@ import { formatDate } from "../../utils/date";
 import { components } from "../../styles/components";
 import { forms } from "../../styles/forms";
 import { layout } from "../../styles/layout";
-import { colors, spacing } from "../../styles/theme";
+import { spacing } from "../../styles/theme";
 import { calculateUserCO2Saved } from "../../utils/sustainability";
 import { getUserBadges } from "../../utils/badges";
 import { BadgeDisplay } from "../../components/BadgeDisplay";
@@ -114,19 +114,12 @@ export default function PublicProfile() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: spacing.xl }}
       >
-        <Text
-        style={{
-          color: colors.primary,
-          marginBottom: spacing.sm,
-          fontWeight: "600",
-        }}
-        onPress={() => router.back()}
-      >
+        <Text style={layout.backLink} onPress={() => router.back()}>
         ← Back
       </Text>
 
       {/* HEADER */}
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: spacing.sm }}>
+      <View style={[components.rowGap, components.mbSm]}>
         <Text style={layout.title}>{user.name}</Text>
         {hasReportedThisUser && (
           <Text style={layout.title}>⚠️</Text>
@@ -134,7 +127,7 @@ export default function PublicProfile() {
       </View>
 
       {showRating && (
-        <Text style={{ marginBottom: spacing.md, color: colors.textLight, fontSize: 16 }}>
+        <Text style={layout.ratingText}>
           ⭐ {averageRating} ({userReviews.length}{" "}
           {userReviews.length === 1 ? "rating" : "ratings"})
         </Text>
@@ -220,22 +213,22 @@ export default function PublicProfile() {
         <Text style={forms.label}>Gender</Text>
         <Text>{user.gender}</Text>
 
-        <View style={{ height: spacing.sm }} />
+        <View style={components.spacerSm} />
 
         <Text style={forms.label}>University</Text>
         <Text>{user.university}</Text>
 
-        <View style={{ height: spacing.sm }} />
+        <View style={components.spacerSm} />
 
         <Text style={forms.label}>Course</Text>
         <Text>{user.course}</Text>
 
-        <View style={{ height: spacing.md }} />
+        <View style={components.spacerMd} />
 
         <Text style={layout.subtitle}>Cars</Text>
 
         {userCars.length === 0 ? (
-          <Text style={{ color: colors.textLight }}>No cars</Text>
+          <Text style={layout.textLight}>No cars</Text>
         ) : (
           userCars.map(c => (
             <View key={c.id} style={{ marginBottom: spacing.sm }}>
@@ -248,13 +241,13 @@ export default function PublicProfile() {
       {/* SUSTAINABILITY IMPACT */}
       <View style={components.card}>
         <Text style={layout.subtitle}>Sustainability Impact</Text>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: spacing.xs }}>
-          <Text style={{ fontSize: 32 }}>🌳</Text>
+        <View style={components.statRow}>
+          <Text style={layout.emojiLg}>🌳</Text>
           <View>
-            <Text style={{ fontSize: 20, fontWeight: "700", color: colors.primary }}>
+            <Text style={layout.statValue}>
               {calculateUserCO2Saved(getRides(), user.uid).toFixed(2)} kg
             </Text>
-            <Text style={{ color: colors.textLight, fontSize: 13 }}>Total CO₂ saved</Text>
+            <Text style={layout.statLabel}>Total CO₂ saved</Text>
           </View>
         </View>
       </View>
@@ -276,17 +269,13 @@ export default function PublicProfile() {
       {hasReportedThisUser && (
         <View style={components.card}>
           <Pressable
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
+            style={components.rowSpaceBetween}
             onPress={() => setShowReports(!showReports)}
           >
             <Text style={layout.subtitle}>
               ⚠️ Your reports ({myReportsOnUser.length})
             </Text>
-            <Text style={{ color: colors.textLight, fontSize: 13 }}>
+            <Text style={layout.collapseIndicator}>
               {showReports ? "Hide ▲" : "Show ▼"}
             </Text>
           </Pressable>
@@ -297,29 +286,22 @@ export default function PublicProfile() {
               return (
                 <View
                   key={report.id}
-                  style={components.feedbackCard}
+                  style={[components.feedbackCard, components.dangerLeftBorder]}
                 >
                   {/* Ride route */}
                   {ride && (
-                    <Text style={{
-                      fontSize: 13,
-                      fontWeight: "700",
-                      color: colors.text,
-                      marginBottom: 2,
-                    }}>
+                    <Text style={[layout.headingSm, { marginBottom: 2 }]}>
                       {ride.origin} → {ride.destination}
                     </Text>
                   )}
 
-                  {/* Date */}
-                  <Text style={{ fontSize: 12, color: colors.textLight, marginBottom: 4 }}>
+                  <Text style={[layout.textLightSm, { marginBottom: 4 }]}>
                     {ride
                       ? formatDate(ride.departureDateTime)
                       : formatDate(report.createdAt)}
                   </Text>
 
-                  {/* Reason */}
-                  <Text style={{ color: colors.text, fontSize: 14 }}>
+                  <Text>
                     {report.reason}
                   </Text>
                 </View>

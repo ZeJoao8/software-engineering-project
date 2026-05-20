@@ -246,7 +246,7 @@ export default function CreateRide() {
       <SafeAreaView style={layout.screen}>
         <View style={{ padding: spacing.lg, flex: 1 }}>
           <Pressable onPress={() => router.back()} style={{ marginBottom: spacing.md }}>
-            <Text style={{ color: colors.primary, fontWeight: "600", fontSize: 16 }}>← Back</Text>
+            <Text style={layout.backLink}>← Back</Text>
           </Pressable>
 
           <Text style={layout.title}>
@@ -282,15 +282,11 @@ export default function CreateRide() {
     <SafeAreaView style={layout.scrollScreen}>
       <ScrollView
         style={layout.scrollScreen}
-        contentContainerStyle={{
-          flexGrow: 1,
-          padding: spacing.lg,
-          paddingBottom: spacing.xl
-        }}
+        contentContainerStyle={layout.scrollContentLg}
         keyboardShouldPersistTaps="handled"
       >
         <Pressable onPress={() => router.back()} style={{ marginBottom: spacing.md }}>
-          <Text style={{ color: colors.primary, fontWeight: "600", fontSize: 16 }}>← Back</Text>
+          <Text style={layout.link}>← Back</Text>
         </Pressable>
 
         <Text style={layout.title}>
@@ -318,31 +314,13 @@ export default function CreateRide() {
         />
 
         <Pressable
-          style={{
-            marginTop: spacing.xs,
-            marginBottom: spacing.sm,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 6,
-          }}
+          style={components.mapActionRow}
           onPress={() => setShowOriginPicker(true)}
           testID="createRideOriginMapButton"
         >
-          <Text style={{
-            color: colors.primary,
-            fontWeight: "600",
-            fontSize: 14,
-          }}>
-            🗺️ Or choose on map
-          </Text>
+          <Text style={layout.mapActionText}>🗺️ Or choose on map</Text>
           {originCoords && (
-            <Text style={{
-              color: colors.accent,
-              fontSize: 12,
-              fontWeight: "700",
-            }}>
-              ✓ Location defined
-            </Text>
+            <Text style={layout.confirmationText}>✓ Location defined</Text>
           )}
         </Pressable>
 
@@ -366,31 +344,13 @@ export default function CreateRide() {
         />
 
         <Pressable
-          style={{
-            marginTop: spacing.xs,
-            marginBottom: spacing.sm,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 6,
-          }}
+          style={components.mapActionRow}
           onPress={() => setShowDestinationPicker(true)}
           testID="createRideDestinationMapButton"
         >
-          <Text style={{
-            color: colors.primary,
-            fontWeight: "600",
-            fontSize: 14,
-          }}>
-            🗺️ Or choose on map
-          </Text>
+          <Text style={layout.mapActionText}>🗺️ Or choose on map</Text>
           {destinationCoords && (
-            <Text style={{
-              color: colors.accent,
-              fontSize: 12,
-              fontWeight: "700",
-            }}>
-              ✓ Location defined
-            </Text>
+            <Text style={layout.confirmationText}>✓ Location defined</Text>
           )}
         </Pressable>
 
@@ -399,7 +359,7 @@ export default function CreateRide() {
 
       {/* Route preview */}
       {originCoords && destinationCoords && (
-        <View style={[components.card, { padding: 0, overflow: "hidden" }]}>
+        <View style={[components.card, components.cardMap]}>
           <RouteMap
             origin={originCoords}
             destination={destinationCoords}
@@ -435,7 +395,7 @@ export default function CreateRide() {
           />
         )}
 
-        <View style={{ height: spacing.xs }} />
+        <View style={components.spacerXs} />
 
 
         <Text style={layout.subtitle}>
@@ -460,7 +420,7 @@ export default function CreateRide() {
           />
         )}
 
-        <View style={{ height: spacing.xs }} />
+        <View style={components.spacerXs} />
 
 
         <Text style={layout.subtitle}>
@@ -501,7 +461,7 @@ export default function CreateRide() {
 
         </View>
 
-        <View style={{ height: spacing.xs }} />
+        <View style={components.spacerXs} />
 
         <Text style={layout.subtitle}>
           Seats
@@ -522,11 +482,7 @@ export default function CreateRide() {
 
         <View style={components.card}>
 
-          <View style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center"
-          }}>
+          <View style={components.rowSpaceBetween}>
 
             <Text style={layout.subtitle}>
               Women only
@@ -536,8 +492,8 @@ export default function CreateRide() {
               value={womenOnly}
               onValueChange={setWomenOnly}
               testID="createRideWomenOnlySwitch"
-              trackColor={{ false: "#bcbdc1", true: "#fbcfe8" }}
-              thumbColor={womenOnly ? colors.women : "#8b8e91"}
+              trackColor={{ false: colors.switchTrackOff, true: colors.switchTrackOn }}
+              thumbColor={womenOnly ? colors.women : colors.switchThumbOff}
             />
           </View>
         </View>

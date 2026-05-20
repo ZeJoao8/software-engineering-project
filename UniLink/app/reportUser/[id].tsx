@@ -127,14 +127,7 @@ export default function ReportUser() {
   return (
     <SafeAreaView style={layout.screen}>
 
-      <Text
-        style={{
-          color: colors.primary,
-          marginBottom: spacing.sm,
-          fontWeight: "600",
-        }}
-        onPress={() => router.back()}
-      >
+      <Text style={layout.backLink} onPress={() => router.back()}>
         ← Back
       </Text>
 
@@ -144,7 +137,7 @@ export default function ReportUser() {
         Reporting: {targetUser.name}
       </Text>
 
-      <Text style={{ color: colors.textLight, marginBottom: spacing.md }}>
+      <Text style={[layout.textLight, { marginBottom: spacing.md }]}>
         Describe what happened during this ride.
       </Text>
 
@@ -152,10 +145,11 @@ export default function ReportUser() {
         value={reason}
         onChangeText={setReason}
         placeholder="Write the reason for your report..."
+        placeholderTextColor={colors.textLight}
         multiline
         numberOfLines={5}
         maxLength={250}
-        style={[forms.input, { minHeight: 120, textAlignVertical: "top" }]}
+        style={[forms.input, forms.multiline, { minHeight: 120 }]}
         testID="reportReasonInput"
       />
 

@@ -13,9 +13,26 @@ import { getRoute, type Coordinates } from "../../utils/routing";
 import ZoomControls from "../../components/ZoomControls";
 
 import { components } from "../../styles/components";
-import { colors, spacing } from "../../styles/theme";
+import { colors, spacing, radius } from "../../styles/theme";
 import { layout } from "../../styles/layout";
 
+
+const TRANSIT_COLORS = ["#2563EB", "#eb8614", "#7C3AED", "#eedc3d"];
+
+function buildLegColorMap(legs: { mode: string; lineName?: string }[]): Record<number, string> {
+  const map: Record<number, string> = {};
+  let colorIndex = -1;
+  let lastLineName: string | undefined = undefined;
+  for (let i = 0; i < legs.length; i++) {
+    if (legs[i].mode.toUpperCase() === "WALK") continue;
+    if (legs[i].lineName !== lastLineName) {
+      colorIndex = (colorIndex + 1) % TRANSIT_COLORS.length;
+      lastLineName = legs[i].lineName;
+    }
+    map[i] = TRANSIT_COLORS[colorIndex];
+  }
+  return map;
+}
 
 function modeEmoji(mode: string) {
   switch (mode.toUpperCase()) {
@@ -67,6 +84,7 @@ export default function BusRouteDetail() {
   }
 
   const { route, origin, destination } = selected;
+  const legColorMap = buildLegColorMap(route.legs);
 
   const allCoords = route.legs.flatMap(leg => [leg.fromCoords, leg.toCoords]);
   const lats = allCoords.map(c => c.latitude);
@@ -83,19 +101,15 @@ export default function BusRouteDetail() {
     longitudeDelta: (maxLon - minLon) * 1.6 + 0.01,
   };
 
-  const transitLegs = route.legs.filter(l => l.mode.toUpperCase() !== "WALK");
-
   return (
     <SafeAreaView style={layout.scrollScreen}>
       <ScrollView style={layout.scrollScreen}>
 
         <View style={{ padding: spacing.md }}>
 
-          <Pressable onPress={() => router.back()} style={{ marginBottom: spacing.sm }}>
-            <Text style={{ color: colors.primary, fontWeight: "600" }}>← Back</Text>
-          </Pressable>
+          <Text style={layout.backLink} onPress={() => router.back()}>← Back</Text>
 
-          <Text style={{ fontSize: 17, fontWeight: "700", color: colors.text, marginBottom: 2 }}>
+          <Text style={layout.sectionTitle}>
             {origin} → {destination}
           </Text>
 
@@ -108,7 +122,7 @@ export default function BusRouteDetail() {
         <View style={{ position: "relative" }}>
           <MapView
             ref={mapRef}
-            style={{ height: 280, marginHorizontal: spacing.md, borderRadius: 12, overflow: "hidden" }}
+            style={{ height: 280, marginHorizontal: spacing.md, borderRadius: radius.md, overflow: "hidden" }}
             provider={PROVIDER_DEFAULT}
             initialRegion={region}
             scrollEnabled
@@ -125,20 +139,23 @@ export default function BusRouteDetail() {
           />
 
           {/* Transit Stops */}
-          {transitLegs.map((leg, i) => (
-            <React.Fragment key={`bus-stops-${i}`}>
-              <Marker
-                coordinate={leg.fromCoords}
-                title={leg.fromStop}
-                pinColor={colors.warning}
-              />
-              <Marker
-                coordinate={leg.toCoords}
-                title={leg.toStop}
-                pinColor={colors.warning}
-              />
-            </React.Fragment>
-          ))}
+          {route.legs
+            .map((leg, i) => ({ leg, i }))
+            .filter(({ leg }) => leg.mode.toUpperCase() !== "WALK")
+            .map(({ leg, i }) => (
+              <React.Fragment key={`bus-stops-${i}`}>
+                <Marker
+                  coordinate={leg.fromCoords}
+                  title={leg.fromStop}
+                  pinColor={legColorMap[i]}
+                />
+                <Marker
+                  coordinate={leg.toCoords}
+                  title={leg.toStop}
+                  pinColor={legColorMap[i]}
+                />
+              </React.Fragment>
+            ))}
 
           {/* Destination Marker */}
           <Marker
@@ -153,7 +170,7 @@ export default function BusRouteDetail() {
               <Polyline
                 key={`leg-${i}`}
                 coordinates={paths[i] || leg.path || [leg.fromCoords, leg.toCoords]}
-                strokeColor={isWalk ? colors.textLight : colors.primary}
+                strokeColor={isWalk ? colors.textLight : legColorMap[i]}
                 strokeWidth={isWalk ? 3 : 5}
                 lineDashPattern={isWalk ? [6, 6] : undefined}
               />
@@ -174,21 +191,23 @@ export default function BusRouteDetail() {
           {route.legs.map((leg, i) => (
             <View
               key={i}
-              style={[components.card, { marginBottom: spacing.sm, flexDirection: "row", alignItems: "center", gap: spacing.sm }]}
+              style={[components.card, components.legRow]}
             >
+              {legColorMap[i] && (
+                <View style={{ width: 4, alignSelf: "stretch", borderRadius: 2, backgroundColor: legColorMap[i], marginRight: 2 }} />
+              )}
               <Text style={{ fontSize: 22 }}>{modeEmoji(leg.mode)}</Text>
 
               <View style={{ flex: 1 }}>
-                <Text style={{ fontWeight: "700", color: colors.text }}>
+                <Text style={layout.headingSm}>
                   {modeLabel(leg.mode, leg.lineName)}
                 </Text>
-                <Text style={{ color: colors.textLight, fontSize: 13, marginTop: 2 }}>
+                <Text style={[layout.textLightSm, { marginTop: 2 }]}>
                   {leg.fromStop === "START" ? origin : leg.fromStop} → {leg.toStop === "END" ? destination : leg.toStop}
                 </Text>
-
               </View>
 
-              <Text style={{ color: colors.textLight, fontSize: 13 }}>
+              <Text style={layout.textLightSm}>
                 {leg.durationMin} min
               </Text>
             </View>

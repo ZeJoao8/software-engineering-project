@@ -7,5 +7,9 @@ module.exports = {
 
  transformIgnorePatterns: [
   "node_modules/(?!(jest-)?react-native|@react-native|expo|@expo|@react-navigation|firebase|@firebase)"
+ ],
+
+ setupFilesAfterEnv: [
+  "./jest.setup.js"
  ]
 };

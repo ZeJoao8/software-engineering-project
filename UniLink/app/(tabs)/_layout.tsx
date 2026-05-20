@@ -7,7 +7,7 @@ import {
 } from "expo-router";
 
 import { getPendingReceivedRequests, subscribeToFriendshipsChanges } from "../../data/friends";
-import { colors } from "../../styles/theme";
+import { colors, radius } from "../../styles/theme";
 
 function CreateRideHeaderButton() {
   const router = useRouter();
@@ -20,7 +20,7 @@ function CreateRideHeaderButton() {
         backgroundColor: colors.primarySoft,
         paddingHorizontal: 12,
         paddingVertical: 6,
-        borderRadius: 8,
+        borderRadius: radius.sm,
         marginRight: 16,
         opacity: pressed ? 0.8 : 1,
       })}
@@ -83,10 +83,11 @@ export default function TabsLayout() {
       />
 
       <Tabs.Screen
-        name="mapView"
+        name="myRides"
         options={{
-          title: "Map",
-          tabBarButtonTestID: "mapTab"
+          title: "My Rides",
+          headerTitle: "My Rides",
+          tabBarButtonTestID: "myRidesTab",
         }}
       />
 
@@ -107,14 +108,6 @@ export default function TabsLayout() {
         }}
       />
 
-
-      <Tabs.Screen
-        name="myRides"
-        options={{
-          href: null,
-          title: "My Rides"
-        }}
-      />
     </Tabs>
   );
 }
