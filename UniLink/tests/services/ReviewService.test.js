@@ -3,6 +3,9 @@ import { addReview } from "../../services/ReviewService";
 jest.mock("../../repositories/ReviewRepository", () => ({
   save: jest.fn(),
 }));
+jest.mock("../../services/NotificationService", () => ({
+  createNotification: jest.fn(),
+}));
 
 import * as ReviewRepo from "../../repositories/ReviewRepository";
 
