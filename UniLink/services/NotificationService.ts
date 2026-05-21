@@ -11,7 +11,8 @@ type CreateNotificationParams = {
   type: NotificationType;
   title: string;
   body: string;
-  rideId: string;
+  rideId?: string;
+  friendshipId?: string;
 };
 
 function buildNotification(
@@ -45,4 +46,19 @@ export async function markNotificationAsRead(
   } catch (error) {
     console.error("Failed to mark notification as read", error);
   }
+}
+
+export async function markAllNotificationsAsRead(
+  notificationIds: string[]
+): Promise<void> {
+  for (const id of notificationIds) {
+    removeNotificationLocally(id);
+  }
+  await Promise.all(
+    notificationIds.map(id =>
+      NotificationRepo.markAsRead(id).catch(err =>
+        console.error("Failed to mark notification as read", err)
+      )
+    )
+  );
 }

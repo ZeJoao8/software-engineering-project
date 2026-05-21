@@ -13,6 +13,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useRides } from "../../hooks/useRides";
 import { useReviews } from "../../hooks/useReviews";
 import { useReports } from "../../hooks/useReports";
+import { useNotifications } from "../../hooks/useNotifications";
 import { sortByDateDesc } from "../../utils/date";
 
 import {
@@ -39,6 +40,7 @@ const EXTRA_FILTERS: { key: ExtraFilter; label: string }[] = [
   { key: "womenOnly", label: "♀️ Women only" },
   { key: "hasFeedback", label: "💬 Has feedback" },
   { key: "hasReport", label: "⚠️ Has report" },
+  { key: "hasNotification", label: "🔔 Has notification" },
 ];
 
 const RATING_FILTERS: { key: RatingFilter; label: string }[] = [
@@ -56,6 +58,7 @@ export default function MyRides() {
   const { user } = useAuth();
   const { reviews } = useReviews();
   const { reports } = useReports();
+  const { notifications } = useNotifications();
 
   const [driverOpen, setDriverOpen] = useState(true);
   const [passengerOpen, setPassengerOpen] = useState(true);
@@ -75,6 +78,8 @@ export default function MyRides() {
     });
   }
 
+  const rideNotifications = notifications.filter(n => n.rideId !== undefined);
+
   const driverRides = applyMyRidesFilters(
     sortByDateDesc(rides.filter(r => isUserDriver(r, activeUser.uid))),
     "driver",
@@ -83,7 +88,8 @@ export default function MyRides() {
     reports,
     statusFilter,
     extraFilters,
-    ratingFilter
+    ratingFilter,
+    rideNotifications
   );
 
   const passengerRides = applyMyRidesFilters(
@@ -94,7 +100,8 @@ export default function MyRides() {
     reports,
     statusFilter,
     extraFilters,
-    ratingFilter
+    ratingFilter,
+    rideNotifications
   );
 
   return (
@@ -194,6 +201,7 @@ export default function MyRides() {
                   <RideCard
                     ride={item}
                     showOccupancyLabel
+                    notifications={rideNotifications.filter(n => n.rideId === item.id)}
                     onPress={() => router.push(`/ride/${item.id}`)}
                   />
                 </View>
@@ -229,6 +237,7 @@ export default function MyRides() {
                 <View style={components.mtMd}>
                   <RideCard
                     ride={item}
+                    notifications={rideNotifications.filter(n => n.rideId === item.id)}
                     onPress={() => router.push(`/ride/${item.id}`)}
                   />
                 </View>

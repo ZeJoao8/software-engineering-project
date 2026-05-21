@@ -75,12 +75,14 @@ export async function cancelSeat(
 
   const updatedCodes = { ...(ride.passengerCodes ?? {}) };
   delete updatedCodes[userId];
+  const updatedVerified = (ride.verifiedPassengers ?? []).filter(pid => pid !== userId);
   try {
     await RideRepo.save({
       ...ride,
       availableSeats: Math.min(ride.availableSeats + 1, ride.totalSeats),
       passengers: ride.passengers.filter(p => p !== userId),
       passengerCodes: updatedCodes,
+      verifiedPassengers: updatedVerified,
     });
     const cancellingUser = getUserById(userId);
     void createNotification({

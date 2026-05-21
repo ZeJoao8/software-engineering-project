@@ -27,7 +27,15 @@ export function syncMessagesForRide(rideId: string): void {
   unsub = MessageRepo.subscribeByRide(
     rideId,
     msgs => { messages = msgs; notifyListeners(); },
-    err => { console.error("Messages sync failed", err); }
+    err => {
+      console.error("Messages sync failed", err);
+      // Firestore closes the snapshot on error (e.g. permission denied).
+      // Reset so syncMessagesForRide can re-establish the subscription on the next call.
+      unsub = null;
+      activeRideId = null;
+      messages = [];
+      notifyListeners();
+    }
   );
 }
 
