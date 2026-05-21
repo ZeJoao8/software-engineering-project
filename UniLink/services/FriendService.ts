@@ -1,6 +1,7 @@
 import * as FriendshipRepo from "../repositories/FriendshipRepository";
 import { getCurrentUser } from "../store/authStore";
-import { getFriendshipWith } from "../store/friends";
+import { getFriendshipWith, getFriendships } from "../store/friends";
+import { createNotification } from "./NotificationService";
 import type { Friendship } from "../domain/entities/Friendship";
 
 type Result<T = void> = { ok: true; data?: T } | { ok: false; error: string };
@@ -20,6 +21,13 @@ export async function sendFriendRequest(targetUid: string): Promise<Result> {
 
   try {
     await FriendshipRepo.save(friendship);
+    await createNotification({
+      userId: targetUid,
+      type: "friend_request",
+      title: "Friend request",
+      body: "You have a new friend request.",
+      friendshipId: id,
+    });
     return { ok: true };
   } catch {
     return { ok: false, error: "Could not send friend request." };
@@ -29,6 +37,16 @@ export async function sendFriendRequest(targetUid: string): Promise<Result> {
 export async function acceptFriendRequest(friendshipId: string): Promise<Result> {
   try {
     await FriendshipRepo.updateStatus(friendshipId, "accepted");
+    const friendship = getFriendships().find(f => f.id === friendshipId);
+    if (friendship) {
+      await createNotification({
+        userId: friendship.senderId,
+        type: "friend_accepted",
+        title: "Friend request accepted",
+        body: "Your friend request was accepted.",
+        friendshipId,
+      });
+    }
     return { ok: true };
   } catch {
     return { ok: false, error: "Could not accept friend request." };

@@ -398,7 +398,7 @@ export default function Profile() {
                       }}
                     >
                       <Pressable onPress={() => router.push(`/user/${req.senderId}`)}>
-                        <Text style={{ fontWeight: "600", color: colors.text }}>
+                        <Text style={layout.link}>
                           {sender?.name ?? "Unknown"}
                         </Text>
                       </Pressable>
@@ -439,7 +439,13 @@ export default function Profile() {
               <Text style={{ color: colors.textLight }}>No friends yet</Text>
             )}
 
-            {friendIds.map(friendId => {
+            {[...friendIds]
+              .sort((a, b) => {
+                const nameA = getUserById(a)?.name ?? a;
+                const nameB = getUserById(b)?.name ?? b;
+                return nameA.localeCompare(nameB);
+              })
+              .map(friendId => {
               const friend = getUserById(friendId);
               return (
                 <Pressable
@@ -453,10 +459,9 @@ export default function Profile() {
                     opacity: pressed ? 0.7 : 1,
                   })}
                 >
-                  <Text style={{ color: colors.text, fontWeight: "500" }}>
+                  <Text style={layout.link}>
                     {friend?.name ?? friendId}
                   </Text>
-                  <Text style={{ color: colors.textLight, fontSize: 13 }}>→</Text>
                 </Pressable>
               );
             })}

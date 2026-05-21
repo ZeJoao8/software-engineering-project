@@ -1,10 +1,11 @@
 import type { Ride } from "../entities/Ride";
 import type { Review } from "../entities/Review";
 import type { Report } from "../entities/Report";
+import type { Notification } from "../entities/Notification";
 import { hasReportedAnyoneInRide } from "./reportRules";
 
 export type StatusFilter = "all" | "active" | "completed";
-export type ExtraFilter = "womenOnly" | "hasFeedback" | "hasReport";
+export type ExtraFilter = "womenOnly" | "hasFeedback" | "hasReport" | "hasNotification";
 export type RatingFilter = "none" | "1-2" | "3" | "4-5";
 
 export function matchesRating(
@@ -44,7 +45,8 @@ export function applyMyRidesFilters(
   reports: Report[],
   statusFilter: StatusFilter,
   extraFilters: Set<ExtraFilter>,
-  ratingFilter: RatingFilter | null
+  ratingFilter: RatingFilter | null,
+  notifications: Notification[] = []
 ): Ride[] {
   return list.filter(r => {
     if (statusFilter === "active" && r.completed) return false;
@@ -59,6 +61,9 @@ export function applyMyRidesFilters(
     if (extraFilters.has("hasReport")) {
       const reported = hasReportedAnyoneInRide(r, reports, userId);
       if (!reported) return false;
+    }
+    if (extraFilters.has("hasNotification")) {
+      if (!notifications.some(n => n.rideId === r.id)) return false;
     }
     if (!matchesRating(r, role, userId, reviews, ratingFilter)) return false;
     return true;

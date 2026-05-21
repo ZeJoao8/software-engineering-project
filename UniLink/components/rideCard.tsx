@@ -10,6 +10,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useReviews } from "../hooks/useReviews";
 import { useReports } from "../hooks/useReports";
 import type { Ride } from "../domain/entities/Ride";
+import type { Notification, NotificationType } from "../domain/entities/Notification";
 import {
   buildRideCardTags,
   type RideCardTag,
@@ -76,14 +77,76 @@ function toDisplayTag(tag: RideCardTag): DisplayTag {
   }
 }
 
+type NotifCategory = {
+  key: string;
+  emoji: string;
+  description: string;
+  bg: string;
+  matches: NotificationType[];
+};
+
+const NOTIF_CATEGORIES: NotifCategory[] = [
+  {
+    key: "notif_join",
+    emoji: "👤+",
+    description: "A new passenger joined this ride",
+    bg: colors.primarySoft,
+    matches: ["ride_join"],
+  },
+  {
+    key: "notif_leave",
+    emoji: "👤-",
+    description: "A passenger cancelled their reservation",
+    bg: colors.dangerSoft,
+    matches: ["ride_cancel", "passenger_removed"],
+  },
+  {
+    key: "notif_chat",
+    emoji: "💬",
+    description: "New chat message in this ride",
+    bg: colors.neutral ?? "#f0f0f0",
+    matches: ["chat_message"],
+  },
+  {
+    key: "notif_completed",
+    emoji: "✅",
+    description: "This ride has been marked as completed",
+    bg: colors.primarySoft,
+    matches: ["ride_completed"],
+  },
+  {
+    key: "notif_cancelled",
+    emoji: "🚫",
+    description: "This ride was cancelled",
+    bg: colors.dangerSoft,
+    matches: ["ride_cancelled"],
+  },
+  {
+    key: "notif_review",
+    emoji: "⭐",
+    description: "A passenger left a review for this ride",
+    bg: colors.neutral ?? "#f0f0f0",
+    matches: ["passenger_review"],
+  },
+];
+
+function buildNotifTags(notifications: Notification[]): DisplayTag[] {
+  const types = new Set(notifications.map(n => n.type));
+  return NOTIF_CATEGORIES
+    .filter(cat => cat.matches.some(t => types.has(t)))
+    .map(cat => ({ key: cat.key, emoji: cat.emoji, description: cat.description, bg: cat.bg }));
+}
+
 export default function RideCard({
   ride,
   onPress,
   showOccupancyLabel = false,
+  notifications = [],
 }: {
   ride: Ride;
   onPress: () => void;
   showOccupancyLabel?: boolean;
+  notifications?: Notification[];
 }) {
   const [openTooltip, setOpenTooltip] = useState<string | null>(null);
 
@@ -97,12 +160,43 @@ export default function RideCard({
       ? [toDisplayTag({ kind: "womenOnly" })]
       : [];
 
+  const notifTags = buildNotifTags(notifications);
+  const allTooltipItems = [...notifTags, ...tags];
+
+  function toggleTooltip(key: string, e: { stopPropagation?: () => void }) {
+    e.stopPropagation?.();
+    setOpenTooltip(prev => (prev === key ? null : key));
+  }
+
   return (
     <Pressable style={components.card} onPress={onPress}>
-      {/* COMPLETED BADGE */}
-      {ride.completed && (
-        <View style={components.completedTag}>
-          <Text style={components.completedTagText}>COMPLETED ✅</Text>
+
+      {/* TOP ROW: COMPLETED BADGE + NOTIFICATION BADGES */}
+      {(ride.completed || notifTags.length > 0) && (
+        <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap", marginBottom: 6, alignItems: "center" }}>
+          {ride.completed && (
+            <View style={components.completedTag}>
+              <Text style={components.completedTagText}>COMPLETED ✅</Text>
+            </View>
+          )}
+          {notifTags.map(tag => (
+            <Pressable
+              key={tag.key}
+              onPress={e => toggleTooltip(tag.key, e)}
+              style={[
+                {
+                  backgroundColor: tag.bg,
+                  paddingHorizontal: 8,
+                  paddingVertical: 3,
+                  borderRadius: 6,
+                },
+                openTooltip === tag.key && components.activeHighlight,
+                openTooltip && openTooltip !== tag.key && components.inactiveDim,
+              ]}
+            >
+              <Text style={{ fontSize: 13 }}>🔔 {tag.emoji}</Text>
+            </Pressable>
+          ))}
         </View>
       )}
 
@@ -133,12 +227,7 @@ export default function RideCard({
           {tags.map(tag => (
             <Pressable
               key={tag.key}
-              onPress={e => {
-                e.stopPropagation?.();
-                setOpenTooltip(
-                  openTooltip === tag.key ? null : tag.key
-                );
-              }}
+              onPress={e => toggleTooltip(tag.key, e)}
               style={[
                 {
                   backgroundColor: tag.bg,
@@ -161,7 +250,7 @@ export default function RideCard({
       {openTooltip && (
         <View style={[components.tooltip, { alignSelf: "flex-end" }]}>
           <Text style={components.tooltipText}>
-            {tags.find(t => t.key === openTooltip)?.description}
+            {allTooltipItems.find(t => t.key === openTooltip)?.description}
           </Text>
         </View>
       )}

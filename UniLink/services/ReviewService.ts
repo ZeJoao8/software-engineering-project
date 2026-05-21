@@ -1,4 +1,5 @@
 import * as ReviewRepo from "../repositories/ReviewRepository";
+import { createNotification } from "./NotificationService";
 import type { Review } from "../domain/entities/Review";
 import { validateReviewRating } from "../domain/rules/reviewRules";
 
@@ -12,6 +13,15 @@ export async function addReview(review: Review): Promise<Result> {
     await ReviewRepo.save({
       ...review,
       comment: review.comment.trim(),
+    });
+    await createNotification({
+      userId: review.revieweeId,
+      type: "passenger_review",
+      title: "New review",
+      body: review.comment.trim()
+        ? `A passenger rated you ${review.rating}/5 and left feedback.`
+        : `A passenger rated you ${review.rating}/5.`,
+      rideId: review.rideId,
     });
     return { ok: true };
   } catch {

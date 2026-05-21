@@ -11,5 +11,10 @@ export function getNotificationRoute(notification: Notification): string {
     case "ride_cancel":
     case "ride_completed":
       return `/ride/${notification.rideId}`;
+    case "friend_request":
+    case "friend_accepted":
+      return "/(tabs)/userProfile";
+    case "passenger_review":
+      return `/ride/${notification.rideId}`;
   }
 }

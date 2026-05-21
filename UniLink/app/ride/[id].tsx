@@ -19,7 +19,9 @@ import { useRides } from "../../hooks/useRides";
 import { useCars } from "../../hooks/useCars";
 import { useReviews } from "../../hooks/useReviews";
 import { useReports } from "../../hooks/useReports";
+import { useNotifications } from "../../hooks/useNotifications";
 import * as RideService from "../../services/RideService";
+import { stopMessagesSync } from "../../store/messageStore";
 import * as CarService from "../../services/CarService";
 import {
   canCompleteRide,
@@ -59,6 +61,7 @@ export default function RideDetails() {
   const { cars: driverCars } = useCars();
   const { reviews: allReviews } = useReviews();
   const { reports: allReports } = useReports();
+  const { notifications, markAsRead } = useNotifications();
 
   const ride = id ? rides.find(r => r.id === id) : undefined;
 
@@ -71,6 +74,15 @@ export default function RideDetails() {
   const [verifyCode, setVerifyCode] = useState("");
   const [showFeedback, setShowFeedback] = useState(false);
   const [routeStats, setRouteStats] = useState<RouteResult | null>(null);
+
+  useEffect(() => {
+    if (!id) return;
+    const toRead = notifications.filter(
+      n => n.rideId === id &&
+        (n.type === "ride_join" || n.type === "ride_cancel" || n.type === "passenger_removed" || n.type === "passenger_review")
+    );
+    for (const n of toRead) void markAsRead(n.id);
+  }, [notifications, id]);
 
   useEffect(() => {
     setSelectedCarId(ride?.carId ?? null);
@@ -128,6 +140,7 @@ export default function RideDetails() {
         onPress: async () => {
           const result = await RideService.cancelSeat(r.id, activeUser.uid);
           if (!result.ok) { Alert.alert("Cannot cancel", result.error); return; }
+          stopMessagesSync();
           router.replace("/(tabs)/myRides");
         },
       },
@@ -143,6 +156,7 @@ export default function RideDetails() {
         onPress: async () => {
           const result = await RideService.cancelRide(r.id);
           if (!result.ok) { Alert.alert("Cannot cancel", result.error); return; }
+          stopMessagesSync();
           router.replace("/(tabs)/myRides");
         },
       },

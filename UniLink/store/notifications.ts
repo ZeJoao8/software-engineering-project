@@ -56,6 +56,14 @@ export function getNotifications() {
   return notifications;
 }
 
+export function getNotificationsForRide(rideId: string) {
+  return notifications.filter(n => n.rideId === rideId);
+}
+
+export function getRideNotificationsCount() {
+  return notifications.filter(n => n.rideId !== undefined).length;
+}
+
 export function subscribeToNotificationsChanges(listener: () => void) {
   listeners.add(listener);
   syncWithAuth();

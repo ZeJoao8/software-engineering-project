@@ -24,12 +24,15 @@ const TYPE_ICON: Record<NotificationType, keyof typeof Ionicons.glyphMap> = {
   ride_completed:     "checkmark-circle-outline",
   ride_cancelled:     "close-circle-outline",
   chat_message:       "chatbubble-ellipses-outline",
+  friend_request:     "people-outline",
+  friend_accepted:    "people-outline",
+  passenger_review:   "star-outline",
 };
 
 export function NotificationBell() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { notifications, markAsRead } = useNotifications();
+  const { notifications, markAsRead, markAllAsRead } = useNotifications();
   const [panelVisible, setPanelVisible] = useState(false);
 
   const unreadCount = notifications.length;
@@ -38,6 +41,10 @@ export function NotificationBell() {
     await markAsRead(notification.id);
     setPanelVisible(false);
     router.push(getNotificationRoute(notification) as Parameters<typeof router.push>[0]);
+  }
+
+  async function handleClearAll() {
+    await markAllAsRead(notifications.map(n => n.id));
   }
 
   return (
@@ -68,9 +75,18 @@ export function NotificationBell() {
           >
             <View style={components.notifPanelHeader}>
               <Text style={components.notifPanelTitle}>Notifications</Text>
-              <Pressable onPress={() => setPanelVisible(false)}>
-                <Ionicons name="close" size={20} color={colors.textLight} />
-              </Pressable>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                {notifications.length > 0 && (
+                  <Pressable onPress={() => void handleClearAll()}>
+                    <Text style={{ color: colors.primary, fontSize: 13, fontWeight: "600" }}>
+                      Clear all
+                    </Text>
+                  </Pressable>
+                )}
+                <Pressable onPress={() => setPanelVisible(false)}>
+                  <Ionicons name="close" size={20} color={colors.textLight} />
+                </Pressable>
+              </View>
             </View>
 
             {notifications.length === 0 ? (

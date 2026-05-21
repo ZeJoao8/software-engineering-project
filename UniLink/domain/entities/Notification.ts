@@ -4,7 +4,10 @@ export type NotificationType =
   | "passenger_removed"
   | "ride_completed"
   | "ride_cancelled"
-  | "chat_message";
+  | "chat_message"
+  | "friend_request"
+  | "friend_accepted"
+  | "passenger_review";
 
 export interface Notification {
   id: string;
@@ -12,7 +15,8 @@ export interface Notification {
   type: NotificationType;
   title: string;
   body: string;
-  rideId: string;
+  rideId?: string;
+  friendshipId?: string;
   read: boolean;
   createdAt: string;
 }
