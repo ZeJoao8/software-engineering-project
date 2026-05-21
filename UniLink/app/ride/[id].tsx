@@ -4,6 +4,7 @@ import {
   View,
   Text,
   Alert,
+  Modal,
   Pressable,
   ScrollView,
   TextInput,
@@ -12,7 +13,6 @@ import {
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import * as Contacts from "expo-contacts";
 
 import { useAuth } from "../../hooks/useAuth";
 import { useRides } from "../../hooks/useRides";
@@ -65,6 +65,7 @@ export default function RideDetails() {
 
   const ride = id ? rides.find(r => r.id === id) : undefined;
 
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [editingCar, setEditingCar] = useState(false);
   const [selectedCarId, setSelectedCarId] = useState<string | null>(
     ride?.carId ?? null
@@ -221,50 +222,6 @@ export default function RideDetails() {
     );
   }
 
-  async function openPhoneContacts() {
-    try {
-      const { status } = await Contacts.requestPermissionsAsync();
-
-      if (status !== "granted") {
-        Alert.alert("Permission needed", "UniLink needs access to your contacts so you can choose an emergency contact.");
-        return;
-      }
-
-      const contact = await Contacts.presentContactPickerAsync();
-
-      if (!contact) return;
-
-      const phoneNumber = contact.phoneNumbers?.[0]?.number;
-
-      if (!phoneNumber) {
-        Alert.alert("No phone number", "The selected contact does not have a phone number.");
-        return;
-      }
-
-      Alert.alert(
-        "Call contact",
-        `Do you want to call ${contact.name ?? "this contact"}?\n\n${phoneNumber}`,
-        [
-          { text: "Cancel", style: "cancel" },
-          { text: "Call", onPress: () => Linking.openURL(`tel:${phoneNumber.replace(/\s/g, "")}`) },
-        ]
-      );
-    } catch {
-      Alert.alert("Contacts unavailable", "Could not open your phone contacts.");
-    }
-  }
-
-  function openEmergencyOptions() {
-    Alert.alert(
-      "Emergency contact",
-      "Choose an emergency option.",
-      [
-        { text: "Call 112", style: "destructive", onPress: callEmergencyNumber },
-        { text: "Choose phone contact", onPress: openPhoneContacts },
-        { text: "Cancel", style: "cancel" },
-      ]
-    );
-  }
 
   return (
     <SafeAreaView style={layout.screen}>
@@ -588,21 +545,75 @@ export default function RideDetails() {
         {(isDriver || joined) && (
           <View style={components.card}>
             <Text style={layout.subtitle}>Safety</Text>
-
             <Text style={[layout.textLight, { marginBottom: spacing.md }]}>
               If something feels unsafe during this ride, use the emergency contact options.
             </Text>
-
             <Button
               outline
               testID="emergencyContactButton"
-              onPress={openEmergencyOptions}
+              onPress={() => setShowEmergencyModal(true)}
               label="Emergency contact"
               style={{ borderColor: colors.danger }}
               textStyle={{ color: colors.danger }}
             />
           </View>
         )}
+
+        {/* EMERGENCY MODAL */}
+        <Modal
+          visible={showEmergencyModal}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowEmergencyModal(false)}
+        >
+          <Pressable
+            style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.4)", justifyContent: "flex-end" }}
+            onPress={() => setShowEmergencyModal(false)}
+          >
+            <Pressable
+              style={{ backgroundColor: colors.card, borderTopLeftRadius: 16, borderTopRightRadius: 16, padding: spacing.lg, gap: spacing.sm }}
+              onPress={() => {}}
+            >
+              <Text style={layout.subtitle}>Emergency contact</Text>
+
+              <Pressable
+                style={{ padding: spacing.md, borderRadius: 8, borderWidth: 1, borderColor: colors.danger }}
+                onPress={() => { setShowEmergencyModal(false); callEmergencyNumber(); }}
+              >
+                <Text style={{ color: colors.danger, fontWeight: "600", textAlign: "center" }}>Call 112</Text>
+              </Pressable>
+
+              {(activeUser.emergencyContacts ?? []).map((c, i) => (
+                <Pressable
+                  key={i}
+                  style={{ padding: spacing.md, borderRadius: 8, borderWidth: 1, borderColor: colors.danger }}
+                  onPress={() => {
+                    setShowEmergencyModal(false);
+                    Linking.openURL(`tel:${c.phone.replace(/\s/g, "")}`);
+                  }}
+                >
+                  <Text style={{ color: colors.danger, fontWeight: "600", textAlign: "center" }}>Call {c.name}</Text>
+                </Pressable>
+              ))}
+
+              {(activeUser.emergencyContacts ?? []).length === 0 && (
+                <Text
+                  style={[layout.link, { textAlign: "center" }]}
+                  onPress={() => { setShowEmergencyModal(false); router.push("/(tabs)/userProfile"); }}
+                >
+                  Add safety contact in profile →
+                </Text>
+              )}
+
+              <Pressable
+                style={{ padding: spacing.md, borderRadius: 8, backgroundColor: colors.background }}
+                onPress={() => setShowEmergencyModal(false)}
+              >
+                <Text style={{ textAlign: "center", color: colors.textLight, fontWeight: "600" }}>Cancel</Text>
+              </Pressable>
+            </Pressable>
+          </Pressable>
+        </Modal>
 
         {/* ACTIONS */}
         {(isDriver || joined) && (

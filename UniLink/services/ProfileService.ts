@@ -32,6 +32,9 @@ export async function updateProfile(user: User): Promise<Result> {
     name: user.name.trim(),
     university: user.university.trim(),
     course: user.course.trim(),
+    emergencyContacts: (user.emergencyContacts ?? [])
+      .map(c => ({ name: c.name.trim(), phone: c.phone.trim() }))
+      .filter(c => c.name || c.phone),
   };
   try {
     await UserRepo.update(trimmed);

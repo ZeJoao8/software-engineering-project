@@ -55,6 +55,10 @@ export default function Profile() {
   const [plate, setPlate] = useState("");
   const [seats, setSeats] = useState("");
 
+  const [showContactForm, setShowContactForm] = useState(false);
+  const [contactName, setContactName] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+
   // Sync editUser with store when not editing
   useEffect(() => {
     if (!editing) setEditUser(currentUser);
@@ -86,6 +90,21 @@ export default function Profile() {
     setColor("");
     setPlate("");
     setSeats("");
+    setShowContactForm(false);
+    setContactName("");
+    setContactPhone("");
+  }
+
+  function addContact() {
+    if (!contactName.trim() && !contactPhone.trim()) return;
+    setEditUser(prev =>
+      prev
+        ? { ...prev, emergencyContacts: [...(prev.emergencyContacts ?? []), { name: contactName.trim(), phone: contactPhone.trim() }] }
+        : prev
+    );
+    setContactName("");
+    setContactPhone("");
+    setShowContactForm(false);
   }
 
   async function saveProfile() {
@@ -226,6 +245,63 @@ export default function Profile() {
           </Text>
         )}
 
+
+        <View style={components.spacerSm} />
+
+        <Text style={layout.subtitle}>
+          Safety Contacts
+        </Text>
+
+        {(currentUser.emergencyContacts ?? []).length === 0 && !editing && (
+          <Text style={layout.textLight}>No safety contacts</Text>
+        )}
+
+        {(editing ? (editUser?.emergencyContacts ?? []) : (currentUser.emergencyContacts ?? [])).map((c, i) => (
+          <View key={i} style={[components.rowSpaceBetween, components.mbSm]}>
+            <Text>{c.name} · {c.phone}</Text>
+            {editing && (
+              <Pressable
+                style={components.dangerTag}
+                onPress={() =>
+                  setEditUser(prev =>
+                    prev
+                      ? { ...prev, emergencyContacts: (prev.emergencyContacts ?? []).filter((_, j) => j !== i) }
+                      : prev
+                  )
+                }
+              >
+                <Text style={components.dangerTagText}>Remove</Text>
+              </Pressable>
+            )}
+          </View>
+        ))}
+
+        {editing && (
+          <View style={components.mtMd}>
+            <Button
+              outline
+              onPress={() => setShowContactForm(f => !f)}
+              label={showContactForm ? "Cancel" : "Add contact"}
+            />
+          </View>
+        )}
+
+        {editing && showContactForm && (
+          <View style={[components.mtMd, { padding: spacing.md, backgroundColor: colors.background, borderRadius: radius.sm }]}>
+            <Text style={layout.subtitle}>Add safety contact</Text>
+
+            <Text style={forms.label}>Name</Text>
+            <TextInput value={contactName} onChangeText={setContactName} style={forms.input} placeholder="Contact name" />
+            <View style={components.spacerSm} />
+
+            <Text style={forms.label}>Phone</Text>
+            <TextInput value={contactPhone} onChangeText={setContactPhone} keyboardType="phone-pad" style={forms.input} placeholder="+351 xxx xxx xxx" />
+
+            <View style={components.mtMd}>
+              <Button onPress={addContact} label="Save contact" />
+            </View>
+          </View>
+        )}
 
         <View style={components.spacerMd} />
 

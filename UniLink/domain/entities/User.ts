@@ -12,4 +12,6 @@ export interface User {
 
  email: string;
 
+ emergencyContacts?: { name: string; phone: string }[];
+
 }
