@@ -2,153 +2,201 @@ import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 import { formatDate } from "../utils/date";
+import { ratingBackground } from "../utils/ratingStyle";
 import { components } from "../styles/components";
 import { layout } from "../styles/layout";
-import { colors, spacing } from "../styles/theme";
-import { getCurrentUser, getUserById } from "../data/user";
-import { getReports } from "../data/reports";
-import { getReviewsForUser, getReviews } from "../data/reviews";
-import type { Ride } from "../types/Ride";
+import { colors } from "../styles/theme";
+import { useAuth } from "../hooks/useAuth";
+import { useReviews } from "../hooks/useReviews";
+import { useReports } from "../hooks/useReports";
+import type { Ride } from "../domain/entities/Ride";
+import type { Notification, NotificationType } from "../domain/entities/Notification";
+import {
+  buildRideCardTags,
+  type RideCardTag,
+} from "../domain/rules/rideCardTags";
 
-function ratingBackground(rating: number) {
-  if (rating >= 4) return colors.primaryLight;
-  if (rating === 3) return colors.warning;
-  return colors.dangerSoft;
-}
-
-interface Tag {
+interface DisplayTag {
   key: string;
   emoji: string;
   description: string;
-  bg?: string;
+  bg: string;
+}
+
+function toDisplayTag(tag: RideCardTag): DisplayTag {
+  switch (tag.kind) {
+    case "womenOnly":
+      return {
+        key: "womenOnly",
+        emoji: "♀️",
+        description: "Women only ride",
+        bg: colors.womenSoft,
+      };
+    case "friendsOnly":
+      return {
+        key: "friendsOnly",
+        emoji: "👥",
+        description: "Friends only ride",
+        bg: colors.primarySoft,
+      };
+    case "driverRating":
+      return {
+        key: "driverRating",
+        emoji: `⭐ ${tag.average}${tag.hasComments ? " 💬" : ""}`,
+        description: `Your average rating on this ride ${tag.hasComments ? "— Passenger left feedback!" : ""}`,
+        bg: ratingBackground(tag.average),
+      };
+    case "driverNoRating":
+      return {
+        key: "driverNoRating",
+        emoji: "⭐",
+        description: "No ratings received for this ride yet",
+        bg: colors.neutral,
+      };
+    case "reportedInRide":
+      return {
+        key: "reported",
+        emoji: "⚠️",
+        description: "You have reported someone who is on this ride",
+        bg: colors.dangerSoft,
+      };
+    case "passengerRating":
+      return {
+        key: "rating",
+        emoji: `⭐ ${tag.rating}${tag.hasComment ? " 💬" : ""}`,
+        description: `You rated this driver ${tag.rating}/5${tag.hasComment ? " and gave feedback" : ""}`,
+        bg: ratingBackground(tag.rating),
+      };
+    case "passengerNoRating":
+      return {
+        key: "rate",
+        emoji: "⭐",
+        description: "You haven't rated this driver yet",
+        bg: colors.border,
+      };
+  }
+}
+
+type NotifCategory = {
+  key: string;
+  emoji: string;
+  description: string;
+  bg: string;
+  matches: NotificationType[];
+};
+
+const NOTIF_CATEGORIES: NotifCategory[] = [
+  {
+    key: "notif_join",
+    emoji: "👤+",
+    description: "A new passenger joined this ride",
+    bg: colors.primarySoft,
+    matches: ["ride_join"],
+  },
+  {
+    key: "notif_leave",
+    emoji: "👤-",
+    description: "A passenger cancelled their reservation",
+    bg: colors.dangerSoft,
+    matches: ["ride_cancel", "passenger_removed"],
+  },
+  {
+    key: "notif_chat",
+    emoji: "💬",
+    description: "New chat message in this ride",
+    bg: colors.neutral ?? "#f0f0f0",
+    matches: ["chat_message"],
+  },
+  {
+    key: "notif_completed",
+    emoji: "✅",
+    description: "This ride has been marked as completed",
+    bg: colors.primarySoft,
+    matches: ["ride_completed"],
+  },
+  {
+    key: "notif_cancelled",
+    emoji: "🚫",
+    description: "This ride was cancelled",
+    bg: colors.dangerSoft,
+    matches: ["ride_cancelled"],
+  },
+  {
+    key: "notif_review",
+    emoji: "⭐",
+    description: "A passenger left a review for this ride",
+    bg: colors.neutral ?? "#f0f0f0",
+    matches: ["passenger_review"],
+  },
+];
+
+function buildNotifTags(notifications: Notification[]): DisplayTag[] {
+  const types = new Set(notifications.map(n => n.type));
+  return NOTIF_CATEGORIES
+    .filter(cat => cat.matches.some(t => types.has(t)))
+    .map(cat => ({ key: cat.key, emoji: cat.emoji, description: cat.description, bg: cat.bg }));
 }
 
 export default function RideCard({
   ride,
   onPress,
   showOccupancyLabel = false,
+  notifications = [],
 }: {
   ride: Ride;
   onPress: () => void;
   showOccupancyLabel?: boolean;
+  notifications?: Notification[];
 }) {
   const [openTooltip, setOpenTooltip] = useState<string | null>(null);
 
-  const user = getCurrentUser();
+  const { user } = useAuth();
+  const { reviews } = useReviews();
+  const { reports } = useReports();
 
-  const tags: Tag[] = [];
+  const tags: DisplayTag[] = user
+    ? buildRideCardTags(ride, user.uid, reviews, reports).map(toDisplayTag)
+    : ride.womenOnly
+      ? [toDisplayTag({ kind: "womenOnly" })]
+      : [];
 
-  if (ride.womenOnly) {
-    tags.push({
-      key: "womenOnly",
-      emoji: "♀️",
-      description: "Women only ride",
-      bg: colors.womenSoft,
-    });
-  }
+  const notifTags = buildNotifTags(notifications);
+  const allTooltipItems = [...notifTags, ...tags];
 
-  if (ride.friendsOnly) {
-    tags.push({
-      key: "friendsOnly",
-      emoji: "👥",
-      description: "Friends only ride",
-      bg: colors.primarySoft,
-    });
-  }
-
-  if (user) {
-    const isPassenger =
-      ride.passengers.includes(user.uid)
-
-    const isDriver =
-      ride.driverId === user.uid
-
-    if (isDriver && ride.completed) {
-      const rideReviews = getReviews().filter(
-        r => r.rideId === ride.id &&
-          (r.revieweeId === user.uid)
-      );
-
-      if (rideReviews.length > 0) {
-        const avg = rideReviews.reduce((sum, r) => sum + r.rating, 0) / rideReviews.length;
-        const avgRounded = Number(avg.toFixed(1));
-        const hasComments = rideReviews.some(r => r.comment.trim().length > 0);
-
-        tags.push({
-          key: "driverRating",
-          emoji: `⭐ ${avgRounded}${hasComments ? " 💬" : ""}`,
-          description: `Your average rating on this ride ${hasComments ? "— Passenger left feedback!" : ""}`,
-          bg: ratingBackground(avgRounded),
-        });
-      } else {
-        tags.push({
-          key: "driverNoRating",
-          emoji: "⭐",
-          description: "No ratings received for this ride yet",
-          bg: colors.neutral,
-        });
-      }
-    }
-
-    // Report warning: check if current user has reported anyone in this ride
-    const allReports = getReports();
-    const reportedInThisRide =
-      [...ride.passengers, ride.driverId].some(targetId => {
-        if (targetId === user.uid) return false;
-        return allReports.some(
-          report =>
-            report.reporterId === user.uid &&
-            report.reportedUserId === targetId
-        );
-      });
-
-    const myRideReviews = getReviews().filter(
-      r => r.rideId === ride.id &&
-        (r.reviewerId === user.uid)
-    );
-
-    const myComments = myRideReviews.some(r => r.comment.trim().length > 0);
-
-    if (reportedInThisRide) {
-      tags.push({
-        key: "reported",
-        emoji: "⚠️",
-        description: "You have reported someone who is on this ride",
-        bg: colors.dangerSoft,
-      });
-    }
-
-    if (isPassenger && !isDriver && ride.completed) {
-      const myReview = getReviewsForUser(ride.driverId).find(
-        r =>
-          r.rideId === ride.id &&
-          r.reviewerId === user.uid
-      );
-
-      if (myReview) {
-        tags.push({
-          key: "rating",
-          emoji: `⭐ ${myReview.rating} ${myComments ? ' 💬' : ''}`,
-          description: `You rated this driver ${myReview.rating}/5 ${myComments ? "and gave feedback" : ""}`,
-          bg: ratingBackground(myReview.rating),
-        });
-      } else {
-        tags.push({
-          key: "rate",
-          emoji: "⭐",
-          description: "You haven't rated this driver yet",
-          bg: colors.border,
-        });
-      }
-    }
+  function toggleTooltip(key: string, e: { stopPropagation?: () => void }) {
+    e.stopPropagation?.();
+    setOpenTooltip(prev => (prev === key ? null : key));
   }
 
   return (
     <Pressable style={components.card} onPress={onPress}>
-      {/* COMPLETED BADGE */}
-      {ride.completed && (
-        <View style={components.completedTag}>
-          <Text style={components.completedTagText}>COMPLETED ✅</Text>
+
+      {/* TOP ROW: COMPLETED BADGE + NOTIFICATION BADGES */}
+      {(ride.completed || notifTags.length > 0) && (
+        <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap", marginBottom: 6, alignItems: "center" }}>
+          {ride.completed && (
+            <View style={components.completedTag}>
+              <Text style={components.completedTagText}>COMPLETED ✅</Text>
+            </View>
+          )}
+          {notifTags.map(tag => (
+            <Pressable
+              key={tag.key}
+              onPress={e => toggleTooltip(tag.key, e)}
+              style={[
+                {
+                  backgroundColor: tag.bg,
+                  paddingHorizontal: 8,
+                  paddingVertical: 3,
+                  borderRadius: 6,
+                },
+                openTooltip === tag.key && components.activeHighlight,
+                openTooltip && openTooltip !== tag.key && components.inactiveDim,
+              ]}
+            >
+              <Text style={{ fontSize: 13 }}>🔔 {tag.emoji}</Text>
+            </Pressable>
+          ))}
         </View>
       )}
 
@@ -158,7 +206,7 @@ export default function RideCard({
       </Text>
 
       {/* DATE */}
-      <Text style={[layout.textLight, { marginBottom: spacing.sm }]}>
+      <Text style={[layout.textLight, { marginBottom: 8 }]}>
         {formatDate(ride.departureDateTime)}
       </Text>
 
@@ -179,15 +227,10 @@ export default function RideCard({
           {tags.map(tag => (
             <Pressable
               key={tag.key}
-              onPress={e => {
-                e.stopPropagation?.();
-                setOpenTooltip(
-                  openTooltip === tag.key ? null : tag.key
-                );
-              }}
+              onPress={e => toggleTooltip(tag.key, e)}
               style={[
                 {
-                  backgroundColor: tag.bg ?? colors.neutral,
+                  backgroundColor: tag.bg,
                   paddingHorizontal: 8,
                   paddingVertical: 4,
                   borderRadius: 6,
@@ -207,7 +250,7 @@ export default function RideCard({
       {openTooltip && (
         <View style={[components.tooltip, { alignSelf: "flex-end" }]}>
           <Text style={components.tooltipText}>
-            {tags.find(t => t.key === openTooltip)?.description}
+            {allTooltipItems.find(t => t.key === openTooltip)?.description}
           </Text>
         </View>
       )}

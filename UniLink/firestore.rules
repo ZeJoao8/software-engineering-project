@@ -19,11 +19,18 @@ service cloud.firestore {
       return request.auth.uid in data.passengers;
     }
 
-    function passengerFieldsOnly() {
+    function joinFieldsOnly() {
       return request.resource.data
         .diff(resource.data)
         .affectedKeys()
         .hasOnly(["passengers", "availableSeats", "passengerCodes"]);
+    }
+
+    function leaveFieldsOnly() {
+      return request.resource.data
+        .diff(resource.data)
+        .affectedKeys()
+        .hasOnly(["passengers", "availableSeats", "passengerCodes", "verifiedPassengers"]);
     }
 
     function validSeatCount(data) {
@@ -32,7 +39,7 @@ service cloud.firestore {
     }
 
     function canJoinRide() {
-      return passengerFieldsOnly() &&
+      return joinFieldsOnly() &&
         !currentUserIsPassenger(resource.data) &&
         currentUserIsPassenger(request.resource.data) &&
         request.resource.data.availableSeats == resource.data.availableSeats - 1 &&
@@ -41,7 +48,7 @@ service cloud.firestore {
     }
 
     function canLeaveRide() {
-      return passengerFieldsOnly() &&
+      return leaveFieldsOnly() &&
         currentUserIsPassenger(resource.data) &&
         !currentUserIsPassenger(request.resource.data) &&
         request.resource.data.availableSeats == resource.data.availableSeats + 1 &&
@@ -86,6 +93,12 @@ service cloud.firestore {
       allow create: if signedIn() &&
         request.resource.data.reporterId == request.auth.uid &&
         isParticipant(request.resource.data.rideId);
+    }
+
+    match /notifications/{notificationId} {
+      // Only the recipient can read or mark as read; any signed-in user can create (cross-user delivery)
+      allow read, update: if signedIn() && matchesCurrentUser(resource.data.userId);
+      allow create: if signedIn();
     }
 
     match /chat_messages/{messageId} {

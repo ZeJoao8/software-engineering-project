@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 
 
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -8,48 +8,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import MapView, { Marker, Polyline, PROVIDER_DEFAULT } from "react-native-maps";
 import { useRouter } from "expo-router";
 
-import { getSelectedBusRoute } from "../../data/busRoute";
-import { getRoute, type Coordinates } from "../../utils/routing";
+import { getSelectedBusRoute } from "../../store/busRouteStore";
+import { getRoute, type Coordinates } from "../../infra/routing";
 import ZoomControls from "../../components/ZoomControls";
 
 import { components } from "../../styles/components";
 import { colors, spacing, radius } from "../../styles/theme";
 import { layout } from "../../styles/layout";
-
-
-const TRANSIT_COLORS = ["#2563EB", "#eb8614", "#7C3AED", "#eedc3d"];
-
-function buildLegColorMap(legs: { mode: string; lineName?: string }[]): Record<number, string> {
-  const map: Record<number, string> = {};
-  let colorIndex = -1;
-  let lastLineName: string | undefined = undefined;
-  for (let i = 0; i < legs.length; i++) {
-    if (legs[i].mode.toUpperCase() === "WALK") continue;
-    if (legs[i].lineName !== lastLineName) {
-      colorIndex = (colorIndex + 1) % TRANSIT_COLORS.length;
-      lastLineName = legs[i].lineName;
-    }
-    map[i] = TRANSIT_COLORS[colorIndex];
-  }
-  return map;
-}
-
-function modeEmoji(mode: string) {
-  switch (mode.toUpperCase()) {
-    case "BUS":    return "🚌";
-    case "SUBWAY": return "🚇";
-    case "RAIL":   return "🚆";
-    case "TRAM":   return "🚃";
-    case "FERRY":  return "⛴️";
-    case "WALK":   return "🚶";
-    default:       return "🚌";
-  }
-}
-
-function modeLabel(mode: string, lineName?: string) {
-  if (mode.toUpperCase() === "WALK") return "Walk";
-  return lineName ? `Line ${lineName}` : mode;
-}
+import { modeEmoji, modeLabel, buildLegColorMap } from "../../utils/transitDisplay";
 
 export default function BusRouteDetail() {
   const router = useRouter();

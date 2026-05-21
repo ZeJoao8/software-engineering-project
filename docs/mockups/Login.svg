@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844">
+  <defs>
+    <style>text { font-family: -apple-system, 'Helvetica Neue', sans-serif; }</style>
+  </defs>
+
+  <!-- Full green background -->
+  <rect width="390" height="844" fill="#10b981"/>
+  <!-- Darker wave at bottom of green section -->
+  <ellipse cx="195" cy="310" rx="280" ry="80" fill="#0d9e6e" opacity="0.4"/>
+
+  <!-- Status bar -->
+  <text x="32" y="24" fill="#ecfdf5" font-size="13" font-weight="600">9:41</text>
+
+  <!-- Logo circle -->
+  <circle cx="195" cy="120" r="52" fill="rgba(255,255,255,0.15)"/>
+  <circle cx="195" cy="120" r="44" fill="#ecfdf5" opacity="0.95"/>
+  <!-- Car icon -->
+  <path d="M172 126 L178 112 Q180 108 186 108 L204 108 Q210 108 212 112 L218 126 L218 133 Q218 137 214 137 L176 137 Q172 137 172 133 Z" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linejoin="round"/>
+  <circle cx="181" cy="137" r="4.5" fill="#10b981"/>
+  <circle cx="209" cy="137" r="4.5" fill="#10b981"/>
+  <rect x="182" y="112" width="26" height="10" fill="#d1fae5" rx="2"/>
+
+  <!-- Title -->
+  <text x="195" y="196" text-anchor="middle" fill="white" font-size="34" font-weight="800">UniLink 🌱</text>
+  <text x="195" y="220" text-anchor="middle" fill="#ecfdf5" font-size="15">Boleias Universitárias Gratuitas</text>
+
+  <!-- White card -->
+  <rect x="0" y="248" width="390" height="596" fill="white" rx="28"/>
+
+  <!-- Tab toggle (Login / Register) -->
+  <rect x="80" y="270" width="230" height="38" fill="#ecfdf5" rx="19"/>
+  <rect x="80" y="270" width="115" height="38" fill="#10b981" rx="19"/>
+  <text x="137" y="295" text-anchor="middle" fill="white" font-size="14" font-weight="700">Entrar</text>
+  <text x="252" y="295" text-anchor="middle" fill="#047857" font-size="14">Registar</text>
+
+  <!-- Email field -->
+  <text x="28" y="336" fill="#0f172a" font-size="13" font-weight="600">Email Universitário</text>
+  <rect x="16" y="344" width="358" height="50" fill="#f8fafc" rx="10" stroke="#e2e8f0" stroke-width="1.5"/>
+  <text x="52" y="375" fill="#94a3b8" font-size="14">📧  joao@feup.pt</text>
+
+  <!-- Password field -->
+  <text x="28" y="416" fill="#0f172a" font-size="13" font-weight="600">Password</text>
+  <rect x="16" y="424" width="358" height="50" fill="#f8fafc" rx="10" stroke="#e2e8f0" stroke-width="1.5"/>
+  <text x="52" y="455" fill="#94a3b8" font-size="14">🔒  ••••••••</text>
+  <text x="356" y="455" text-anchor="end" fill="#10b981" font-size="13">Ver</text>
+
+  <!-- Login button -->
+  <rect x="16" y="492" width="358" height="52" fill="#10b981" rx="28"/>
+  <text x="195" y="524" text-anchor="middle" fill="white" font-size="16" font-weight="700">ENTRAR</text>
+
+  <!-- Forgot password -->
+  <text x="195" y="565" text-anchor="middle" fill="#10b981" font-size="14">Esqueceste a password?</text>
+
+  <!-- University email info box -->
+  <rect x="16" y="582" width="358" height="50" fill="#ecfdf5" rx="12"/>
+  <text x="195" y="603" text-anchor="middle" fill="#047857" font-size="13">🎓  Usa o teu email universitário para acederes</text>
+  <text x="195" y="620" text-anchor="middle" fill="#047857" font-size="12">Aceites: @up.pt  ·  @feup.pt</text>
+
+  <!-- Test accounts -->
+  <text x="195" y="658" text-anchor="middle" fill="#94a3b8" font-size="12">Contas de teste: joao@feup.pt · maria@feup.pt</text>
+
+  <!-- Bottom tagline -->
+  <text x="195" y="710" text-anchor="middle" fill="#94a3b8" font-size="13">Partilha, Poupa, Conecta 🚗💚</text>
+</svg>

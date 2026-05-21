@@ -6,8 +6,10 @@ import {
   useRouter
 } from "expo-router";
 
-import { getPendingReceivedRequests, subscribeToFriendshipsChanges } from "../../data/friends";
+import { getPendingReceivedRequests, subscribeToFriendshipsChanges } from "../../store/friends";
+import { getRideNotificationsCount, subscribeToNotificationsChanges } from "../../store/notifications";
 import { colors, radius } from "../../styles/theme";
+import { NotificationBell } from "../../components/NotificationBell";
 
 function CreateRideHeaderButton() {
   const router = useRouter();
@@ -40,10 +42,18 @@ function CreateRideHeaderButton() {
 
 export default function TabsLayout() {
   const [pendingCount, setPendingCount] = useState(getPendingReceivedRequests().length);
+  const [rideNotifCount, setRideNotifCount] = useState(getRideNotificationsCount());
 
   useEffect(() => {
     const unsub = subscribeToFriendshipsChanges(() => {
       setPendingCount(getPendingReceivedRequests().length);
+    });
+    return unsub;
+  }, []);
+
+  useEffect(() => {
+    const unsub = subscribeToNotificationsChanges(() => {
+      setRideNotifCount(getRideNotificationsCount());
     });
     return unsub;
   }, []);
@@ -61,6 +71,8 @@ export default function TabsLayout() {
         },
 
         headerTintColor: colors.primarySoft,
+
+        headerLeft: () => <NotificationBell />,
 
         tabBarStyle: {
           backgroundColor: colors.primary,
@@ -88,6 +100,7 @@ export default function TabsLayout() {
           title: "My Rides",
           headerTitle: "My Rides",
           tabBarButtonTestID: "myRidesTab",
+          tabBarBadge: rideNotifCount > 0 ? rideNotifCount : undefined,
         }}
       />
 

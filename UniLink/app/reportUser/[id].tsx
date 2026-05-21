@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   Alert,
-  Pressable,
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -14,12 +13,14 @@ import {
   useRouter,
 } from "expo-router";
 
-import { getRides } from "../../data/rides";
-import { getCurrentUser, getUserById } from "../../data/user";
-import { addReport, hasReportForRide } from "../../data/reports";
-import { generateId } from "../../lib/firebase";
+import { useAuth } from "../../hooks/useAuth";
+import { useRides } from "../../hooks/useRides";
+import { useReports } from "../../hooks/useReports";
+import { addReport } from "../../services/ReportService";
+import { generateId } from "../../infra/firebase";
+import { canAccessRideReport } from "../../domain/rules/rideRules";
+import { validateReportReason } from "../../domain/rules/reportRules";
 
-import { components } from "../../styles/components";
 import { Button } from "../../components/Button";
 import { forms } from "../../styles/forms";
 import { layout } from "../../styles/layout";
@@ -29,98 +30,75 @@ export default function ReportUser() {
   const router = useRouter();
   const params = useLocalSearchParams();
 
-  const rideId =
-    typeof params.id === "string" ? params.id : "";
+  const rideId = typeof params.id === "string" ? params.id : "";
+  const targetUserId = typeof params.targetUserId === "string" ? params.targetUserId : "";
 
-  const targetUserId =
-    typeof params.targetUserId === "string"
-      ? params.targetUserId
-      : "";
+  const rides = useRides();
+  const { user: activeUser, getUserById } = useAuth();
+  const { hasReportForRide } = useReports();
 
-  const ride = getRides().find(r => r.id === rideId);
-  const activeUser = getCurrentUser();
+  const ride = rides.find(r => r.id === rideId);
   const targetUser = targetUserId ? getUserById(targetUserId) : undefined;
 
   const [reason, setReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  if (!ride || !activeUser || !targetUser) return null;
+  const canAccess = !!ride && !!activeUser && !!targetUser &&
+    canAccessRideReport(ride, activeUser.uid, targetUser.uid);
 
-  const isDriver = ride.driverId === activeUser.uid;
-
-  const isPassenger = ride.passengers.includes(activeUser.uid);
-
-  const targetIsPassenger = ride.passengers.includes(targetUser.uid);
-
-  const targetIsDriver = ride.driverId === targetUser.uid;
-
-  const canAccess =
-    ride.completed &&
-    (isDriver || isPassenger) &&
-    (targetIsPassenger || targetIsDriver) &&
-    targetUser.uid !== activeUser.uid;
-
-  const alreadyReported = hasReportForRide(
-    ride.id,
-    activeUser.uid,
-    targetUser.uid
-  );
+  const alreadyReported = ride && activeUser && targetUser
+    ? hasReportForRide(ride.id, activeUser.uid, targetUser.uid)
+    : false;
 
   const trimmedReason = reason.trim();
 
   useEffect(() => {
-    if (!canAccess) {
+    if (ride && activeUser && targetUser && !canAccess) {
       Alert.alert("Not allowed", "You cannot report this user.");
       router.replace("/(tabs)/myRides");
     }
-  }, [canAccess, router]);
+  }, [canAccess, ride, activeUser, targetUser, router]);
 
-  if (!canAccess) return null;
+  if (!ride || !activeUser || !targetUser || !canAccess) return null;
 
   async function submitReport() {
     if (!ride || !activeUser || !targetUser) return;
     if (submitting) return;
 
     if (alreadyReported) {
-      Alert.alert(
-        "Already reported",
-        "You have already reported this user for this ride."
-      );
+      Alert.alert("Already reported", "You have already reported this user for this ride.");
       router.replace(`/ride/${ride.id}`);
       return;
     }
 
-    if (trimmedReason.length < 15) {
-      Alert.alert(
-        "Reason too short",
-        "Please write at least 15 characters."
-      );
+    const reasonCheck = validateReportReason(trimmedReason);
+    if (!reasonCheck.ok) {
+      Alert.alert("Reason too short", reasonCheck.error);
       return;
     }
 
     setSubmitting(true);
 
-    await addReport({
+    const result = await addReport({
       id: generateId("reports"),
       rideId: ride.id,
       reporterId: activeUser.uid,
       reportedUserId: targetUser.uid,
       reason: trimmedReason,
       createdAt: new Date().toISOString(),
-      status: "pending",
     });
 
     setSubmitting(false);
 
+    if (!result.ok) {
+      Alert.alert("Error", result.error);
+      return;
+    }
+
     Alert.alert(
       "Report submitted",
       "Your report was submitted successfully.",
-      [
-        {
-          text: "OK",
-          onPress: () => router.replace(`/ride/${ride.id}`),
-        },
-      ]
+      [{ text: "OK", onPress: () => router.replace(`/ride/${ride.id}`) }]
     );
   }
 

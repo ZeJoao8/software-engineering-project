@@ -10,7 +10,8 @@
     "lint": "expo lint",
     "acceptance:maestro": "maestro test ./maestro",
     "acceptance:maestro:login": "maestro test ./maestro/auth_login_success.yaml",
-    "test": "jest"
+    "test": "jest",
+    "typecheck": "tsc --noEmit --noUnusedLocals --noUnusedParameters"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

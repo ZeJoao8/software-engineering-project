@@ -1,17 +1,15 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
-import { getCurrentUser, getUserById, getUsers } from "../data/user";
+import { useAuth } from "../hooks/useAuth";
+import { useFriends } from "../hooks/useFriends";
 import {
   acceptFriendRequest,
-  getFriendshipStatus,
-  getPendingReceivedRequests,
   removeFriend,
-  subscribeToFriendshipsChanges,
-} from "../data/friends";
+} from "../services/FriendService";
 
 import { forms } from "../styles/forms";
 import { layout } from "../styles/layout";
@@ -20,14 +18,9 @@ import { components } from "../styles/components";
 
 export default function FindFriends() {
   const router = useRouter();
+  const { user: me, getUserById, getUsers } = useAuth();
+  const { getFriendshipStatus, getPendingReceivedRequests } = useFriends();
   const [query, setQuery] = useState("");
-  const [, setVersion] = useState(0);
-  const me = getCurrentUser();
-
-  useEffect(() => {
-    const unsub = subscribeToFriendshipsChanges(() => setVersion(v => v + 1));
-    return unsub;
-  }, []);
 
   const pending = getPendingReceivedRequests();
 

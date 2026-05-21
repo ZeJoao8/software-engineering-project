@@ -11,8 +11,8 @@ import {
 import {
   searchPlaces,
   type AddressSuggestion,
-  type Coordinates,
-} from "../utils/routing";
+} from "../infra/geocoding";
+import type { Coordinates } from "../infra/routing";
 
 import { colors } from "../styles/theme";
 import { forms } from "../styles/forms";

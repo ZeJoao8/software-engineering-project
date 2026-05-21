@@ -6,24 +6,29 @@ import {
   View,
 } from "react-native";
 
-import { useRouter, useFocusEffect } from "expo-router";
-import { useState, useCallback, useEffect } from "react";
+import { useRouter } from "expo-router";
+import { useState } from "react";
 
-import { getRides, removeEmptyPastRides, subscribeToRidesChanges } from "../../data/rides";
-import { getReviews, subscribeToReviewsChanges } from "../../data/reviews";
-import { getReports, subscribeToReportsChanges } from "../../data/reports";
-import { getCurrentUser } from "../../data/user";
+import { useAuth } from "../../hooks/useAuth";
+import { useRides } from "../../hooks/useRides";
+import { useReviews } from "../../hooks/useReviews";
+import { useReports } from "../../hooks/useReports";
+import { useNotifications } from "../../hooks/useNotifications";
 import { sortByDateDesc } from "../../utils/date";
-import type { Ride } from "../../types/Ride";
+
+import {
+  applyMyRidesFilters,
+  type StatusFilter,
+  type ExtraFilter,
+  type RatingFilter,
+} from "../../domain/rules/myRidesFilters";
+import { isUserDriver, isUserPassenger } from "../../domain/rules/rideRules";
 
 import RideCard from "../../components/rideCard";
 import { components } from "../../styles/components";
 import { layout } from "../../styles/layout";
-import { colors, spacing } from "../../styles/theme";
-
-type StatusFilter = "all" | "active" | "completed";
-type ExtraFilter = "womenOnly" | "hasFeedback" | "hasReport";
-type RatingFilter = "none" | "1-2" | "3" | "4-5";
+import { spacing } from "../../styles/theme";
+import { RATING_ACTIVE_COLORS } from "../../utils/ratingStyle";
 
 const STATUS_FILTERS: { key: StatusFilter; label: string }[] = [
   { key: "all", label: "All" },
@@ -35,6 +40,7 @@ const EXTRA_FILTERS: { key: ExtraFilter; label: string }[] = [
   { key: "womenOnly", label: "♀️ Women only" },
   { key: "hasFeedback", label: "💬 Has feedback" },
   { key: "hasReport", label: "⚠️ Has report" },
+  { key: "hasNotification", label: "🔔 Has notification" },
 ];
 
 const RATING_FILTERS: { key: RatingFilter; label: string }[] = [
@@ -44,54 +50,24 @@ const RATING_FILTERS: { key: RatingFilter; label: string }[] = [
   { key: "4-5",  label: "⭐ 4-5" },
 ];
 
-const RATING_ACTIVE_COLORS: Record<RatingFilter, { bg: string; text: string }> = {
-  "none": { bg: colors.neutralDark,    text: colors.text },
-  "1-2":  { bg: colors.dangerSoft,   text: colors.danger },
-  "3":    { bg: colors.warning,      text: colors.text },
-  "4-5":  { bg: colors.primaryLight, text: colors.primaryDark },
-};
 
 export default function MyRides() {
   const router = useRouter();
 
-  const [rides, setRides] = useState(getRides());
-  const [user, setUser] = useState(getCurrentUser());
+  const rides = useRides();
+  const { user } = useAuth();
+  const { reviews } = useReviews();
+  const { reports } = useReports();
+  const { notifications } = useNotifications();
+
   const [driverOpen, setDriverOpen] = useState(true);
   const [passengerOpen, setPassengerOpen] = useState(true);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [extraFilters, setExtraFilters] = useState(new Set<ExtraFilter>());
   const [ratingFilter, setRatingFilter] = useState<RatingFilter | null>(null);
 
-  useFocusEffect(
-    useCallback(() => {
-      removeEmptyPastRides();
-      setRides([...getRides()]);
-      setUser(getCurrentUser());
-    }, [])
-  );
-
-  useEffect(() => {
-    const triggerRender = () => setRides([...getRides()]);
-    const unsubRides = subscribeToRidesChanges(triggerRender);
-    const unsubReviews = subscribeToReviewsChanges(triggerRender);
-    const unsubReports = subscribeToReportsChanges(triggerRender);
-    const interval = setInterval(() => {
-      removeEmptyPastRides();
-      triggerRender();
-    }, 10000);
-    return () => {
-      unsubRides();
-      unsubReviews();
-      unsubReports();
-      clearInterval(interval);
-    };
-  }, []);
-
   if (!user) return null;
   const activeUser = user;
-
-  const allReviews = getReviews();
-  const allReports = getReports();
 
   function toggleExtra(key: ExtraFilter) {
     setExtraFilters(prev => {
@@ -102,60 +78,30 @@ export default function MyRides() {
     });
   }
 
-  function matchesRating(r: Ride, role: "driver" | "passenger"): boolean {
-    if (!ratingFilter) return true;
-    if (role === "driver") {
-      const rideReviews = allReviews.filter(
-        rev => rev.rideId === r.id && rev.revieweeId === activeUser.uid
-      );
-      if (ratingFilter === "none") return r.completed && rideReviews.length === 0;
-      if (rideReviews.length === 0) return false;
-      const avg = rideReviews.reduce((s, rev) => s + rev.rating, 0) / rideReviews.length;
-      if (ratingFilter === "1-2") return avg < 3;
-      if (ratingFilter === "3") return avg >= 3 && avg < 4;
-      return avg >= 4;
-    }
-    const myReview = allReviews.find(
-      rev => rev.rideId === r.id && rev.reviewerId === activeUser.uid
-    );
-    if (ratingFilter === "none") return r.completed && !myReview;
-    if (!myReview) return false;
-    if (ratingFilter === "1-2") return myReview.rating <= 2;
-    if (ratingFilter === "3") return myReview.rating === 3;
-    return myReview.rating >= 4;
-  }
+  const rideNotifications = notifications.filter(n => n.rideId !== undefined);
 
-  function applyFilters(list: Ride[], role: "driver" | "passenger"): Ride[] {
-    return list.filter(r => {
-      if (statusFilter === "active" && r.completed) return false;
-      if (statusFilter === "completed" && !r.completed) return false;
-      if (extraFilters.has("womenOnly") && !r.womenOnly) return false;
-      if (extraFilters.has("hasFeedback")) {
-        const hasFeedback = role === "driver"
-          ? allReviews.some(rev => rev.rideId === r.id && rev.revieweeId === activeUser.uid && rev.comment.trim().length > 0)
-          : allReviews.some(rev => rev.rideId === r.id && rev.reviewerId === activeUser.uid && rev.comment.trim().length > 0);
-        if (!hasFeedback) return false;
-      }
-      if (extraFilters.has("hasReport")) {
-        const reported = [...r.passengers, r.driverId].some(
-          uid => uid !== activeUser.uid &&
-            allReports.some(rep => rep.reporterId === activeUser.uid && rep.reportedUserId === uid)
-        );
-        if (!reported) return false;
-      }
-      if (!matchesRating(r, role)) return false;
-      return true;
-    });
-  }
-
-  const driverRides = applyFilters(
-    sortByDateDesc(rides.filter(r => r.driverId === activeUser.uid)),
-    "driver"
+  const driverRides = applyMyRidesFilters(
+    sortByDateDesc(rides.filter(r => isUserDriver(r, activeUser.uid))),
+    "driver",
+    activeUser.uid,
+    reviews,
+    reports,
+    statusFilter,
+    extraFilters,
+    ratingFilter,
+    rideNotifications
   );
 
-  const passengerRides = applyFilters(
-    sortByDateDesc(rides.filter(r => r.passengers.includes(activeUser.uid))),
-    "passenger"
+  const passengerRides = applyMyRidesFilters(
+    sortByDateDesc(rides.filter(r => isUserPassenger(r, activeUser.uid))),
+    "passenger",
+    activeUser.uid,
+    reviews,
+    reports,
+    statusFilter,
+    extraFilters,
+    ratingFilter,
+    rideNotifications
   );
 
   return (
@@ -255,6 +201,7 @@ export default function MyRides() {
                   <RideCard
                     ride={item}
                     showOccupancyLabel
+                    notifications={rideNotifications.filter(n => n.rideId === item.id)}
                     onPress={() => router.push(`/ride/${item.id}`)}
                   />
                 </View>
@@ -290,6 +237,7 @@ export default function MyRides() {
                 <View style={components.mtMd}>
                   <RideCard
                     ride={item}
+                    notifications={rideNotifications.filter(n => n.rideId === item.id)}
                     onPress={() => router.push(`/ride/${item.id}`)}
                   />
                 </View>

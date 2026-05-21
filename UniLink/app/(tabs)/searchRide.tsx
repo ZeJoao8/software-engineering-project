@@ -7,7 +7,6 @@ import {
   Pressable
 } from "react-native";
 
-
 import {
   useFocusEffect,
   useRouter
@@ -19,17 +18,9 @@ import {
   useState
 } from "react";
 
-import {
-  getRides,
-  removeEmptyPastRides,
-  subscribeToRidesChanges
-} from "../../data/rides";
-
-import { subscribeToReviewsChanges } from "../../data/reviews";
-import { subscribeToReportsChanges } from "../../data/reports";
-
-import { getCurrentUser } from "../../data/user";
-import { getAcceptedFriendIds, subscribeToFriendshipsChanges } from "../../data/friends";
+import { useAuth } from "../../hooks/useAuth";
+import { useRides } from "../../hooks/useRides";
+import { useFriends } from "../../hooks/useFriends";
 
 import RideCard from "../../components/rideCard";
 import BusAlternatives from "../../components/BusAlternatives";
@@ -40,80 +31,41 @@ import { forms } from "../../styles/forms";
 import { layout } from "../../styles/layout";
 import { colors, spacing } from "../../styles/theme";
 import { sortByDateAsc } from "../../utils/date";
-import { FilterCriteria, filterRides } from "../../utils/rideFilters";
-import { type Coordinates } from "../../utils/routing";
+import { FilterCriteria, filterRides } from "../../domain/rules/rideFilters";
+import { type Coordinates } from "../../infra/routing";
 
 
 export default function Home() {
 
   const router = useRouter();
+  const rides = useRides();
+  const { user } = useAuth();
+  const { getAcceptedFriendIds } = useFriends();
 
-  const [rides, setRides] =
-    useState(getRides());
-
-  const [user, setUser] =
-    useState(getCurrentUser());
-
-  const [originFilter, setOriginFilter] =
-    useState("");
-
-  const [originCoords, setOriginCoords] =
-    useState<Coordinates | null>(null);
-
-  const [destinationFilter, setDestinationFilter] =
-    useState("");
-
-  const [destinationCoords, setDestinationCoords] =
-    useState<Coordinates | null>(null);
-
-  const [dateFilter, setDateFilter] =
-    useState("");
-
-  const [womenOnlyFilter, setWomenOnlyFilter] =
-    useState(false);
-
-  const [minSeats, setMinSeats] =
-    useState("");
-
-  const [now, setNow] =
-    useState(new Date());
-
-  const [showBusAlternatives, setShowBusAlternatives] =
-    useState(false);
+  const [originFilter, setOriginFilter] = useState("");
+  const [originCoords, setOriginCoords] = useState<Coordinates | null>(null);
+  const [destinationFilter, setDestinationFilter] = useState("");
+  const [destinationCoords, setDestinationCoords] = useState<Coordinates | null>(null);
+  const [dateFilter, setDateFilter] = useState("");
+  const [womenOnlyFilter, setWomenOnlyFilter] = useState(false);
+  const [minSeats, setMinSeats] = useState("");
+  const [now, setNow] = useState(new Date());
+  const [showBusAlternatives, setShowBusAlternatives] = useState(false);
 
   const [friendsOnlyFilter, setFriendsOnlyFilter] =
     useState(false);
 
   useFocusEffect(
     useCallback(() => {
-      setRides([...getRides()]);
-      setUser(getCurrentUser());
+      setNow(new Date());
     }, [])
   );
 
   useEffect(() => {
-    const triggerRender = () => {
+    const interval = setInterval(() => {
       setNow(new Date());
-      setRides([...getRides()]);
-    };
-
-    const unsubRides = subscribeToRidesChanges(triggerRender);
-    const unsubReviews = subscribeToReviewsChanges(triggerRender);
-    const unsubReports = subscribeToReportsChanges(triggerRender);
-    const unsubFriends = subscribeToFriendshipsChanges(triggerRender);
-
-    const interval =
-      setInterval(() => {
-        removeEmptyPastRides();
-        triggerRender();
-      }, 10000);
-    return () => {
-      unsubRides();
-      unsubReviews();
-      unsubReports();
-      unsubFriends();
-      clearInterval(interval);
-    };
+    }, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   if (!user) return null;

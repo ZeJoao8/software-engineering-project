@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844">
+  <defs>
+    <style>text { font-family: -apple-system, 'Helvetica Neue', sans-serif; }</style>
+    <filter id="sh"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.08"/></filter>
+  </defs>
+
+  <rect width="390" height="844" fill="#f8fafc"/>
+
+  <!-- Green header -->
+  <rect width="390" height="110" fill="#10b981"/>
+  <text x="32" y="22" fill="#ecfdf5" font-size="13" font-weight="600">9:41</text>
+  <path d="M26 66 L16 56 L26 46" stroke="#ecfdf5" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="195" y="58" text-anchor="middle" fill="#ecfdf5" font-size="17" font-weight="700">Chat da Boleia</text>
+  <text x="195" y="78" text-anchor="middle" fill="#d1fae5" font-size="13">Lisboa – Marquês → FEUP  ·  18/03</text>
+  <text x="195" y="96" text-anchor="middle" fill="#d1fae5" font-size="12">3 participantes</text>
+
+  <!-- Messages area (scrollable) -->
+  <!-- Message 1: other user (João Santos - driver) -->
+  <text x="24" y="140" fill="#94a3b8" font-size="11">João Santos  · Condutor</text>
+  <rect x="16" y="146" width="240" height="58" fill="white" rx="14" rx-tl="4" filter="url(#sh)"/>
+  <text x="32" y="168" fill="#0f172a" font-size="14">Olá a todos! Boleia confirmada</text>
+  <text x="32" y="186" fill="#0f172a" font-size="14">para amanhã às 08:30. ✅</text>
+  <text x="30" y="198" fill="#94a3b8" font-size="11">10:23</text>
+  <!-- Driver badge -->
+  <text x="82" y="138" fill="#10b981" font-size="11">• Condutor</text>
+
+  <!-- Message 2: other user (Ana) -->
+  <text x="24" y="222" fill="#94a3b8" font-size="11">Ana Costa</text>
+  <rect x="16" y="228" width="200" height="44" fill="white" rx="14" rx-tl="4" filter="url(#sh)"/>
+  <text x="32" y="252" fill="#0f172a" font-size="14">Ótimo! Vemo-nos lá 😊</text>
+  <text x="30" y="268" fill="#94a3b8" font-size="11">10:25</text>
+
+  <!-- Message 3: MY message (right side, green bubble) -->
+  <rect x="134" y="290" width="240" height="44" fill="#10b981" rx="14" rx-tr="4"/>
+  <text x="150" y="314" fill="white" font-size="14">Confirmado! Vou estar no</text>
+  <text x="150" y="330" fill="white" font-size="14">Marquês às 08:25 👍</text>
+  <text x="356" y="348" text-anchor="end" fill="#94a3b8" font-size="11">10:26</text>
+
+  <!-- Message 4: other (João driver) -->
+  <text x="24" y="374" fill="#94a3b8" font-size="11">João Santos</text>
+  <rect x="16" y="380" width="220" height="44" fill="white" rx="14" filter="url(#sh)"/>
+  <text x="32" y="404" fill="#0f172a" font-size="14">Perfeito! Até amanhã 🚗</text>
+  <text x="30" y="420" fill="#94a3b8" font-size="11">10:27</text>
+  <text x="74" y="372" fill="#10b981" font-size="11">• Condutor</text>
+
+  <!-- Message 5: MY message -->
+  <rect x="154" y="438" width="220" height="44" fill="#10b981" rx="14"/>
+  <text x="170" y="456" fill="white" font-size="14">Até amanhã! 😄</text>
+  <text x="356" y="476" text-anchor="end" fill="#94a3b8" font-size="11">10:28</text>
+
+  <!-- Separator: Hoje -->
+  <line x1="60" y1="508" x2="155" y2="508" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="195" y="512" text-anchor="middle" fill="#94a3b8" font-size="11">HOJE</text>
+  <line x1="235" y1="508" x2="330" y2="508" stroke="#e2e8f0" stroke-width="1"/>
+
+  <!-- Message 6: system notification -->
+  <rect x="80" y="520" width="230" height="36" fill="#ecfdf5" rx="10"/>
+  <text x="195" y="543" text-anchor="middle" fill="#047857" font-size="12">🔒 Código de segurança enviado</text>
+
+  <!-- Input area -->
+  <rect x="0" y="694" width="390" height="70" fill="white" filter="url(#sh)"/>
+  <line x1="0" y1="694" x2="390" y2="694" stroke="#e2e8f0" stroke-width="1"/>
+  <rect x="16" y="706" width="288" height="46" fill="#f8fafc" rx="23" stroke="#e2e8f0" stroke-width="1.5"/>
+  <text x="36" y="734" fill="#94a3b8" font-size="14">Escreve uma mensagem...</text>
+  <rect x="316" y="706" width="58" height="46" fill="#10b981" rx="23"/>
+  <text x="345" y="734" text-anchor="middle" fill="white" font-size="14" font-weight="700">Enviar</text>
+
+  <!-- 4-tab green nav bar (Boleias active) -->
+  <rect x="0" y="764" width="390" height="80" fill="#10b981"/>
+  <path d="M40 793 L40 800 L58 800 L58 793 L49 782 Z" fill="none" stroke="#ecfdf5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="44" y="793" width="10" height="7" fill="none" stroke="#ecfdf5" stroke-width="2" rx="1"/>
+  <text x="49" y="822" text-anchor="middle" fill="#ecfdf5" font-size="11" font-weight="700">Boleias</text>
+  <rect x="137" y="784" width="18" height="17" fill="none" stroke="#064e3b" stroke-width="1.8" rx="3"/>
+  <line x1="141" y1="789" x2="151" y2="789" stroke="#064e3b" stroke-width="1.4" stroke-linecap="round"/>
+  <line x1="141" y1="793" x2="151" y2="793" stroke="#064e3b" stroke-width="1.4" stroke-linecap="round"/>
+  <line x1="141" y1="797" x2="151" y2="797" stroke="#064e3b" stroke-width="1.4" stroke-linecap="round"/>
+  <text x="146" y="822" text-anchor="middle" fill="#064e3b" font-size="11">Minhas</text>
+  <path d="M237 783 L237 795 Q237 802 244 802 Q251 802 251 795 L251 783 Z" fill="none" stroke="#064e3b" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M237 787 Q233 787 233 791 Q233 795 237 795" fill="none" stroke="#064e3b" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M251 787 Q255 787 255 791 Q255 795 251 795" fill="none" stroke="#064e3b" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="244" y1="802" x2="244" y2="805" stroke="#064e3b" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="240" y1="805" x2="248" y2="805" stroke="#064e3b" stroke-width="1.8" stroke-linecap="round"/>
+  <text x="244" y="822" text-anchor="middle" fill="#064e3b" font-size="11">Ranking</text>
+  <circle cx="341" cy="789" r="6" fill="none" stroke="#064e3b" stroke-width="1.8"/>
+  <path d="M328 806 Q328 799 341 799 Q354 799 354 806" fill="none" stroke="#064e3b" stroke-width="1.8" stroke-linecap="round"/>
+  <text x="341" y="822" text-anchor="middle" fill="#064e3b" font-size="11">Perfil</text>
+</svg>

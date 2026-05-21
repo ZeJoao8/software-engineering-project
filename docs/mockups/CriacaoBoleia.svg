@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844">
+  <defs>
+    <style>text { font-family: -apple-system, 'Helvetica Neue', sans-serif; }</style>
+    <filter id="sh"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.08"/></filter>
+  </defs>
+
+  <rect width="390" height="844" fill="#f8fafc"/>
+
+  <!-- Green header (pushed screen) -->
+  <rect width="390" height="110" fill="#10b981"/>
+  <text x="32" y="22" fill="#ecfdf5" font-size="13" font-weight="600">9:41</text>
+  <path d="M26 66 L16 56 L26 46" stroke="#ecfdf5" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="44" y="63" fill="#ecfdf5" font-size="16">Criar Boleia</text>
+
+  <!-- Section: Localização -->
+  <text x="28" y="130" fill="#94a3b8" font-size="12" font-weight="600">LOCALIZAÇÃO</text>
+  <rect x="16" y="138" width="358" height="120" fill="white" rx="12" filter="url(#sh)"/>
+  <!-- Origin -->
+  <circle cx="44" cy="170" r="7" fill="#10b981"/>
+  <rect x="58" y="158" width="298" height="36" fill="#f8fafc" rx="8" stroke="#e2e8f0" stroke-width="1.5"/>
+  <text x="74" y="181" fill="#0f172a" font-size="14">Lisboa – Marquês de Pombal</text>
+  <text x="350" y="180" text-anchor="end" fill="#10b981" font-size="13">🗺</text>
+  <!-- Dashed connector -->
+  <line x1="44" y1="177" x2="44" y2="211" stroke="#e2e8f0" stroke-width="2" stroke-dasharray="4,3"/>
+  <!-- Destination -->
+  <circle cx="44" cy="218" r="7" fill="#ef4444"/>
+  <rect x="58" y="206" width="298" height="36" fill="#f8fafc" rx="8" stroke="#e2e8f0" stroke-width="1.5"/>
+  <text x="74" y="229" fill="#0f172a" font-size="14">FEUP – Porto</text>
+  <text x="350" y="228" text-anchor="end" fill="#10b981" font-size="13">🗺</text>
+
+  <!-- Section: Data e Hora -->
+  <text x="28" y="278" fill="#94a3b8" font-size="12" font-weight="600">DATA E HORA</text>
+  <rect x="16" y="286" width="170" height="50" fill="white" rx="12" filter="url(#sh)"/>
+  <text x="28" y="316" fill="#0f172a" font-size="14">📅  18/03/2026</text>
+  <rect x="204" y="286" width="170" height="50" fill="white" rx="12" filter="url(#sh)"/>
+  <text x="216" y="316" fill="#0f172a" font-size="14">🕐  08:30</text>
+
+  <!-- Section: Veículo -->
+  <text x="28" y="358" fill="#94a3b8" font-size="12" font-weight="600">VEÍCULO</text>
+  <rect x="16" y="366" width="358" height="50" fill="white" rx="12" filter="url(#sh)"/>
+  <text x="32" y="396" fill="#0f172a" font-size="14">🚗  Renault Clio · Azul · 45-AB-23</text>
+  <text x="356" y="396" text-anchor="end" fill="#64748b" font-size="16">▾</text>
+
+  <!-- Section: Lugares -->
+  <text x="28" y="438" fill="#94a3b8" font-size="12" font-weight="600">LUGARES DISPONÍVEIS</text>
+  <rect x="16" y="446" width="358" height="56" fill="white" rx="12" filter="url(#sh)"/>
+  <!-- Stepper -->
+  <rect x="32" y="462" width="36" height="28" fill="#f8fafc" rx="8" stroke="#e2e8f0" stroke-width="1.5"/>
+  <text x="50" y="481" text-anchor="middle" fill="#0f172a" font-size="18" font-weight="700">−</text>
+  <text x="130" y="481" text-anchor="middle" fill="#0f172a" font-size="18" font-weight="700">2</text>
+  <rect x="158" y="462" width="36" height="28" fill="#f8fafc" rx="8" stroke="#e2e8f0" stroke-width="1.5"/>
+  <text x="176" y="481" text-anchor="middle" fill="#0f172a" font-size="18" font-weight="700">+</text>
+  <text x="230" y="479" fill="#94a3b8" font-size="13">de 4 lugares</text>
+  <!-- Free badge -->
+  <rect x="296" y="458" width="62" height="28" fill="#ecfdf5" rx="8"/>
+  <text x="327" y="477" text-anchor="middle" fill="#047857" font-size="12" font-weight="600">✓ Grátis</text>
+
+  <!-- Section: Apenas Mulheres -->
+  <rect x="16" y="516" width="358" height="58" fill="white" rx="12" filter="url(#sh)"/>
+  <text x="32" y="540" fill="#0f172a" font-size="15" font-weight="600">Apenas Mulheres</text>
+  <text x="32" y="558" fill="#64748b" font-size="13">Limitar passageiros a mulheres</text>
+  <!-- Toggle OFF -->
+  <rect x="328" y="532" width="42" height="24" fill="#bcbdc1" rx="12"/>
+  <circle cx="340" cy="544" r="10" fill="white"/>
+
+  <!-- Route preview (simplified map) -->
+  <rect x="16" y="586" width="358" height="100" fill="#ecfdf5" rx="12"/>
+  <line x1="16" y1="630" x2="374" y2="630" stroke="#a7f3d0" stroke-width="8"/>
+  <line x1="100" y1="586" x2="100" y2="686" stroke="#a7f3d0" stroke-width="6"/>
+  <path d="M 70 650 Q 120 610 180 614 Q 240 618 290 598" stroke="#10b981" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <circle cx="70" cy="650" r="7" fill="#10b981"/>
+  <circle cx="70" cy="650" r="3" fill="white"/>
+  <circle cx="290" cy="598" r="7" fill="#ef4444"/>
+  <circle cx="290" cy="598" r="3" fill="white"/>
+  <text x="195" y="678" text-anchor="middle" fill="#047857" font-size="12">📍  ~28km · ~35 min</text>
+
+  <!-- Create button -->
+  <rect x="16" y="696" width="358" height="52" fill="#10b981" rx="28"/>
+  <text x="195" y="728" text-anchor="middle" fill="white" font-size="16" font-weight="700">CRIAR BOLEIA</text>
+
+  <!-- 4-tab green nav bar (Boleias active) -->
+  <rect x="0" y="764" width="390" height="80" fill="#10b981"/>
+  <path d="M40 793 L40 800 L58 800 L58 793 L49 782 Z" fill="none" stroke="#ecfdf5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="44" y="793" width="10" height="7" fill="none" stroke="#ecfdf5" stroke-width="2" rx="1"/>
+  <text x="49" y="822" text-anchor="middle" fill="#ecfdf5" font-size="11" font-weight="700">Boleias</text>
+  <rect x="137" y="784" width="18" height="17" fill="none" stroke="#064e3b" stroke-width="1.8" rx="3"/>
+  <line x1="141" y1="789" x2="151" y2="789" stroke="#064e3b" stroke-width="1.4" stroke-linecap="round"/>
+  <line x1="141" y1="793" x2="151" y2="793" stroke="#064e3b" stroke-width="1.4" stroke-linecap="round"/>
+  <line x1="141" y1="797" x2="151" y2="797" stroke="#064e3b" stroke-width="1.4" stroke-linecap="round"/>
+  <text x="146" y="822" text-anchor="middle" fill="#064e3b" font-size="11">Minhas</text>
+  <path d="M237 783 L237 795 Q237 802 244 802 Q251 802 251 795 L251 783 Z" fill="none" stroke="#064e3b" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M237 787 Q233 787 233 791 Q233 795 237 795" fill="none" stroke="#064e3b" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M251 787 Q255 787 255 791 Q255 795 251 795" fill="none" stroke="#064e3b" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="244" y1="802" x2="244" y2="805" stroke="#064e3b" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="240" y1="805" x2="248" y2="805" stroke="#064e3b" stroke-width="1.8" stroke-linecap="round"/>
+  <text x="244" y="822" text-anchor="middle" fill="#064e3b" font-size="11">Ranking</text>
+  <circle cx="341" cy="789" r="6" fill="none" stroke="#064e3b" stroke-width="1.8"/>
+  <path d="M328 806 Q328 799 341 799 Q354 799 354 806" fill="none" stroke="#064e3b" stroke-width="1.8" stroke-linecap="round"/>
+  <text x="341" y="822" text-anchor="middle" fill="#064e3b" font-size="11">Perfil</text>
+</svg>
