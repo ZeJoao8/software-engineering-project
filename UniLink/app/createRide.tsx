@@ -26,6 +26,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useCars } from "../hooks/useCars";
 import { generateId } from "../infra/firebase";
 import { createRide } from "../services/RideService";
+import { getDriverPreferenceLines } from "../utils/driverPreferencesDisplay";
 
 import {
   useFocusEffect,
@@ -115,13 +116,7 @@ export default function CreateRide() {
     const check = canCreateRide({ origin, destination, originCoords, destinationCoords, seats, car, departure });
     if (!check.ok) { Alert.alert("Error", check.error); return; }
 
-    const prefs = activeUser.driverPreferences;
-    const prefLines = [];
-    if (prefs?.noSmoking)      prefLines.push("🚭 No smoking");
-    if (prefs?.acceptLuggage)  prefLines.push("🧳 Luggage allowed");
-    if (prefs?.acceptPets)     prefLines.push("🐾 Pets allowed");
-    if (prefs?.passengerMusic) prefLines.push("🎵 Passengers can play music");
-
+    const prefLines = getDriverPreferenceLines(activeUser.driverPreferences);
     const prefSummary = prefLines.length > 0 ? prefLines.join("\n") : "No preferences set.";
 
     try {

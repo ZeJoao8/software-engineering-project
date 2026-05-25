@@ -148,6 +148,16 @@ export const layout = StyleSheet.create({
     fontSize: 32,
   },
 
+  /** Small all-caps section divider used in settings/preferences screens. */
+  sectionLabel: {
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 1.1,
+    color: colors.textLight,
+    marginTop: spacing.md,
+    marginBottom: spacing.xs,
+  },
+
   /** "▲ / ▼" indicator used in all collapsible card headers. */
   collapseIndicator: {
     fontSize: 16,

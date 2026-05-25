@@ -842,6 +842,83 @@ Next improvements:
 
 ### Sprint 3
 
-### Sprint 4
+### Sprint Backlog
+
+<p align="center" justify="center">
+  <img src="docs/sprints/Sprint3Start.png"/>
+</p>
+
+### Done
+
+<p align="center" justify="center">
+  <img src="docs/sprints/Sprint3Done.png"/>
+</p>
+
+#### Sprint goal
+
+Extend UniLink with social, safety and personalisation features — a friends system, in-app notifications, emergency safety contacts, and driver preferences — while restructuring the entire codebase into a clean layered architecture to support future growth.
+
+#### Sprint planning
+
+Coming off Sprint 2, the team identified what would make UniLink genuinely more trustworthy and social. Four themes emerged clearly from the backlog:
+
+- **Friends** — users wanted to restrict rides to people they know, not just any student
+- **Notifications** — without feedback on ride and message events the app felt unresponsive
+- **Safety** — emergency contact access during a ride was flagged as a priority by the professor
+- **Driver Preferences** — drivers needed a way to set expectations for their rides (smoking, pets, luggage, music)
+
+A significant architecture refactor was also agreed upon after noticing that business logic had slowly leaked into UI screens, making testing harder. This was scheduled early in the sprint so later features could be built on the clean structure.
+
+Tasks were distributed in GitHub Projects and estimated by the team before the sprint started.
+
+#### Development
+
+Features implemented this sprint:
+
+**👥 Friends System**
+- Friend requests (send, accept, decline, remove) backed by Firestore
+- Find Friends screen to discover other users by name
+- Profile screen shows pending requests and accepted friends
+- "Friends only" ride filter and tag on ride cards
+- Tab-bar badge showing pending incoming requests
+
+**🔔 Notifications**
+- Full notification system with types: ride join/cancel, chat messages, friend requests, reviews, and more
+- NotificationBell component in the header with unread count badge
+- Notifications auto-marked as read when opening the relevant screen
+- My Rides tab badge and per-ride notification badges
+
+**🆘 Emergency / Safety Contacts**
+- Emergency contacts stored on the user profile (name + phone)
+- Profile screen: inline add/remove form for safety contacts
+- Ride detail: bottom-sheet Modal replacing the old Alert + expo-contacts flow
+
+**⚙️ Driver Preferences**
+- Drivers can toggle preferences (no smoking, luggage, pets, music) from their profile
+- Saved through the existing profile service
+
+**🏗️ Architecture refactor**
+- Full 5-layer structure: `domain/entities`, `domain/rules`, `repositories`, `store`, `services`, `hooks`
+- All business logic removed from UI screens
+- 252 tests across 21 suites
+- TypeScript type check step added to CI
+
+#### Testing
+
+Tests fully reorganised into `tests/domain/`, `tests/services/`, `tests/ui/`, `tests/infra/`, and `tests/utils/`. New domain rule suites, service integration tests, and UI component tests were added to reach 252 tests total. TypeScript strict type-checking was added to the CI pipeline.
+
+#### Sprint retrospective
+
+What went well:
+
+- The team maintained clear and open communication throughout the sprint — blockers were surfaced and resolved quickly without friction
+- Work was distributed evenly and everyone delivered on their commitments
+- The team adapted smoothly when the scope of the architecture refactor expanded, reprioritising without disrupting other features
+- Code reviews were consistent and collaborative, helping everyone stay aligned and learn from each other
+- The sprint ended with a significantly stronger, more testable codebase
+
+Next improvements:
+
+- Improve mockups and screen prints for the final release
 
 ### Final Release

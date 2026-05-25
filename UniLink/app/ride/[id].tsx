@@ -38,6 +38,7 @@ import * as CarService from "../../services/CarService";
 import * as RideService from "../../services/RideService";
 import { stopMessagesSync } from "../../store/messageStore";
 import { formatDate } from "../../utils/date";
+import { getDriverPreferenceLines } from "../../utils/driverPreferencesDisplay";
 import { getFeedbackStyle } from "../../utils/ratingStyle";
 
 import DropDownPicker from "react-native-dropdown-picker";
@@ -116,16 +117,8 @@ export default function RideDetails() {
   const allFeedbackComments = getVisibleFeedback(allReviews, r.id, isDriver, activeUser.uid);
 
   function reserveSeat() {
-    const prefs = driver?.driverPreferences;
-    const prefLines = [];
-    if (prefs?.noSmoking)      prefLines.push("🚭 No smoking");
-    if (prefs?.acceptLuggage)  prefLines.push("🧳 Luggage allowed");
-    if (prefs?.acceptPets)     prefLines.push("🐾 Pets allowed");
-    if (prefs?.passengerMusic) prefLines.push("🎵 Passengers can play music");
-
-    const prefSummary = prefLines.length > 0
-      ? prefLines.join("\n")
-      : "No specific requirements.";
+    const prefLines = getDriverPreferenceLines(driver?.driverPreferences);
+    const prefSummary = prefLines.length > 0 ? prefLines.join("\n") : "No specific requirements.";
 
     Alert.alert(
       "Driver requirements",

@@ -4,7 +4,7 @@ All notable changes to UniLink since the Sprint 2 release are documented here.
 
 ---
 
-## [Unreleased] — Sprint 3
+## Sprint 3
 
 ### Added
 
@@ -36,8 +36,15 @@ All notable changes to UniLink since the Sprint 2 release are documented here.
 - **Ride card notification badges** — ride cards in My Rides display deduplicated badges per category (`👤+` new passenger, `👤−` cancellation or removal, `💬` chat message, `⭐` review, `✅` completed, `🚫` cancelled). Each badge is tappable and shows a tooltip description. A **"🔔 Has notification"** filter lets drivers and passengers show only rides with unread activity.
 - **Auto-mark-read on ride detail open** — opening a ride's detail screen automatically marks `ride_join`, `ride_cancel`, `passenger_removed`, and `passenger_review` notifications for that ride as read, mirroring the chat screen behaviour for `chat_message`.
 
-#### Emergency Contact
-- Emergency contact options added directly to the ride detail screen, allowing passengers to quickly reach emergency services or saved contacts during a ride.
+#### Driver Preferences
+- New `DriverPreferences` entity (`domain/entities/DriverPreferences.ts`) with fields: `noSmoking`, `acceptLuggage`, `acceptPets`, `passengerMusic`, and sensible defaults.
+- `User` entity updated with optional `driverPreferences` field.
+- **Driver Preferences screen** (`/user/driverPreferences`) — allows drivers to toggle ride preferences via a grouped switch list (sections: PASSENGERS, TRIP). Accessible from the Profile screen via a new "Manage preferences" button. Saves through `ProfileService`.
+
+#### Emergency / Safety Contacts
+- `emergencyContacts` array (`{ name, phone }[]`) added to the `User` entity.
+- **Profile screen** — new Safety Contacts section with an inline form to add contacts (name + phone) and remove existing ones. Changes are saved as part of the regular profile save flow.
+- **Ride detail screen** — replaced the `expo-contacts` native picker and `Alert`-based flow with a bottom-sheet `Modal` that lists the user's saved safety contacts and "Call 112". If no contacts are saved, a link redirects the user to the profile to add them.
 
 #### Architecture — 5-Layer Refactor
 The entire codebase was restructured into a clean 5-layer architecture to eliminate business logic from the UI layer:
