@@ -9,33 +9,33 @@ import {
   View
 } from "react-native";
 
+import { calculateAverageRating } from "../../domain/rules/reviewRules";
+import { getActiveRidesForCar, hasUserDrivenRide } from "../../domain/rules/rideRules";
 import { useAuth } from "../../hooks/useAuth";
 import { useCars } from "../../hooks/useCars";
-import { useRides } from "../../hooks/useRides";
-import { useReviews } from "../../hooks/useReviews";
-import { logout } from "../../services/AuthService";
-import { updateProfile } from "../../services/ProfileService";
-import { addCar, removeCarCascade } from "../../services/CarService";
-import { calculateAverageRating } from "../../domain/rules/reviewRules";
-import { hasUserDrivenRide, getActiveRidesForCar } from "../../domain/rules/rideRules";
 import { useFriends } from "../../hooks/useFriends";
+import { useReviews } from "../../hooks/useReviews";
+import { useRides } from "../../hooks/useRides";
+import { logout } from "../../services/AuthService";
+import { addCar, removeCarCascade } from "../../services/CarService";
 import {
   acceptFriendRequest,
   removeFriend,
 } from "../../services/FriendService";
+import { updateProfile } from "../../services/ProfileService";
 
 import { useRouter } from "expo-router";
 
 import { BadgeDisplay } from "../../components/BadgeDisplay";
 import { Button } from "../../components/Button";
-import { components } from "../../styles/components";
-import { forms } from "../../styles/forms";
-import { layout } from "../../styles/layout";
-import { colors, spacing, radius } from "../../styles/theme";
+import type { User } from "../../domain/entities/User";
 import { getUserBadges } from "../../domain/rules/badges";
 import { calculateWeeklyStreak } from "../../domain/rules/streaks";
 import { calculateUserCO2Saved } from "../../domain/rules/sustainability";
-import type { User } from "../../domain/entities/User";
+import { components } from "../../styles/components";
+import { forms } from "../../styles/forms";
+import { layout } from "../../styles/layout";
+import { colors, radius, spacing } from "../../styles/theme";
 
 export default function Profile() {
 
@@ -544,6 +544,20 @@ export default function Profile() {
           </View>
         );
       })()}
+
+      {/* DRIVER PREFERENCES */}
+      <View style={components.card}>
+        <Text style={layout.subtitle}>Driver Preferences</Text>
+        <Text style={{ color: colors.textLight, marginBottom: spacing.md }}>
+          Customise your ride experience.
+        </Text>
+        <Button
+          outline
+          testID="driverPreferencesButton"
+          onPress={() => router.push("/user/driverPreferences")}
+          label="Manage preferences"
+        />
+      </View>
 
       {/* LOGOUT */}
       <View style={components.card}>

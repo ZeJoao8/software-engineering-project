@@ -1,3 +1,4 @@
+import type { DriverPreferences } from "./DriverPreferences";
 export interface User {
 
  uid: string;
@@ -13,5 +14,7 @@ export interface User {
  email: string;
 
  emergencyContacts?: { name: string; phone: string }[];
+
+ driverPreferences?: DriverPreferences;
 
 }
