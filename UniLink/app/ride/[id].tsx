@@ -1,28 +1,23 @@
 import { useEffect, useState } from "react";
 
 import {
-  View,
-  Text,
   Alert,
+  Linking,
   Modal,
   Pressable,
   ScrollView,
+  Text,
   TextInput,
-  Linking,
+  View,
 } from "react-native";
 
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useAuth } from "../../hooks/useAuth";
-import { useRides } from "../../hooks/useRides";
-import { useCars } from "../../hooks/useCars";
-import { useReviews } from "../../hooks/useReviews";
-import { useReports } from "../../hooks/useReports";
-import { useNotifications } from "../../hooks/useNotifications";
-import * as RideService from "../../services/RideService";
-import { stopMessagesSync } from "../../store/messageStore";
-import * as CarService from "../../services/CarService";
+import type { Car } from "../../domain/entities/Car";
+import type { User } from "../../domain/entities/User";
+import { hasUserReportedInRide } from "../../domain/rules/reportRules";
+import { findPassengerReviewInRide, getVisibleFeedback } from "../../domain/rules/reviewRules";
 import {
   canCompleteRide,
   canRateDriver,
@@ -31,14 +26,19 @@ import {
   isUserDriver,
   isUserPassenger,
 } from "../../domain/rules/rideRules";
-import { getVisibleFeedback, findPassengerReviewInRide } from "../../domain/rules/reviewRules";
-import { getFeedbackStyle } from "../../utils/ratingStyle";
-import { hasUserReportedInRide } from "../../domain/rules/reportRules";
-import type { Car } from "../../domain/entities/Car";
-import { formatDate } from "../../utils/date";
-import type { RouteResult } from "../../infra/routing";
 import { calculateCO2ForDistance } from "../../domain/rules/sustainability";
-import type { User } from "../../domain/entities/User";
+import { useAuth } from "../../hooks/useAuth";
+import { useCars } from "../../hooks/useCars";
+import { useNotifications } from "../../hooks/useNotifications";
+import { useReports } from "../../hooks/useReports";
+import { useReviews } from "../../hooks/useReviews";
+import { useRides } from "../../hooks/useRides";
+import type { RouteResult } from "../../infra/routing";
+import * as CarService from "../../services/CarService";
+import * as RideService from "../../services/RideService";
+import { stopMessagesSync } from "../../store/messageStore";
+import { formatDate } from "../../utils/date";
+import { getFeedbackStyle } from "../../utils/ratingStyle";
 
 import DropDownPicker from "react-native-dropdown-picker";
 
@@ -116,20 +116,35 @@ export default function RideDetails() {
   const allFeedbackComments = getVisibleFeedback(allReviews, r.id, isDriver, activeUser.uid);
 
   function reserveSeat() {
-    Alert.alert("Reserve seat", "Confirm reservation?", [
-      { text: "No", style: "cancel" },
-      {
-        text: "Yes",
-        onPress: async () => {
-          const result = await RideService.reserveSeat(r.id, activeUser);
-          if (!result.ok) { Alert.alert("Cannot reserve", result.error); return; }
-          Alert.alert(
-            "Seat reserved! 🎉",
-            `Your boarding code is:\n\n${result.data!.boardingCode}\n\nShow this code to the driver before the ride starts.`
-          );
+    const prefs = driver?.driverPreferences;
+    const prefLines = [];
+    if (prefs?.noSmoking)      prefLines.push("🚭 No smoking");
+    if (prefs?.acceptLuggage)  prefLines.push("🧳 Luggage allowed");
+    if (prefs?.acceptPets)     prefLines.push("🐾 Pets allowed");
+    if (prefs?.passengerMusic) prefLines.push("🎵 Passengers can play music");
+
+    const prefSummary = prefLines.length > 0
+      ? prefLines.join("\n")
+      : "No specific requirements.";
+
+    Alert.alert(
+      "Driver requirements",
+      `Before reserving, check the driver's requirements:\n\n${prefSummary}\n\nDo you want to reserve a seat?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Reserve",
+          onPress: async () => {
+            const result = await RideService.reserveSeat(r.id, activeUser);
+            if (!result.ok) { Alert.alert("Cannot reserve", result.error); return; }
+            Alert.alert(
+              "Seat reserved! 🎉",
+              `Your boarding code is:\n\n${result.data!.boardingCode}\n\nShow this code to the driver before the ride starts.`
+            );
+          },
         },
-      },
-    ]);
+      ]
+    );
   }
 
   function cancelSeat() {

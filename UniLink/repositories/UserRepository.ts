@@ -7,8 +7,8 @@ import {
   updateDoc,
 } from "firebase/firestore";
 
-import { db } from "../infra/firebase";
 import type { User } from "../domain/entities/User";
+import { db } from "../infra/firebase";
 
 function mapDoc(id: string, data: Omit<User, "uid">): User {
   return { uid: id, ...data };
@@ -41,5 +41,6 @@ export async function update(user: User): Promise<void> {
     university: user.university.trim(),
     course: user.course.trim(),
     gender: user.gender,
+    driverPreferences: user.driverPreferences ?? null,
   });
 }

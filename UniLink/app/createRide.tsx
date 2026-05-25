@@ -1,41 +1,40 @@
-import { useState, useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import {
+  Alert,
+  Pressable,
   ScrollView,
-  View,
+  Switch,
   Text,
   TextInput,
-  Switch,
-  Pressable,
-  Alert
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { layout } from "../styles/layout";
-import { forms } from "../styles/forms";
 import { Button } from "../components/Button";
 import { components } from "../styles/components";
+import { forms } from "../styles/forms";
+import { layout } from "../styles/layout";
 import { colors, spacing } from "../styles/theme";
 
 import DropDownPicker from "react-native-dropdown-picker";
 
-import DateTimePicker
-  from "@react-native-community/datetimepicker";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
-import { createRide } from "../services/RideService";
 import { canCreateRide } from "../domain/rules/rideCreateRules";
 import { useAuth } from "../hooks/useAuth";
 import { useCars } from "../hooks/useCars";
 import { generateId } from "../infra/firebase";
+import { createRide } from "../services/RideService";
 
 import {
   useFocusEffect,
   useRouter
 } from "expo-router";
 
+import AddressAutocomplete from "../components/AddressAutocomplete";
 import LocationPickerMap from "../components/LocationPickerMap";
 import RouteMap from "../components/RouteMap";
-import AddressAutocomplete from "../components/AddressAutocomplete";
 import type { Coordinates } from "../infra/routing";
 
 export default function CreateRide() {
@@ -115,6 +114,30 @@ export default function CreateRide() {
 
     const check = canCreateRide({ origin, destination, originCoords, destinationCoords, seats, car, departure });
     if (!check.ok) { Alert.alert("Error", check.error); return; }
+
+    const prefs = activeUser.driverPreferences;
+    const prefLines = [];
+    if (prefs?.noSmoking)      prefLines.push("🚭 No smoking");
+    if (prefs?.acceptLuggage)  prefLines.push("🧳 Luggage allowed");
+    if (prefs?.acceptPets)     prefLines.push("🐾 Pets allowed");
+    if (prefs?.passengerMusic) prefLines.push("🎵 Passengers can play music");
+
+    const prefSummary = prefLines.length > 0 ? prefLines.join("\n") : "No preferences set.";
+
+    try {
+      await new Promise<void>((resolve, reject) => {
+        Alert.alert(
+          "Your ride preferences",
+          `Passengers will see:\n\n${prefSummary}\n\nProceed with these preferences?`,
+          [
+            { text: "Cancel", style: "cancel", onPress: () => reject() },
+            { text: "Confirm", onPress: () => resolve() },
+          ]
+        );
+      });
+    } catch {
+      return;
+    }
 
     const result = await createRide({
       id: generateId("rides"),
