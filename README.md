@@ -21,7 +21,6 @@ This Software Development Report, tailored for LEIC-ES-2025-26, provides compreh
   * [Sprint 1](#Sprint-1)
   * [Sprint 2](#Sprint-2)
   * [Sprint 3](#Sprint-3)
-  * [Sprint 4](#Sprint-4)
   * [Final Release](#Final-Release)
 * [How to Run the Project](#How-to-Run-the-Project)
   
