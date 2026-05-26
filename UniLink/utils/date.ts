@@ -1,3 +1,13 @@
+export function formatRelativeTime(isoString: string): string {
+  const diffMs = Date.now() - new Date(isoString).getTime();
+  const diffMin = Math.floor(diffMs / 60_000);
+  if (diffMin < 1) return "Now";
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHours = Math.floor(diffMs / 3_600_000);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return `${Math.floor(diffMs / 86_400_000)}d ago`;
+}
+
 export function formatDate(iso:string){
  const d = new Date(iso);
  const day =
@@ -13,24 +23,20 @@ export function formatDate(iso:string){
  return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
 
-export function sortByDateAsc(
- array:any[]
-){
- return [...array].sort(
-  (a,b)=>
-   new Date(a.departureDateTime).getTime()
-   -
-   new Date(b.departureDateTime).getTime()
- );
+export function formatTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-export function sortByDateDesc(
- array:any[]
-){
- return [...array].sort(
-  (a,b)=>
-   new Date(b.departureDateTime).getTime()
-   -
-   new Date(a.departureDateTime).getTime()
- );
+import type { Ride } from "../domain/entities/Ride";
+
+export function sortByDateAsc(array: Ride[]): Ride[] {
+  return [...array].sort(
+    (a, b) => new Date(a.departureDateTime).getTime() - new Date(b.departureDateTime).getTime()
+  );
+}
+
+export function sortByDateDesc(array: Ride[]): Ride[] {
+  return [...array].sort(
+    (a, b) => new Date(b.departureDateTime).getTime() - new Date(a.departureDateTime).getTime()
+  );
 }

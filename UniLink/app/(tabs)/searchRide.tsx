@@ -7,7 +7,6 @@ import {
   Pressable
 } from "react-native";
 
-
 import {
   useFocusEffect,
   useRouter
@@ -19,18 +18,9 @@ import {
   useState
 } from "react";
 
-import {
-  getRides,
-  removeEmptyPastRides,
-  subscribeToRidesChanges
-} from "../../data/rides";
-
-import { subscribeToReviewsChanges } from "../../data/reviews";
-import { subscribeToReportsChanges } from "../../data/reports";
-
-import {
-  getCurrentUser
-} from "../../data/user";
+import { useAuth } from "../../hooks/useAuth";
+import { useRides } from "../../hooks/useRides";
+import { useFriends } from "../../hooks/useFriends";
 
 import RideCard from "../../components/rideCard";
 import BusAlternatives from "../../components/BusAlternatives";
@@ -41,75 +31,41 @@ import { forms } from "../../styles/forms";
 import { layout } from "../../styles/layout";
 import { colors, spacing } from "../../styles/theme";
 import { sortByDateAsc } from "../../utils/date";
-import { FilterCriteria, filterRides } from "../../utils/rideFilters";
-import { type Coordinates } from "../../utils/routing";
+import { FilterCriteria, filterRides } from "../../domain/rules/rideFilters";
+import { type Coordinates } from "../../infra/routing";
 
 
 export default function Home() {
 
   const router = useRouter();
+  const rides = useRides();
+  const { user } = useAuth();
+  const { getAcceptedFriendIds } = useFriends();
 
-  const [rides, setRides] =
-    useState(getRides());
+  const [originFilter, setOriginFilter] = useState("");
+  const [originCoords, setOriginCoords] = useState<Coordinates | null>(null);
+  const [destinationFilter, setDestinationFilter] = useState("");
+  const [destinationCoords, setDestinationCoords] = useState<Coordinates | null>(null);
+  const [dateFilter, setDateFilter] = useState("");
+  const [womenOnlyFilter, setWomenOnlyFilter] = useState(false);
+  const [minSeats, setMinSeats] = useState("");
+  const [now, setNow] = useState(new Date());
+  const [showBusAlternatives, setShowBusAlternatives] = useState(false);
 
-  const [user, setUser] =
-    useState(getCurrentUser());
-
-  const [originFilter, setOriginFilter] =
-    useState("");
-
-  const [originCoords, setOriginCoords] =
-    useState<Coordinates | null>(null);
-
-  const [destinationFilter, setDestinationFilter] =
-    useState("");
-
-  const [destinationCoords, setDestinationCoords] =
-    useState<Coordinates | null>(null);
-
-  const [dateFilter, setDateFilter] =
-    useState("");
-
-  const [womenOnlyFilter, setWomenOnlyFilter] =
-    useState(false);
-
-  const [minSeats, setMinSeats] =
-    useState("");
-
-  const [now, setNow] =
-    useState(new Date());
-
-  const [showBusAlternatives, setShowBusAlternatives] =
+  const [friendsOnlyFilter, setFriendsOnlyFilter] =
     useState(false);
 
   useFocusEffect(
     useCallback(() => {
-      setRides([...getRides()]);
-      setUser(getCurrentUser());
+      setNow(new Date());
     }, [])
   );
 
   useEffect(() => {
-    const triggerRender = () => {
+    const interval = setInterval(() => {
       setNow(new Date());
-      setRides([...getRides()]);
-    };
-
-    const unsubRides = subscribeToRidesChanges(triggerRender);
-    const unsubReviews = subscribeToReviewsChanges(triggerRender);
-    const unsubReports = subscribeToReportsChanges(triggerRender);
-
-    const interval =
-      setInterval(() => {
-        removeEmptyPastRides();
-        triggerRender();
-      }, 10000);
-    return () => {
-      unsubRides();
-      unsubReviews();
-      unsubReports();
-      clearInterval(interval);
-    };
+    }, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   if (!user) return null;
@@ -119,7 +75,9 @@ export default function Home() {
     destination: destinationFilter,
     date: dateFilter,
     womenOnly: womenOnlyFilter,
-    minSeats: minSeats
+    minSeats: minSeats,
+    friendsOnly: friendsOnlyFilter,
+    friendIds: getAcceptedFriendIds(),
   };
 
   const availableRides = sortByDateAsc(
@@ -128,11 +86,18 @@ export default function Home() {
 
   const filtersHeader = (
     <View>
-      <Text style={layout.title}>
-        Search rides
-      </Text>
+      <View style={components.rowSpaceBetween}>
+        <Text style={layout.title}>Search rides</Text>
+        <Pressable
+          onPress={() => router.push("/mapView")}
+          testID="openMapButton"
+          style={[components.badgePrimary, { paddingVertical: 6 }]}
+        >
+          <Text style={components.badgePrimaryText}>🗺️ Search on Map</Text>
+        </Pressable>
+      </View>
 
-      <View style={[components.card, { backgroundColor: colors.neutral, borderColor: colors.neutralLight, borderWidth: 1.5 }]}>
+      <View style={[components.card, components.cardNeutral]}>
 
         <Text style={layout.subtitle}>Origin</Text>
 
@@ -144,7 +109,7 @@ export default function Home() {
           testID="searchOriginInput"
         />
 
-        <View style={{ height: spacing.sm }} />
+        <View style={components.spacerSm} />
 
         <Text style={layout.subtitle}>Destination</Text>
 
@@ -156,7 +121,7 @@ export default function Home() {
           testID="searchDestinationInput"
         />
 
-        <View style={{ height: spacing.sm }} />
+        <View style={components.spacerSm} />
 
         <Text style={layout.subtitle}>
           Date
@@ -171,7 +136,7 @@ export default function Home() {
           testID="searchDateInput"
         />
 
-        <View style={{ height: spacing.sm }} />
+        <View style={components.spacerSm} />
 
         <Text style={layout.subtitle}>
           Minimum seats
@@ -189,12 +154,7 @@ export default function Home() {
 
         {user.gender === "Female" && (
 
-          <View style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginTop: spacing.sm
-          }}>
+          <View style={[components.rowSpaceBetween, { marginTop: spacing.sm }]}>
 
             <Text style={layout.subtitle}>
               Women only
@@ -205,19 +165,35 @@ export default function Home() {
               onValueChange={setWomenOnlyFilter}
               testID="searchWomenOnlySwitch"
               trackColor={{
-                false: "#bcbdc1",
-                true: "#fbcfe8"
+                false: colors.switchTrackOff,
+                true: colors.switchTrackOn,
               }}
               thumbColor={
                 womenOnlyFilter
                   ? colors.women
-                  : "#8b8e91"
+                  : colors.switchThumbOff
               }
             />
 
           </View>
 
         )}
+
+        <View style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginTop: spacing.sm
+        }}>
+          <Text style={layout.subtitle}>Friends only</Text>
+          <Switch
+            value={friendsOnlyFilter}
+            onValueChange={setFriendsOnlyFilter}
+            testID="searchFriendsOnlySwitch"
+            trackColor={{ false: "#bcbdc1", true: colors.primaryLight }}
+            thumbColor={friendsOnlyFilter ? colors.primary : "#8b8e91"}
+          />
+        </View>
 
       </View>
     </View>
@@ -228,42 +204,31 @@ export default function Home() {
   const emptyState = (
     <>
       <View style={components.card}>
-        <Text
-          style={{ color: colors.textLight }}
-          testID="searchEmptyState"
-        >
+        <Text style={layout.textLight} testID="searchEmptyState">
           No rides found
         </Text>
       </View>
 
       {
-        <View style={[components.card, { borderColor: colors.primaryLight, borderWidth: 1.5 }]}>
+        <View style={components.card}>
           <Pressable
             onPress={() => setShowBusAlternatives(prev => !prev)}
-            style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}
+            style={components.rowSpaceBetween}
           >
-            <Text style={{ fontWeight: "700", fontSize: 15, color: colors.primary }}>
+            <Text style={[layout.headingSm, { color: colors.textLight }]}>
               🚌 Bus Alternatives
             </Text>
-            <Text style={{ fontSize: 18, color: colors.primary, fontWeight: "600" }}>
-              {showBusAlternatives ? "▲" : "▼"}
+            <Text style={layout.collapseIndicator}>
+              {showBusAlternatives ? "Hide ▲" : "Show ▼"}
             </Text>
           </Pressable>
 
           {showBusAlternatives && (
-            <View style={{ marginTop: spacing.sm }}>
+            <View style={components.mtMd}>
               {!hasBothCoords ? (
-                <View style={{
-                  backgroundColor: colors.warningSoft,
-                  borderRadius: 8,
-                  padding: spacing.sm,
-                  flexDirection: "row",
-                  alignItems: "flex-start",
-                  gap: spacing.xs,
-                  marginTop: spacing.xs,
-                }}>
-                  <Text style={{ fontSize: 15 }}>⚠️</Text>
-                  <Text style={{ color: colors.text, fontSize: 13, flex: 1, lineHeight: 18 }}>
+                <View style={components.infoBox}>
+                  <Text>⚠️</Text>
+                  <Text style={components.infoBoxText}>
                     To see bus alternatives, please select a specific address from the suggestions for{" "}
                     {!originCoords ? "Origin" : ""}
                     {!originCoords && !destinationCoords ? " and " : ""}

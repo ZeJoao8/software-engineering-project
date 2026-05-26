@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { View, Text, ScrollView, StyleSheet, Pressable } from "react-native";
+import { View, Text, ScrollView, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { BadgeStatus, BadgeLevel } from "../utils/badges";
+import type { BadgeStatus, BadgeLevel } from "../domain/entities/Badge";
 import { colors, spacing } from "../styles/theme";
 import { components } from "../styles/components";
 
@@ -28,24 +28,23 @@ export function BadgeDisplay({ badges, showProgress = false }: BadgeDisplayProps
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.container}
+        contentContainerStyle={components.badgesRow}
       >
         {badges.map((badge) => {
           const isLocked = badge.level === "none";
           const bgColor = LEVEL_COLORS[badge.level];
           const iconColor = isLocked ? "#9CA3AF" : "#1F2937";
           const isSelected = openTooltip === badge.id;
-          const opacity = openTooltip && !isSelected ? 0.3 : (isLocked ? 0.6 : 1);
 
           return (
             <Pressable
               key={badge.id}
-              style={styles.badgeWrapper}
+              style={components.badgeWrapper}
               onPress={() => setOpenTooltip(openTooltip === badge.id ? null : badge.id)}
             >
               <View
                 style={[
-                  styles.badgeCircle,
+                  components.badgeCircle,
                   { backgroundColor: bgColor, opacity: openTooltip && !isSelected ? 0.4 : (isLocked ? 0.6 : 1) },
                   isSelected && components.activeHighlight
                 ]}
@@ -58,7 +57,7 @@ export function BadgeDisplay({ badges, showProgress = false }: BadgeDisplayProps
               </View>
               <Text
                 style={[
-                  styles.title,
+                  components.badgeTitle,
                   { color: isLocked ? colors.textLight : colors.text },
                 ]}
                 numberOfLines={1}
@@ -66,24 +65,24 @@ export function BadgeDisplay({ badges, showProgress = false }: BadgeDisplayProps
                 {badge.title}
               </Text>
               {isLocked ? (
-                <Text style={styles.description}>Locked</Text>
+                <Text style={components.badgeCaption}>Locked</Text>
               ) : (
-                <Text style={styles.levelText}>
+                <Text style={components.badgeLevelText}>
                   {badge.level.charAt(0).toUpperCase() + badge.level.slice(1)}
                 </Text>
               )}
               {!isLocked && showProgress && (
-                <Text style={styles.description}>{badge.description}</Text>
+                <Text style={components.badgeCaption}>{badge.description}</Text>
               )}
 
               {showProgress && badge.nextLevelThreshold !== null && (
-                <Text style={styles.progressText}>
+                <Text style={components.badgeProgress}>
                   Next: {Math.floor(badge.progress)} / {badge.nextLevelThreshold}
                 </Text>
               )}
-              
+
               {!isLocked && badge.nextLevelThreshold === null && (
-                <Text style={styles.maxLevelText}>
+                <Text style={components.badgeMaxLevel}>
                   Max Level! 🏆
                 </Text>
               )}
@@ -107,57 +106,3 @@ export function BadgeDisplay({ badges, showProgress = false }: BadgeDisplayProps
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    paddingVertical: spacing.xs,
-    gap: spacing.md,
-  },
-  badgeWrapper: {
-    alignItems: "center",
-    width: 90,
-  },
-  badgeCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: spacing.xs,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  title: {
-    fontSize: 13,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  levelText: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: colors.primary,
-    marginTop: 2,
-  },
-  description: {
-    fontSize: 10,
-    color: colors.textLight,
-    textAlign: "center",
-    marginTop: 2,
-  },
-  progressText: {
-    fontSize: 9,
-    color: colors.textLight,
-    textAlign: "center",
-    marginTop: 4,
-  },
-  maxLevelText: {
-    fontSize: 9,
-    fontWeight: "700",
-    color: "#D4AF37",
-    textAlign: "center",
-    marginTop: 4,
-  },
-});

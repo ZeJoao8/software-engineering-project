@@ -3,7 +3,6 @@ import {
   View,
   Text,
   Pressable,
-  StyleSheet,
   ActivityIndicator,
   Modal,
   SafeAreaView,
@@ -17,14 +16,13 @@ import MapView, {
 
 import * as Location from "expo-location";
 
-import {
-  reverseGeocode,
-  type Coordinates,
-} from "../utils/routing";
+import { reverseGeocode } from "../infra/geocoding";
+import type { Coordinates } from "../infra/routing";
 
-import { colors, spacing, radius } from "../styles/theme";
+import { colors } from "../styles/theme";
+import { mapStyles } from "../styles/map";
+import { components } from "../styles/components";
 
-// FEUP coordinates — fallback when location permission is denied
 const FEUP_REGION = {
   latitude: 41.1780,
   longitude: -8.5980,
@@ -60,7 +58,6 @@ export default function LocationPickerMap({
   const [loading, setLoading] =
     useState(false);
 
-  // When modal opens, try to center on user's location; fall back to FEUP
   useEffect(() => {
     if (!visible) return;
 
@@ -129,18 +126,18 @@ export default function LocationPickerMap({
       animationType="slide"
       presentationStyle="pageSheet"
     >
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={mapStyles.pickerContainer}>
 
         {/* Header */}
-        <View style={styles.header}>
+        <View style={mapStyles.pickerHeader}>
 
           <Pressable onPress={handleClose}>
-            <Text style={styles.cancelText}>
+            <Text style={mapStyles.pickerCancelText}>
               Cancel
             </Text>
           </Pressable>
 
-          <Text style={styles.title}>
+          <Text style={mapStyles.pickerTitle}>
             {title}
           </Text>
 
@@ -149,8 +146,8 @@ export default function LocationPickerMap({
         </View>
 
         {/* Instruction */}
-        <View style={styles.instruction}>
-          <Text style={styles.instructionText}>
+        <View style={mapStyles.pickerInstruction}>
+          <Text style={mapStyles.pickerInstructionText}>
             📍 Tap on the map to select a location
           </Text>
         </View>
@@ -158,7 +155,7 @@ export default function LocationPickerMap({
         {/* Map */}
         <MapView
           ref={mapRef}
-          style={styles.map}
+          style={mapStyles.pickerMap}
           provider={PROVIDER_DEFAULT}
           initialRegion={FEUP_REGION}
           onPress={handleMapPress}
@@ -174,9 +171,9 @@ export default function LocationPickerMap({
         </MapView>
 
         {/* Zoom Controls */}
-        <View style={styles.zoomControls}>
+        <View style={mapStyles.pickerZoomControls}>
           <Pressable
-            style={styles.zoomButton}
+            style={components.zoomButton}
             onPress={() => {
               if (mapRef.current) {
                 mapRef.current.getCamera().then((cam) => {
@@ -189,11 +186,11 @@ export default function LocationPickerMap({
               }
             }}
           >
-            <Text style={styles.zoomButtonText}>+</Text>
+            <Text style={components.zoomButtonText}>+</Text>
           </Pressable>
-          <View style={styles.zoomDivider} />
+          <View style={components.zoomDivider} />
           <Pressable
-            style={styles.zoomButton}
+            style={components.zoomButton}
             onPress={() => {
               if (mapRef.current) {
                 mapRef.current.getCamera().then((cam) => {
@@ -206,13 +203,13 @@ export default function LocationPickerMap({
               }
             }}
           >
-            <Text style={styles.zoomButtonText}>−</Text>
+            <Text style={components.zoomButtonText}>−</Text>
           </Pressable>
         </View>
 
         {/* Selected place info */}
         {selected && (
-          <View style={styles.infoCard}>
+          <View style={mapStyles.pickerInfoCard}>
 
             {loading ? (
               <ActivityIndicator
@@ -220,21 +217,21 @@ export default function LocationPickerMap({
               />
             ) : (
               <>
-                <Text style={styles.placeName}>
+                <Text style={mapStyles.pickerPlaceName}>
                   {placeName}
                 </Text>
 
-                <Text style={styles.coords}>
+                <Text style={mapStyles.pickerCoords}>
                   {selected.latitude.toFixed(5)},{" "}
                   {selected.longitude.toFixed(5)}
                 </Text>
 
                 <Pressable
-                  style={styles.confirmButton}
+                  style={mapStyles.pickerConfirmButton}
                   onPress={handleConfirm}
                   testID="confirmLocationButton"
                 >
-                  <Text style={styles.confirmText}>
+                  <Text style={mapStyles.pickerConfirmText}>
                     ✓ Confirm location
                   </Text>
                 </Pressable>
@@ -248,132 +245,3 @@ export default function LocationPickerMap({
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    backgroundColor: "white",
-  },
-
-  cancelText: {
-    color: colors.danger,
-    fontWeight: "600",
-    fontSize: 15,
-  },
-
-  title: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: colors.text,
-  },
-
-  instruction: {
-    backgroundColor: colors.primarySoft,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-
-  instructionText: {
-    color: colors.text,
-    fontSize: 14,
-    textAlign: "center",
-    fontWeight: "500",
-  },
-
-  map: {
-    flex: 1,
-  },
-
-  infoCard: {
-    backgroundColor: "white",
-    padding: spacing.lg,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-
-  placeName: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: colors.text,
-    marginBottom: 4,
-  },
-
-  coords: {
-    fontSize: 12,
-    color: colors.textLight,
-    marginBottom: spacing.md,
-  },
-
-  confirmButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: spacing.md,
-    borderRadius: radius.md,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-
-  confirmText: {
-    color: "white",
-    fontWeight: "700",
-    fontSize: 15,
-  },
-
-  zoomControls: {
-    position: "absolute",
-    right: 16,
-    bottom: "35%",
-    backgroundColor: "rgba(255,255,255,0.95)",
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 4,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  zoomButton: {
-    width: 44,
-    height: 44,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  zoomButtonText: {
-    fontSize: 24,
-    color: colors.primary,
-    fontWeight: "400",
-    lineHeight: 28,
-  },
-
-  zoomDivider: {
-    width: 32,
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.border,
-  },
-
-});

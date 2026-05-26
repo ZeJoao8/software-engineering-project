@@ -1,24 +1,14 @@
 import { useEffect, useState } from "react";
 
 import {
- View,
- Text,
- TextInput,
- ScrollView,
- Alert,
- ActivityIndicator
+  View,
+  Text,
+  TextInput,
+  ScrollView,
+  Alert,
+  ActivityIndicator
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-
-import {
- getCurrentUser,
- isAuthReady,
- loginUser,
- registerUser,
- subscribeToAuthChanges,
- waitForAuthReady,
-} from "../data/user";
 
 import { useRouter } from "expo-router";
 
@@ -35,432 +25,332 @@ import {
   isPasswordStrong,
   isValidEmail,
   isUniversityEmail
-} from "../utils/validation";
+} from "../domain/rules/validation";
+import { useAuth } from "../hooks/useAuth";
+import { login as authLogin, register as authRegister } from "../services/AuthService";
 
 
-export default function Login(){
+export default function Login() {
 
- const router = useRouter();
+  const router = useRouter();
+  const { user, isReady } = useAuth();
 
- const [registerMode,setRegisterMode] = useState(false);
-
- const [email,setEmail] = useState("");
-
- const [password,setPassword] = useState("");
-
- const [confirmPassword,setConfirmPassword] = useState("");
-
- const [name,setName] = useState("");
-
- const [university,setUniversity] = useState("");
-
- const [course,setCourse] = useState("");
-
- const [gender,setGender] =
-  useState<"Male"|"Female">("Male");
-
- const [loading, setLoading] =
-  useState(false);
-
- const [ready, setReady] =
-  useState(isAuthReady());
-
-  const [genderDropdownOpen, setGenderDropdownOpen] =
- useState(false);
+  const [registerMode, setRegisterMode] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [name, setName] = useState("");
+  const [university, setUniversity] = useState("");
+  const [course, setCourse] = useState("");
+  const [gender, setGender] = useState<"Male" | "Female">("Male");
+  const [loading, setLoading] = useState(false);
+  const [genderDropdownOpen, setGenderDropdownOpen] = useState(false);
 
   const genderItems = [
-  { label: "Male", value: "Male" },
-  { label: "Female", value: "Female" }
+    { label: "Male", value: "Male" },
+    { label: "Female", value: "Female" }
   ];
 
- useEffect(() => {
-  let mounted = true;
+  useEffect(() => {
+    if (isReady && user) {
+      router.replace("/(tabs)/searchRide");
+    }
+  }, [isReady, user, router]);
 
-  function syncState() {
-   if (!mounted) return;
-   setReady(isAuthReady());
 
-   if (getCurrentUser()) {
+  async function login() {
+    if (loading) return;
+    setLoading(true);
+    const result = await authLogin(email, password);
+    setLoading(false);
+    if (!result.ok) {
+      Alert.alert("Login failed", result.error);
+      return;
+    }
     router.replace("/(tabs)/searchRide");
-   }
   }
 
-  syncState();
 
-  const unsubscribe =
-   subscribeToAuthChanges(syncState);
+  async function register() {
+    if (loading) return;
 
-  void waitForAuthReady().then(syncState);
+    const fields = { name, email, password, university, course, confirmPassword };
 
-  return () => {
-   mounted = false;
-   unsubscribe();
-  };
- }, [router]);
+    if (!areRequiredFieldsFilled(fields)) {
+      Alert.alert("Error", "Fill all fields");
+      return;
+    }
 
+    if (!isValidEmail(email)) {
+      Alert.alert("Invalid email", "Incorrect email format");
+      return;
+    }
 
- async function login(){
+    if (!isUniversityEmail(email)) {
+      Alert.alert("Invalid email", "Email must be from @up.pt (e.g. up123456789@up.pt)");
+      return;
+    }
 
-  if(loading) return;
+    if (!doPasswordsMatch(password, confirmPassword)) {
+      Alert.alert("Passwords do not match", "Please confirm your password correctly");
+      return;
+    }
 
-  setLoading(true);
+    if (!isPasswordStrong(password)) {
+      Alert.alert("Weak password", "Password must have at least 8 characters");
+      return;
+    }
 
-  const success =
-   await loginUser(email,password);
-
-  if(!success){
-   setLoading(false);
-
-   return;
-
+    setLoading(true);
+    const result = await authRegister(name, email, password, university, course, gender);
+    setLoading(false);
+    if (!result.ok) {
+      Alert.alert("Registration failed", result.error);
+      return;
+    }
+    router.replace("/(tabs)/searchRide");
   }
 
-  setLoading(false);
-  router.replace("/(tabs)/searchRide");
-
- }
-
-
- async function register(){
-
-  if(loading) return;
-
-  const fields = {
-    name,
-    email,
-    password,
-    university,
-    course,
-    confirmPassword
-  };
-
-  if(!areRequiredFieldsFilled(fields)){
-   Alert.alert(
-    "Error",
-    "Fill all fields"
-   );
-   return;
+  if (!isReady) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator color={colors.primary} />
+      </View>
+    );
   }
 
-  if(!isValidEmail(email)){
-   Alert.alert(
-    "Invalid email",
-    "Incorrect email format"
-   );
-   return;
-  }
-
-  if(!isUniversityEmail(email)){
-   Alert.alert(
-    "Invalid email",
-    "Email must be from @up.pt (e.g. up123456789@up.pt)"
-   );
-   return;
-
-  }
 
-  if(!doPasswordsMatch(password, confirmPassword)){
+  return (
 
-  Alert.alert(
-    "Passwords do not match",
-    "Please confirm your password correctly"
-  );
-  return;
-  }
+    <SafeAreaView style={layout.screen}>
+      <ScrollView
+        style={layout.screen}
+        contentContainerStyle={{
+          justifyContent: "center",
+          flexGrow: 1
+        }}
+      >
 
-  if(!isPasswordStrong(password)){
 
-  Alert.alert(
-    "Weak password",
-    "Password must have at least 8 characters"
-  );
+        <Text style={[
+          layout.title,
+          { textAlign: "center" }
+        ]}
+          testID="authScreenTitle"
+        >
+          UniLink 🌱
+        </Text>
 
-  return;
 
-  }
 
-  setLoading(true);
+        <View style={components.card}>
 
-  const user =
-   await registerUser(
-    name,
-    email,
-    password,
-    university,
-    course,
-    gender
-   );
 
-  if(!user){
-   setLoading(false);
-   return;
-  }
+          {registerMode && (
 
-  setLoading(false);
-  router.replace("/(tabs)/searchRide");
+            <>
 
- }
+              <Text style={forms.label}>
+                Name
+              </Text>
 
- if(!ready){
-  return(
-   <View
-    style={{
-     flex:1,
-     justifyContent:"center",
-     alignItems:"center"
-    }}
-   >
-    <ActivityIndicator color={colors.primary} />
-   </View>
-  );
- }
+              <TextInput
+                value={name}
+                onChangeText={setName}
+                style={forms.input}
+                testID="registerNameInput"
+              />
 
 
- return(
+              <View style={components.spacerSm} />
 
-  <SafeAreaView style={layout.screen}>
-    <ScrollView
-      style={layout.screen}
-      contentContainerStyle={{
-        justifyContent: "center",
-        flexGrow: 1
-      }}
-    >
 
+              <Text style={forms.label}>
+                University
+              </Text>
 
-<Text style={[
- layout.title,
- {textAlign:"center"}
- ]}
- testID="authScreenTitle"
- >
- UniLink 🌱
-</Text>
+              <TextInput
+                value={university}
+                onChangeText={setUniversity}
+                style={forms.input}
+                testID="registerUniversityInput"
+              />
 
 
+              <View style={components.spacerSm} />
 
-<View style={components.card}>
 
+              <Text style={forms.label}>
+                Course
+              </Text>
 
-{registerMode && (
+              <TextInput
+                value={course}
+                onChangeText={setCourse}
+                style={forms.input}
+                testID="registerCourseInput"
+              />
 
-<>
 
-<Text style={forms.label}>
- Name
-</Text>
+              <View style={components.spacerSm} />
 
-<TextInput
- value={name}
- onChangeText={setName}
- style={forms.input}
- testID="registerNameInput"
-/>
 
+              <Text style={forms.label}>
+                Gender
+              </Text>
 
-<View style={{height:spacing.sm}} />
 
+              <View style={components.pickerWrapper}>
 
-<Text style={forms.label}>
- University
-</Text>
+                <DropDownPicker
+                  open={genderDropdownOpen}
+                  value={gender}
+                  items={genderItems}
 
-<TextInput
- value={university}
- onChangeText={setUniversity}
- style={forms.input}
- testID="registerUniversityInput"
-/>
+                  setOpen={setGenderDropdownOpen}
+                  setValue={setGender}
 
+                  placeholder="Select gender"
+                  testID="genderPicker"
 
-<View style={{height:spacing.sm}} />
+                  style={components.dropdown}
 
+                  dropDownContainerStyle={
+                    components.dropdownContainer
+                  }
 
-<Text style={forms.label}>
- Course
-</Text>
+                  textStyle={components.dropdownText}
 
-<TextInput
- value={course}
- onChangeText={setCourse}
- style={forms.input}
- testID="registerCourseInput"
-/>
+                  placeholderStyle={
+                    components.dropdownPlaceholder
+                  }
 
+                  listMode="SCROLLVIEW"
 
-<View style={{height:spacing.sm}} />
+                  scrollViewProps={{
+                    nestedScrollEnabled: true
+                  }}
+                />
 
+              </View>
 
-<Text style={forms.label}>
- Gender
-</Text>
 
+              <View style={components.spacerSm} />
 
-<View style={components.pickerWrapper}>
+            </>
 
-  <DropDownPicker
-  open={genderDropdownOpen}
-  value={gender}
-  items={genderItems}
+          )}
 
-  setOpen={setGenderDropdownOpen}
-  setValue={setGender}
 
-  placeholder="Select gender"
-  testID="genderPicker"
 
-  style={components.dropdown}
+          <Text style={forms.label}>
+            Email
+          </Text>
 
-  dropDownContainerStyle={
-    components.dropdownContainer
-  }
+          <TextInput
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            style={forms.input}
+            testID="loginEmailInput"
+          />
 
-  textStyle={components.dropdownText}
 
-  placeholderStyle={
-    components.dropdownPlaceholder
-  }
+          <View style={components.spacerSm} />
 
-  listMode="SCROLLVIEW"
 
-  scrollViewProps={{
-    nestedScrollEnabled: true
-  }}
-  />
+          <Text style={forms.label}>
+            Password
+          </Text>
 
-</View>
+          <TextInput
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            style={forms.input}
+            testID="loginPasswordInput"
+          />
 
 
-<View style={{height:spacing.sm}} />
+          {registerMode && (
 
-</>
+            <>
 
-)}
+              <View style={components.spacerSm} />
 
+              <Text style={forms.label}>
+                Confirm password
+              </Text>
 
+              <TextInput
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry
+                style={forms.input}
+                testID="registerConfirmPasswordInput"
+              />
 
-<Text style={forms.label}>
- Email
-</Text>
+            </>
 
-<TextInput
- value={email}
- onChangeText={setEmail}
- autoCapitalize="none"
- keyboardType="email-address"
- style={forms.input}
- testID="loginEmailInput"
-/>
+          )}
 
 
-<View style={{height:spacing.sm}} />
 
 
-<Text style={forms.label}>
- Password
-</Text>
+          <View style={components.spacerMd} />
 
-<TextInput
- value={password}
- onChangeText={setPassword}
- secureTextEntry
- style={forms.input}
- testID="loginPasswordInput"
-/>
 
+          <Button testID="authSubmitButton"
+            onPress={registerMode ? register : login}
+            label={loading
+              ? "LOADING..."
+              : registerMode
+                ? "CREATE ACCOUNT"
+                : "LOGIN"}
+          />
 
-{registerMode && (
 
-<>
 
-<View style={{height:spacing.sm}} />
+          <View style={components.spacerSm} />
 
-<Text style={forms.label}>
- Confirm password
-</Text>
 
-<TextInput
- value={confirmPassword}
- onChangeText={setConfirmPassword}
- secureTextEntry
- style={forms.input}
- testID="registerConfirmPasswordInput"
-/>
+          <Button
+            outline
+            testID="authModeToggleButton"
+            onPress={() => setRegisterMode(!registerMode)}
+            label={registerMode
+              ? "Already have account?"
+              : "Create account"}
+          />
 
-</>
 
-)}
+          {!registerMode && (
 
+            <Text style={[layout.textLightSm, { marginTop: spacing.md, textAlign: "center" }]}>
 
+              test accounts:
 
+              {"\n"}
 
-<View style={{height:spacing.md}} />
+              joao@feup.pt / 123456
 
+              {"\n"}
 
-<Button testID="authSubmitButton"
- onPress={
-  registerMode
-   ? register
-   : login
- }
- label={loading
-  ? "LOADING..."
-  : registerMode
-    ? "CREATE ACCOUNT"
-    : "LOGIN"}
- />
+              maria@feup.pt / 123456
 
+              {"\n"}
 
+              ana@feup.pt / 123456
 
-<View style={{height:spacing.sm}} />
+            </Text>
 
+          )}
 
-<Button
- outline
- testID="authModeToggleButton"
- onPress={()=>
-  setRegisterMode(!registerMode)
- }
- label={registerMode
-  ? "Already have account?"
-  : "Create account"}
-/>
-
-
-{!registerMode && (
-
-<Text
- style={{
-  marginTop:spacing.md,
-  fontSize:12,
-  color:colors.textLight,
-  textAlign:"center"
- }}
->
-
-test accounts:
-
-{"\n"}
-
-joao@feup.pt / 123456
-
-{"\n"}
-
-maria@feup.pt / 123456
-
-{"\n"}
-
-ana@feup.pt / 123456
-
-</Text>
-
-)}
-
-</View>
+        </View>
 
 
       </ScrollView>
     </SafeAreaView>
   );
 }
-

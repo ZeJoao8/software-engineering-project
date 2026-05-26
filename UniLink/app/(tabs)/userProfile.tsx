@@ -2,243 +2,150 @@ import { useEffect, useState } from "react";
 
 import {
   Alert,
+  Pressable,
   ScrollView,
   Text,
   TextInput,
   View
 } from "react-native";
 
+import { calculateAverageRating } from "../../domain/rules/reviewRules";
+import { getActiveRidesForCar, hasUserDrivenRide } from "../../domain/rules/rideRules";
+import { useAuth } from "../../hooks/useAuth";
+import { useCars } from "../../hooks/useCars";
+import { useFriends } from "../../hooks/useFriends";
+import { useReviews } from "../../hooks/useReviews";
+import { useRides } from "../../hooks/useRides";
+import { logout } from "../../services/AuthService";
+import { addCar, removeCarCascade } from "../../services/CarService";
 import {
-  getCurrentUser,
-  logoutUser,
-  updateUser
-} from "../../data/user";
-
-import {
-  addCar,
-  deleteCar,
-  getUserCars,
-  subscribeToCarsChanges
-} from "../../data/cars";
-import { generateId } from "../../lib/firebase";
-
-import {
-  deleteRide,
-  getRides,
-  subscribeToRidesChanges
-} from "../../data/rides";
-
-import {
-  getAverageRatingForUser,
-  getReviewsForUser,
-  subscribeToReviewsChanges
-} from "../../data/reviews";
+  acceptFriendRequest,
+  removeFriend,
+} from "../../services/FriendService";
+import { updateProfile } from "../../services/ProfileService";
 
 import { useRouter } from "expo-router";
 
 import { BadgeDisplay } from "../../components/BadgeDisplay";
 import { Button } from "../../components/Button";
+import type { User } from "../../domain/entities/User";
+import { getUserBadges } from "../../domain/rules/badges";
+import { calculateWeeklyStreak } from "../../domain/rules/streaks";
+import { calculateUserCO2Saved } from "../../domain/rules/sustainability";
 import { components } from "../../styles/components";
 import { forms } from "../../styles/forms";
 import { layout } from "../../styles/layout";
-import { colors, spacing } from "../../styles/theme";
-import { getUserBadges } from "../../utils/badges";
-import { calculateWeeklyStreak } from "../../utils/streaks";
-import { calculateUserCO2Saved } from "../../utils/sustainability";
+import { colors, radius, spacing } from "../../styles/theme";
 
 export default function Profile() {
 
   const router = useRouter();
 
-  const [user, setUser] =
-    useState(getCurrentUser());
+  const { user: currentUser, getUserById } = useAuth();
+  const { cars } = useCars();
+  const rides = useRides();
+  const { getReviewsForUser } = useReviews();
+  const { getAcceptedFriendIds, getPendingReceivedRequests } = useFriends();
 
-  const [editing, setEditing] =
-    useState(false);
+  const [editUser, setEditUser] = useState<User | null>(currentUser);
+  const [editing, setEditing] = useState(false);
+  const [showCarForm, setShowCarForm] = useState(false);
+  const [model, setModel] = useState("");
+  const [color, setColor] = useState("");
+  const [plate, setPlate] = useState("");
+  const [seats, setSeats] = useState("");
 
-  const [showCarForm, setShowCarForm] =
-    useState(false);
+  const [showContactForm, setShowContactForm] = useState(false);
+  const [contactName, setContactName] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
 
-  const [model, setModel] =
-    useState("");
-
-  const [color, setColor] =
-    useState("");
-
-  const [plate, setPlate] =
-    useState("");
-
-  const [seats, setSeats] =
-    useState("");
-
-  const [, setVersion] =
-    useState(0);
-
+  // Sync editUser with store when not editing
   useEffect(() => {
-    const rerender = () => {
-      setVersion(value => value + 1);
-    };
+    if (!editing) setEditUser(currentUser);
+  }, [currentUser, editing]);
 
-    const unsubscribeCars =
-      subscribeToCarsChanges(rerender);
+  if (!currentUser) return null;
 
-    const unsubscribeRides =
-      subscribeToRidesChanges(rerender);
+  const activeUser = editing ? (editUser ?? currentUser) : currentUser;
 
-    const unsubscribeReviews =
-      subscribeToReviewsChanges(rerender);
+  const userReviews = getReviewsForUser(currentUser.uid);
+  const averageRating = calculateAverageRating(userReviews);
 
-    return () => {
-      unsubscribeCars();
-      unsubscribeRides();
-      unsubscribeReviews();
-    };
-  }, []);
+  const hasDrivenRide = hasUserDrivenRide(rides, currentUser.uid);
+  const showRating = hasDrivenRide && userReviews.length > 0;
 
-  if (!user) {
-    return null;
-  }
-
-  const activeUser = user;
-
-  const userCars = getUserCars(activeUser.uid);
-
-  const hasDrivenRide =
-    getRides().some(
-    ride => ride.driverId === activeUser.uid
-    );
-
-  const userReviews = getReviewsForUser(activeUser.uid);
-
-  const averageRating = getAverageRatingForUser(activeUser.uid);
-
-  // Show rating if has driven a ride AND has reviews (same logic as public profile)
-  const showRating =
-    hasDrivenRide &&
-    userReviews.length > 0;
-
-  const weeklyStreak =
-  calculateWeeklyStreak(
-    getRides(),
-    activeUser.uid
-  );
+  const weeklyStreak = calculateWeeklyStreak(rides, currentUser.uid);
+  const co2Saved = calculateUserCO2Saved(rides, currentUser.uid);
 
   function startEdit() {
+    setEditUser(currentUser);
     setEditing(true);
   }
 
   function cancelEdit() {
-    const current =
-      getCurrentUser();
-
-    if (current) {
-      setUser(current);
-    }
-
+    setEditUser(currentUser);
     setEditing(false);
     setShowCarForm(false);
     setModel("");
     setColor("");
     setPlate("");
     setSeats("");
+    setShowContactForm(false);
+    setContactName("");
+    setContactPhone("");
+  }
+
+  function addContact() {
+    if (!contactName.trim() && !contactPhone.trim()) return;
+    setEditUser(prev =>
+      prev
+        ? { ...prev, emergencyContacts: [...(prev.emergencyContacts ?? []), { name: contactName.trim(), phone: contactPhone.trim() }] }
+        : prev
+    );
+    setContactName("");
+    setContactPhone("");
+    setShowContactForm(false);
   }
 
   async function saveProfile() {
-    await updateUser(activeUser);
-    setUser({ ...activeUser });
+    if (!editUser) return;
+    const result = await updateProfile(editUser);
+    if (!result.ok) {
+      Alert.alert("Error", result.error);
+      return;
+    }
     setEditing(false);
     Alert.alert("Saved");
   }
 
   function removeCar(carId: string) {
-    const ridesUsingCar =
-      getRides().filter(
-        r =>
-          r.carId === carId &&
-          !r.completed &&
-          new Date(r.departureDateTime) > new Date()
-      );
-    const warningText =
-      ridesUsingCar.length > 0
-        ? `This will cancel ${ridesUsingCar.length} future ride(s) using this car.`
-        : "Are you sure you want to remove this car?";
-    Alert.alert(
-      "Remove car",
-      warningText,
-      [
-        {
-          text: "No",
-          style: "cancel"
-        },
-        {
-          text: "Yes",
-          style: "destructive",
-          onPress: async () => {
-            await Promise.all(
-              ridesUsingCar.map(
-                ride => deleteRide(ride.id)
-              )
-            );
-            await deleteCar(carId);
-            const current =
-              getCurrentUser();
+    const ridesUsingCar = getActiveRidesForCar(rides, carId, new Date());
+    const warningText = ridesUsingCar.length > 0
+      ? `This will cancel ${ridesUsingCar.length} future ride(s) using this car.`
+      : "Are you sure you want to remove this car?";
 
-            if (current) {
-              setUser({ ...current });
-            }
+    Alert.alert("Remove car", warningText, [
+      { text: "No", style: "cancel" },
+      {
+        text: "Yes",
+        style: "destructive",
+        onPress: async () => {
+          const result = await removeCarCascade(carId);
+          if (!result.ok) {
+            Alert.alert("Error", result.error);
           }
         }
-      ]
-    );
+      }
+    ]);
   }
 
   async function addNewCar() {
-    if (
-      !model.trim() ||
-      !color.trim() ||
-      !plate.trim() ||
-      !seats.trim()
-    ) {
-      Alert.alert("Fill all fields");
+    if (!currentUser) return;
+    const result = await addCar(model, color, plate, seats, currentUser.uid);
+    if (!result.ok) {
+      Alert.alert("Error", result.error);
       return;
     }
-    if (model.length > 40) {
-      Alert.alert("Model max 40 chars");
-      return;
-    }
-    const seatsNumber = Number(seats);
-    if (
-      !Number.isInteger(seatsNumber) ||
-      seatsNumber < 2 || seatsNumber > 9
-    ) {
-      Alert.alert("Invalid seat number","Seats must be integer between 2 and 9");
-      return;
-    }
-    const formattedPlate =
-      plate.toUpperCase().replace(/\s/g, "");
-    const plateRegex = /^[A-Z0-9-]{6,8}$/;
-    if (!plateRegex.test(formattedPlate)) {
-      Alert.alert("Invalid plate format");
-      return;
-    }
-    const duplicate = getUserCars(activeUser.uid)
-        .some(
-          c =>
-            c.licensePlate ===
-            formattedPlate
-        );
-    if (duplicate) {
-      Alert.alert("Plate already exists");
-      return;
-    }
-    await addCar({
-      id: generateId("cars"),
-      model: model.trim(),
-      color: color.trim(),
-      licensePlate: formattedPlate,
-      seatCapacity: seatsNumber,
-      ownerId: activeUser.uid
-    });
     setModel("");
     setColor("");
     setPlate("");
@@ -250,11 +157,7 @@ export default function Profile() {
 
     <ScrollView
       style={layout.scrollScreen}
-      contentContainerStyle={{
-        flexGrow: 1,
-        padding: spacing.lg,
-        paddingBottom: 80,
-      }}
+      contentContainerStyle={layout.scrollContentTab}
       keyboardDismissMode="on-drag"
     >
 
@@ -262,42 +165,12 @@ export default function Profile() {
         Profile
       </Text>
 
-      {/* OWN RATING — same display as public profile */}
       {showRating && (
-        <Text
-          style={{
-            marginBottom: spacing.md,
-            color: colors.textLight,
-            fontSize: 16
-          }}
-        >
+        <Text style={layout.ratingText}>
           ⭐ {averageRating} ({userReviews.length} {userReviews.length === 1 ? "rating" : "ratings"})
         </Text>
       )}
-      {/* RIDES SHORTCUT */}
-      <View style={components.card}>
 
-        <Text style={layout.subtitle}>
-          Rides
-        </Text>
-
-        <Text
-          style={{
-            color: colors.textLight,
-            marginBottom: spacing.md
-          }}
-        >
-          View the rides you created and the rides you joined.
-        </Text>
-
-        <Button
-          outline
-          testID="profileMyRidesButton"
-          onPress={() => router.push("/(tabs)/myRides")}
-          label="My rides"
-        />
-
-      </View>
       {/* USER INFO */}
       <View style={components.card}>
 
@@ -312,9 +185,7 @@ export default function Profile() {
         {editing ? (
           <TextInput
             value={activeUser.name}
-            onChangeText={t =>
-              setUser({ ...activeUser, name: t })
-            }
+            onChangeText={t => setEditUser(prev => prev ? { ...prev, name: t } : prev)}
             style={forms.input}
             testID="profileNameInput"
           />
@@ -323,8 +194,8 @@ export default function Profile() {
         )}
 
 
-        <View style={{ height: spacing.sm }} />
-        
+        <View style={components.spacerSm} />
+
         <Text style={forms.label}>
           E-mail
         </Text>
@@ -333,8 +204,8 @@ export default function Profile() {
           {activeUser.email}
         </Text>
 
-        <View style={{ height: spacing.sm }} />
-        
+        <View style={components.spacerSm} />
+
         <Text style={forms.label}>
           Gender
         </Text>
@@ -344,7 +215,7 @@ export default function Profile() {
         </Text>
 
 
-        <View style={{ height: spacing.sm }} />
+        <View style={components.spacerSm} />
 
         <Text style={forms.label}>
           University
@@ -355,7 +226,7 @@ export default function Profile() {
         </Text>
 
 
-        <View style={{ height: spacing.sm }} />
+        <View style={components.spacerSm} />
 
         <Text style={forms.label}>
           Course
@@ -364,9 +235,7 @@ export default function Profile() {
         {editing ? (
           <TextInput
             value={activeUser.course}
-            onChangeText={t =>
-              setUser({ ...activeUser, course: t })
-            }
+            onChangeText={t => setEditUser(prev => prev ? { ...prev, course: t } : prev)}
             style={forms.input}
             testID="profileCourseInput"
           />
@@ -377,48 +246,89 @@ export default function Profile() {
         )}
 
 
-        <View style={{ height: spacing.md }} />
+        <View style={components.spacerSm} />
 
         <Text style={layout.subtitle}>
-          My cars
+          Safety Contacts
         </Text>
 
-        {userCars.length === 0 && (
-          <Text style={{ color: colors.textLight }}>
-            No cars yet
-          </Text>
+        {(currentUser.emergencyContacts ?? []).length === 0 && !editing && (
+          <Text style={layout.textLight}>No safety contacts</Text>
         )}
 
-        {userCars.map(car => (
-          <View
-            key={car.id}
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: spacing.sm
-            }}
-          >
-            <Text>
-              {car.model} • {car.color} • {car.licensePlate}
-            </Text>
-
+        {(editing ? (editUser?.emergencyContacts ?? []) : (currentUser.emergencyContacts ?? [])).map((c, i) => (
+          <View key={i} style={[components.rowSpaceBetween, components.mbSm]}>
+            <Text>{c.name} · {c.phone}</Text>
             {editing && (
-              <Text
-                style={{
-                  color: colors.danger,
-                  fontWeight: "600"
-                }}
-                onPress={() => removeCar(car.id)}
+              <Pressable
+                style={components.dangerTag}
+                onPress={() =>
+                  setEditUser(prev =>
+                    prev
+                      ? { ...prev, emergencyContacts: (prev.emergencyContacts ?? []).filter((_, j) => j !== i) }
+                      : prev
+                  )
+                }
               >
-                remove
-              </Text>
+                <Text style={components.dangerTagText}>Remove</Text>
+              </Pressable>
             )}
           </View>
         ))}
 
         {editing && (
-          <View style={{ marginTop: spacing.sm }}>
+          <View style={components.mtMd}>
+            <Button
+              outline
+              onPress={() => setShowContactForm(f => !f)}
+              label={showContactForm ? "Cancel" : "Add contact"}
+            />
+          </View>
+        )}
+
+        {editing && showContactForm && (
+          <View style={[components.mtMd, { padding: spacing.md, backgroundColor: colors.background, borderRadius: radius.sm }]}>
+            <Text style={layout.subtitle}>Add safety contact</Text>
+
+            <Text style={forms.label}>Name</Text>
+            <TextInput value={contactName} onChangeText={setContactName} style={forms.input} placeholder="Contact name" />
+            <View style={components.spacerSm} />
+
+            <Text style={forms.label}>Phone</Text>
+            <TextInput value={contactPhone} onChangeText={setContactPhone} keyboardType="phone-pad" style={forms.input} placeholder="+351 xxx xxx xxx" />
+
+            <View style={components.mtMd}>
+              <Button onPress={addContact} label="Save contact" />
+            </View>
+          </View>
+        )}
+
+        <View style={components.spacerMd} />
+
+        <Text style={layout.subtitle}>
+          My cars
+        </Text>
+
+        {cars.length === 0 && (
+          <Text style={layout.textLight}>No cars yet</Text>
+        )}
+
+        {cars.map(car => (
+          <View key={car.id} style={[components.rowSpaceBetween, components.mbSm]}>
+            <Text>
+              {car.model} • {car.color} • {car.licensePlate}
+            </Text>
+
+            {editing && (
+              <Pressable style={components.dangerTag} onPress={() => removeCar(car.id)}>
+                <Text style={components.dangerTagText}>Remove</Text>
+              </Pressable>
+            )}
+          </View>
+        ))}
+
+        {editing && (
+          <View style={components.mtMd}>
             <Button
               outline
               testID="toggleAddCarButton"
@@ -429,31 +339,31 @@ export default function Profile() {
         )}
 
         {editing && showCarForm && (
-          <View style={{ marginTop: spacing.md, padding: spacing.md, backgroundColor: colors.background, borderRadius: 8 }}>
-            <Text style={{ ...layout.subtitle, fontSize: 16 }}>Add car details</Text>
+          <View style={[components.mtMd, { padding: spacing.md, backgroundColor: colors.background, borderRadius: radius.sm }]}>
+            <Text style={layout.subtitle}>Add car details</Text>
 
             <Text style={forms.label}>Model</Text>
             <TextInput value={model} onChangeText={setModel} style={forms.input} testID="carModelInput" />
-            <View style={{ height: spacing.sm }} />
+            <View style={components.spacerSm} />
 
             <Text style={forms.label}>Color</Text>
             <TextInput value={color} onChangeText={setColor} style={forms.input} testID="carColorInput" />
-            <View style={{ height: spacing.sm }} />
+            <View style={components.spacerSm} />
 
             <Text style={forms.label}>Plate</Text>
             <TextInput value={plate} onChangeText={setPlate} autoCapitalize="characters" style={forms.input} testID="carPlateInput" />
-            <View style={{ height: spacing.sm }} />
+            <View style={components.spacerSm} />
 
             <Text style={forms.label}>Seats</Text>
             <TextInput value={seats} onChangeText={setSeats} keyboardType="numeric" style={forms.input} testID="carSeatsInput" />
 
-            <View style={{ marginTop: spacing.md }}>
+            <View style={components.mtMd}>
               <Button testID="saveCarButton" onPress={() => void addNewCar()} label="Save car" />
             </View>
           </View>
         )}
 
-        <View style={{ height: spacing.lg }} />
+        <View style={components.spacerLg} />
 
         {!editing ? (
 
@@ -469,11 +379,11 @@ export default function Profile() {
           <>
             <Button
               testID="saveProfileButton"
-              onPress={saveProfile}
+              onPress={() => void saveProfile()}
               label="Save profile"
             />
 
-            <View style={{ height: spacing.sm }} />
+            <View style={components.spacerSm} />
 
             <Button
               outline
@@ -486,45 +396,29 @@ export default function Profile() {
         )}
 
       </View>
+
       <View style={components.card}>
-        <Text style={layout.subtitle}>
-          Weekly Streak 🔥
-        </Text>
-
-        <Text
-          style={{
-            fontSize: 28,
-            fontWeight: "700",
-            color: colors.primary,
-            marginTop: spacing.xs
-          }}
-        >
-          {weeklyStreak}
-        </Text>
-
-        <Text
-          style={{
-            color: colors.textLight,
-            marginTop: spacing.xs
-          }}
-        >
-          {weeklyStreak === 1
-            ? "week in a row"
-            : "weeks in a row"}
-        </Text>
+        <Text style={layout.subtitle}>Weekly Streak</Text>
+        <View style={components.statRow}>
+          <Text style={layout.emojiLg}>🔥</Text>
+          <View>
+            <Text style={layout.statValue}>{weeklyStreak}</Text>
+            <Text style={layout.statLabel}>
+              {weeklyStreak === 1 ? "week in a row" : "weeks in a row"}
+            </Text>
+          </View>
+        </View>
       </View>
-
-
 
       <View style={components.card}>
         <Text style={layout.subtitle}>Sustainability Impact</Text>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: spacing.xs }}>
-          <Text style={{ fontSize: 32 }}>🌳</Text>
+        <View style={components.statRow}>
+          <Text style={layout.emojiLg}>🌳</Text>
           <View>
-            <Text style={{ fontSize: 20, fontWeight: "700", color: colors.primary }}>
-              {calculateUserCO2Saved(getRides(), activeUser.uid).toFixed(2)} kg
+            <Text style={layout.statValue}>
+              {co2Saved.toFixed(2)} kg
             </Text>
-            <Text style={{ color: colors.textLight, fontSize: 13 }}>Total CO₂ saved</Text>
+            <Text style={layout.statLabel}>Total CO₂ saved</Text>
           </View>
         </View>
       </View>
@@ -532,19 +426,138 @@ export default function Profile() {
       {/* BADGES & ACHIEVEMENTS */}
       <View style={components.card}>
         <Text style={layout.subtitle}>Achievements</Text>
-        <BadgeDisplay 
+        <BadgeDisplay
           showProgress={true}
-          badges={getUserBadges(
-            activeUser.uid,
-            getRides(),
-            calculateUserCO2Saved(getRides(), activeUser.uid)
-          )} 
+          badges={getUserBadges(currentUser.uid, rides, co2Saved)}
         />
       </View>
 
 
+      {/* FRIENDS */}
+      {(() => {
+        const pendingRequests = getPendingReceivedRequests();
+        const friendIds = getAcceptedFriendIds();
 
+        return (
+          <View style={components.card}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: spacing.sm }}>
+              <Text style={layout.subtitle}>Friends</Text>
+              <Pressable
+                onPress={() => router.push("/findFriends")}
+                style={({ pressed }) => ({
+                  backgroundColor: colors.primary,
+                  paddingHorizontal: 12,
+                  paddingVertical: 5,
+                  borderRadius: 8,
+                  opacity: pressed ? 0.7 : 1,
+                })}
+              >
+                <Text style={{ color: "#fff", fontWeight: "600", fontSize: 13 }}>🔍 Find Friends</Text>
+              </Pressable>
+            </View>
 
+            {pendingRequests.length > 0 && (
+              <View style={{ marginBottom: spacing.md }}>
+                <Text style={{ color: colors.textLight, fontSize: 13, marginBottom: spacing.sm }}>
+                  Pending requests
+                </Text>
+                {pendingRequests.map(req => {
+                  const sender = getUserById(req.senderId);
+                  return (
+                    <View
+                      key={req.id}
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        marginBottom: spacing.sm,
+                      }}
+                    >
+                      <Pressable onPress={() => router.push(`/user/${req.senderId}`)}>
+                        <Text style={layout.link}>
+                          {sender?.name ?? "Unknown"}
+                        </Text>
+                      </Pressable>
+                      <View style={{ flexDirection: "row", gap: spacing.sm }}>
+                        <Pressable
+                          onPress={() => void acceptFriendRequest(req.id)}
+                          style={({ pressed }) => ({
+                            backgroundColor: colors.primary,
+                            paddingHorizontal: 10,
+                            paddingVertical: 4,
+                            borderRadius: 6,
+                            opacity: pressed ? 0.7 : 1,
+                          })}
+                        >
+                          <Text style={{ color: "#fff", fontWeight: "600", fontSize: 13 }}>Accept</Text>
+                        </Pressable>
+                        <Pressable
+                          onPress={() => void removeFriend(req.senderId)}
+                          style={({ pressed }) => ({
+                            borderWidth: 1,
+                            borderColor: colors.border,
+                            paddingHorizontal: 10,
+                            paddingVertical: 4,
+                            borderRadius: 6,
+                            opacity: pressed ? 0.7 : 1,
+                          })}
+                        >
+                          <Text style={{ color: colors.textLight, fontSize: 13 }}>Decline</Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+
+            {friendIds.length === 0 && pendingRequests.length === 0 && (
+              <Text style={{ color: colors.textLight }}>No friends yet</Text>
+            )}
+
+            {[...friendIds]
+              .sort((a, b) => {
+                const nameA = getUserById(a)?.name ?? a;
+                const nameB = getUserById(b)?.name ?? b;
+                return nameA.localeCompare(nameB);
+              })
+              .map(friendId => {
+              const friend = getUserById(friendId);
+              return (
+                <Pressable
+                  key={friendId}
+                  onPress={() => router.push(`/user/${friendId}`)}
+                  style={({ pressed }) => ({
+                    flexDirection: "row" as const,
+                    alignItems: "center" as const,
+                    justifyContent: "space-between" as const,
+                    marginBottom: spacing.sm,
+                    opacity: pressed ? 0.7 : 1,
+                  })}
+                >
+                  <Text style={layout.link}>
+                    {friend?.name ?? friendId}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        );
+      })()}
+
+      {/* DRIVER PREFERENCES */}
+      <View style={components.card}>
+        <Text style={layout.subtitle}>Driver Preferences</Text>
+        <Text style={{ color: colors.textLight, marginBottom: spacing.md }}>
+          Customise your ride experience.
+        </Text>
+        <Button
+          outline
+          testID="driverPreferencesButton"
+          onPress={() => router.push("/user/driverPreferences")}
+          label="Manage preferences"
+        />
+      </View>
 
       {/* LOGOUT */}
       <View style={components.card}>
@@ -552,7 +565,6 @@ export default function Profile() {
         <Text style={layout.subtitle}>
           Session
         </Text>
-
 
         <Button
           testID="logoutButton"
@@ -565,9 +577,8 @@ export default function Profile() {
                 {
                   text: "Logout",
                   style: "destructive",
-
                   onPress: async () => {
-                    await logoutUser();
+                    await logout();
                     router.replace("/login");
                   }
                 }

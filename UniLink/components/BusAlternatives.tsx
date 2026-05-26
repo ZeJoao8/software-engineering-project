@@ -1,24 +1,14 @@
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { useRouter } from "expo-router";
-import { setSelectedBusRoute } from "../data/busRoute";
+import { setSelectedBusRoute } from "../store/busRouteStore";
 
-import { getTransitRoutes, TransitRoute } from "../utils/transitRoutes";
-import type { Coordinates } from "../utils/routing";
+import { getTransitRoutes, TransitRoute } from "../infra/transit";
+import type { Coordinates } from "../infra/routing";
 import { components } from "../styles/components";
 import { colors, spacing } from "../styles/theme";
 import { layout } from "../styles/layout";
-
-function modeEmoji(mode: string) {
-  switch (mode.toUpperCase()) {
-    case "BUS": return "🚌";
-    case "SUBWAY": return "🚇";
-    case "RAIL": return "🚆";
-    case "TRAM": return "🚃";
-    case "FERRY": return "⛴️";
-    default: return "🚌";
-  }
-}
+import { modeEmoji, isTransitLeg } from "../utils/transitDisplay";
 
 export default function BusAlternatives({
   origin,
@@ -70,9 +60,7 @@ export default function BusAlternatives({
 
 
       {!loading && (failed || routes.length === 0) && (
-        <Text style={{ color: colors.textLight }}>
-          No bus routes found for this route.
-        </Text>
+        <Text style={layout.textLight}>No bus routes found for this route.</Text>
       )}
 
       {!loading && routes.length > 0 && routes.map((route, i) => (
@@ -90,29 +78,21 @@ export default function BusAlternatives({
             opacity: pressed ? 0.7 : 1,
           })}
         >
-          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: spacing.xs }}>
-            <Text style={{ fontWeight: "700", fontSize: 15, color: colors.text }}>
+          <View style={[components.rowSpaceBetween, { marginBottom: spacing.xs }]}>
+            <Text style={layout.headingSm}>
               {route.departureTime} → {route.arrivalTime}
             </Text>
-            <Text style={{ color: colors.textLight, fontSize: 13 }}>
+            <Text style={layout.textLightSm}>
               {route.durationMin} min
             </Text>
           </View>
 
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.xs, marginBottom: spacing.xs }}>
+          <View style={[components.tagRow, { marginBottom: spacing.xs }]}>
             {route.legs
-              .filter(leg => leg.mode.toUpperCase() !== "WALK")
+              .filter(isTransitLeg)
               .map((leg, j) => (
-                <View
-                  key={j}
-                  style={{
-                    backgroundColor: colors.primaryLight,
-                    paddingHorizontal: 8,
-                    paddingVertical: 4,
-                    borderRadius: 6,
-                  }}
-                >
-                  <Text style={{ fontSize: 13, color: colors.primaryDark, fontWeight: "600" }}>
+                <View key={j} style={components.badgePrimary}>
+                  <Text style={components.badgePrimaryText}>
                     {modeEmoji(leg.mode)}{leg.lineName ? ` ${leg.lineName}` : ""}
                   </Text>
                 </View>
@@ -121,7 +101,7 @@ export default function BusAlternatives({
           </View>
 
           {route.legs.find(leg => leg.mode.toUpperCase() !== "WALK") && (
-            <Text style={{ fontSize: 12, color: colors.textLight }}>
+            <Text style={layout.textLightSm}>
               📍 {route.legs.find(leg => leg.mode.toUpperCase() !== "WALK")?.fromStop}
             </Text>
           )}

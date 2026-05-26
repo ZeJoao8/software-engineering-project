@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Pressable, Text } from "react-native";
 
 import {
@@ -5,7 +6,10 @@ import {
   useRouter
 } from "expo-router";
 
-import { colors } from "../../styles/theme";
+import { getPendingReceivedRequests, subscribeToFriendshipsChanges } from "../../store/friends";
+import { getRideNotificationsCount, subscribeToNotificationsChanges } from "../../store/notifications";
+import { colors, radius } from "../../styles/theme";
+import { NotificationBell } from "../../components/NotificationBell";
 
 function CreateRideHeaderButton() {
   const router = useRouter();
@@ -18,7 +22,7 @@ function CreateRideHeaderButton() {
         backgroundColor: colors.primarySoft,
         paddingHorizontal: 12,
         paddingVertical: 6,
-        borderRadius: 8,
+        borderRadius: radius.sm,
         marginRight: 16,
         opacity: pressed ? 0.8 : 1,
       })}
@@ -37,6 +41,23 @@ function CreateRideHeaderButton() {
 }
 
 export default function TabsLayout() {
+  const [pendingCount, setPendingCount] = useState(getPendingReceivedRequests().length);
+  const [rideNotifCount, setRideNotifCount] = useState(getRideNotificationsCount());
+
+  useEffect(() => {
+    const unsub = subscribeToFriendshipsChanges(() => {
+      setPendingCount(getPendingReceivedRequests().length);
+    });
+    return unsub;
+  }, []);
+
+  useEffect(() => {
+    const unsub = subscribeToNotificationsChanges(() => {
+      setRideNotifCount(getRideNotificationsCount());
+    });
+    return unsub;
+  }, []);
+
   return (
     <Tabs
       screenOptions={{
@@ -50,6 +71,8 @@ export default function TabsLayout() {
         },
 
         headerTintColor: colors.primarySoft,
+
+        headerLeft: () => <NotificationBell />,
 
         tabBarStyle: {
           backgroundColor: colors.primary,
@@ -72,10 +95,12 @@ export default function TabsLayout() {
       />
 
       <Tabs.Screen
-        name="mapView"
+        name="myRides"
         options={{
-          title: "Map",
-          tabBarButtonTestID: "mapTab"
+          title: "My Rides",
+          headerTitle: "My Rides",
+          tabBarButtonTestID: "myRidesTab",
+          tabBarBadge: rideNotifCount > 0 ? rideNotifCount : undefined,
         }}
       />
 
@@ -91,18 +116,11 @@ export default function TabsLayout() {
         name="userProfile"
         options={{
           title: "Profile",
-          tabBarButtonTestID: "profileTab"
+          tabBarButtonTestID: "profileTab",
+          tabBarBadge: pendingCount > 0 ? pendingCount : undefined,
         }}
       />
 
-
-      <Tabs.Screen
-        name="myRides"
-        options={{
-          href: null,
-          title: "My Rides"
-        }}
-      />
     </Tabs>
   );
 }

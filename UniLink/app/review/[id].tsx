@@ -17,10 +17,13 @@ import {
   useRouter
 } from "expo-router";
 
-import { getRides } from "../../data/rides";
-import { getCurrentUser, getUserById } from "../../data/user";
-import { addReview, hasReviewForRide } from "../../data/reviews";
-import { generateId } from "../../lib/firebase";
+import { useAuth } from "../../hooks/useAuth";
+import { useRides } from "../../hooks/useRides";
+import { useReviews } from "../../hooks/useReviews";
+import { addReview } from "../../services/ReviewService";
+import { generateId } from "../../infra/firebase";
+import { canAccessRideReview } from "../../domain/rules/rideRules";
+import { validateReviewRating } from "../../domain/rules/reviewRules";
 
 import { components } from "../../styles/components";
 import { Button } from "../../components/Button";
@@ -36,41 +39,32 @@ export default function ReviewRide() {
   const id = typeof params.id === "string" ? params.id : "";
   const targetUserId = typeof params.targetUserId === "string" ? params.targetUserId : "";
 
-  const ride = getRides().find(currentRide => currentRide.id === id);
-  const activeUser = getCurrentUser();
+  const rides = useRides();
+  const { user: activeUser, getUserById } = useAuth();
+  const { hasReviewForRide } = useReviews();
+
+  const ride = rides.find(r => r.id === id);
   const targetUser = targetUserId ? getUserById(targetUserId) : undefined;
 
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  if (!ride || !activeUser || !targetUser) {
-    return null;
-  }
+  const canAccess = !!ride && !!activeUser && !!targetUser &&
+    canAccessRideReview(ride, activeUser.uid, targetUser.uid);
 
-  const joined = ride.passengers.includes(activeUser.uid);
-
-  const isDriver = ride.driverId === activeUser.uid;
-
-  const canAccess = joined && !isDriver && ride.completed;
-
-  const alreadyReviewed = hasReviewForRide(
-    ride.id,
-    activeUser.uid,
-    targetUser.uid
-  );
+  const alreadyReviewed = ride && activeUser && targetUser
+    ? hasReviewForRide(ride.id, activeUser.uid, targetUser.uid)
+    : false;
 
   useEffect(() => {
-    if (!canAccess) {
-      Alert.alert(
-        "Not allowed",
-        "You cannot review this ride."
-      );
+    if (ride && activeUser && targetUser && !canAccess) {
+      Alert.alert("Not allowed", "You cannot review this ride.");
       router.replace("/(tabs)/myRides");
     }
-  }, [canAccess, router]);
+  }, [canAccess, ride, activeUser, targetUser, router]);
 
-  if (!canAccess) {
+  if (!ride || !activeUser || !targetUser || !canAccess) {
     return null;
   }
 
@@ -78,26 +72,21 @@ export default function ReviewRide() {
     if (!ride || !activeUser || !targetUser) return;
     if (submitting) return;
 
-    if (rating < 1 || rating > 5) {
-      Alert.alert(
-        "Select rating",
-        "Choose a rating between 1 and 5 stars."
-      );
+    const ratingCheck = validateReviewRating(rating);
+    if (!ratingCheck.ok) {
+      Alert.alert("Select rating", ratingCheck.error);
       return;
     }
 
     if (alreadyReviewed) {
-      Alert.alert(
-        "Already reviewed",
-        "You have already reviewed this user for this ride."
-      );
+      Alert.alert("Already reviewed", "You have already reviewed this user for this ride.");
       router.replace("/(tabs)/myRides");
       return;
     }
 
     setSubmitting(true);
 
-    await addReview({
+    const result = await addReview({
       id: generateId("reviews"),
       rideId: ride.id,
       reviewerId: activeUser.uid,
@@ -109,15 +98,15 @@ export default function ReviewRide() {
 
     setSubmitting(false);
 
+    if (!result.ok) {
+      Alert.alert("Error", result.error);
+      return;
+    }
+
     Alert.alert(
       "Feedback submitted",
       "Thank you for your feedback.",
-      [
-        {
-          text: "OK",
-          onPress: () => router.replace("/(tabs)/myRides")
-        }
-      ]
+      [{ text: "OK", onPress: () => router.replace("/(tabs)/myRides") }]
     );
   }
 
@@ -129,17 +118,10 @@ export default function ReviewRide() {
       >
         <ScrollView
           style={layout.scrollScreen}
-          contentContainerStyle={{ flexGrow: 1, paddingBottom: spacing.xl, padding: spacing.lg }}
+          contentContainerStyle={layout.scrollContentLg}
           keyboardShouldPersistTaps="handled"
         >
-          <Text
-            style={{
-              color: colors.primary,
-              marginBottom: spacing.sm,
-              fontWeight: "600"
-            }}
-            onPress={() => router.back()}
-          >
+          <Text style={layout.backLink} onPress={() => router.back()}>
             ← Back
           </Text>
 
@@ -148,26 +130,15 @@ export default function ReviewRide() {
               Rate driver
             </Text>
 
-            <Text style={{ marginBottom: spacing.sm, fontWeight: "500", fontSize: 16 }}>
+            <Text style={[layout.headingSm, { marginBottom: spacing.sm }]}>
               {targetUser.name}
             </Text>
 
-            <Text
-              style={{
-                color: colors.textLight,
-                marginBottom: spacing.xl
-              }}
-            >
+            <Text style={[layout.textLight, { marginBottom: spacing.xl }]}>
               {ride.origin} → {ride.destination}
             </Text>
 
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "center",
-                marginBottom: spacing.xl
-              }}
-            >
+            <View style={[components.row, { justifyContent: "center", marginBottom: spacing.xl }]}>
               {[1, 2, 3, 4, 5].map(value => (
                 <Pressable
                   key={value}
@@ -187,10 +158,10 @@ export default function ReviewRide() {
               ))}
             </View>
 
-            <Text style={{ fontSize: 15, fontWeight: "600", marginBottom: spacing.sm }}>
+            <Text style={[layout.headingSm, { marginBottom: spacing.sm }]}>
               Add a comment (optional)
             </Text>
-            
+
             <TextInput
               value={comment}
               onChangeText={setComment}
@@ -199,10 +170,7 @@ export default function ReviewRide() {
               multiline
               numberOfLines={4}
               maxLength={250}
-              style={[
-                forms.input,
-                { minHeight: 100, textAlignVertical: "top", marginBottom: spacing.xl }
-              ]}
+              style={[forms.input, forms.multiline, { marginBottom: spacing.xl }]}
               testID="reviewCommentInput"
             />
 

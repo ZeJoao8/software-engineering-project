@@ -7,46 +7,58 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
-  StyleSheet,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
-import { getRides } from "../../data/rides";
-import { getCurrentUser, getUserById } from "../../data/user";
-import { subscribeToRideChat, sendMessage, type Message } from "../../data/chat";
-import { generateId } from "../../lib/firebase";
+import { useAuth } from "../../hooks/useAuth";
+import { useRides } from "../../hooks/useRides";
+import { useMessages } from "../../hooks/useMessages";
+import { sendMessage } from "../../services/ChatService";
+import { isUserDriver, isUserPassenger } from "../../domain/rules/rideRules";
+import type { Message } from "../../domain/entities/Message";
+import { formatTime } from "../../utils/date";
+import { useNotifications } from "../../hooks/useNotifications";
 
-import { colors, spacing, radius } from "../../styles/theme";
+import { colors, spacing } from "../../styles/theme";
+import { chatStyles } from "../../styles/chat";
+import { layout } from "../../styles/layout";
 
 export default function RideChat() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const id = typeof params.id === "string" ? params.id : "";
 
-  const ride = getRides().find(r => r.id === id);
-  const activeUser = getCurrentUser();
+  const rides = useRides();
+  const { user: activeUser, getUserById } = useAuth();
 
-  const [messages, setMessages] = useState<Message[]>([]);
+  const ride = rides.find(r => r.id === id);
+
+  const joined = ride ? isUserPassenger(ride, activeUser?.uid ?? "") : false;
+  const isDriver = ride ? isUserDriver(ride, activeUser?.uid ?? "") : false;
+  const messages = useMessages(joined || isDriver ? ride?.id ?? null : null);
+
   const [inputText, setInputText] = useState("");
   const flatListRef = useRef<FlatList>(null);
+  const { notifications, markAsRead } = useNotifications();
 
   useEffect(() => {
     if (!ride || !activeUser) return;
-
-    const joined = ride.passengers.includes(activeUser.uid);
-    const isDriver = ride.driverId === activeUser.uid;
-
     if (!joined && !isDriver) {
       router.replace("/(tabs)/myRides");
-      return;
     }
-
-    const unsub = subscribeToRideChat(ride.id, (msgs) => setMessages(msgs));
-    return () => {
-      if (unsub) unsub();
-    };
   }, [ride?.id, activeUser?.uid]);
+
+  useEffect(() => {
+    if (!ride) return;
+    const toRead = notifications.filter(
+      n => n.type === "chat_message" && n.rideId === ride.id
+    );
+    for (const n of toRead) {
+      void markAsRead(n.id);
+    }
+  }, [notifications, ride?.id]);
 
   if (!ride || !activeUser) return null;
 
@@ -54,47 +66,39 @@ export default function RideChat() {
     if (!ride || !activeUser) return;
     const text = inputText.trim();
     if (!text) return;
-
     setInputText("");
 
-    const newMessage: Message = {
-      id: generateId("chat_messages"),
-      rideId: ride.id,
-      senderId: activeUser.uid,
-      text,
-      createdAt: new Date().toISOString(),
-    };
-
-    await sendMessage(newMessage);
-  }
-
-  function formatTime(isoString: string) {
-    const date = new Date(isoString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const result = await sendMessage(ride.id, activeUser.uid, text, {
+      senderName: activeUser.name,
+      recipientIds: [ride.driverId, ...ride.passengers].filter(uid => uid !== activeUser.uid),
+      rideRoute: `${ride.origin} → ${ride.destination}`,
+    });
+    if (!result.ok) {
+      setInputText(text);
+      Alert.alert("Error", result.error);
+    }
   }
 
   const renderMessage = ({ item }: { item: Message }) => {
     if (!ride || !activeUser) return null;
     const isMe = item.senderId === activeUser.uid;
     const sender = isMe ? activeUser : getUserById(item.senderId);
-
-    // Check if driver
-    const isSenderDriver = item.senderId === ride.driverId;
+    const isSenderDriver = isUserDriver(ride, item.senderId);
 
     return (
-      <View style={[styles.messageContainer, isMe ? styles.myMessage : styles.otherMessage]}>
+      <View style={[chatStyles.messageContainer, isMe ? chatStyles.myMessage : chatStyles.otherMessage]}>
         {!isMe && (
           <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 2 }}>
-            <Text style={styles.senderName}>{sender?.name || "User"}</Text>
-            {isSenderDriver && <Text style={styles.driverBadge}> • Driver</Text>}
+            <Text style={chatStyles.senderName}>{sender?.name || "User"}</Text>
+            {isSenderDriver && <Text style={chatStyles.driverBadge}> • Driver</Text>}
           </View>
         )}
 
-        <View style={[styles.bubble, isMe ? styles.myBubble : styles.otherBubble]}>
-          <Text style={[styles.messageText, isMe ? styles.myMessageText : styles.otherMessageText]}>
+        <View style={[chatStyles.bubble, isMe ? chatStyles.myBubble : chatStyles.otherBubble]}>
+          <Text style={[chatStyles.messageText, isMe ? chatStyles.myMessageText : chatStyles.otherMessageText]}>
             {item.text}
           </Text>
-          <Text style={[styles.timeText, isMe ? styles.myTimeText : styles.otherTimeText]}>
+          <Text style={[chatStyles.timeText, isMe ? chatStyles.myTimeText : chatStyles.otherTimeText]}>
             {formatTime(item.createdAt)}
           </Text>
         </View>
@@ -103,19 +107,19 @@ export default function RideChat() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={chatStyles.container}>
       <KeyboardAvoidingView
-        style={styles.container}
+        style={chatStyles.container}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
       >
-        <View style={styles.header}>
+        <View style={chatStyles.header}>
           <Pressable onPress={() => router.back()} style={{ padding: spacing.sm }}>
-            <Text style={styles.backButton}>← Back</Text>
+            <Text style={layout.link}>← Back</Text>
           </Pressable>
-          <View style={styles.headerTitleContainer}>
-            <Text style={styles.headerTitle}>Ride Group Chat</Text>
-            <Text style={styles.headerSubtitle}>{ride.origin} → {ride.destination}</Text>
+          <View style={chatStyles.headerTitleContainer}>
+            <Text style={chatStyles.headerTitle}>Ride Group Chat</Text>
+            <Text style={chatStyles.headerSubtitle}>{ride.origin} → {ride.destination}</Text>
           </View>
           <View style={{ width: 50 }} />
         </View>
@@ -125,13 +129,13 @@ export default function RideChat() {
           data={messages}
           keyExtractor={item => item.id}
           renderItem={renderMessage}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={chatStyles.listContent}
           inverted
         />
 
-        <View style={styles.inputContainer}>
+        <View style={chatStyles.inputContainer}>
           <TextInput
-            style={styles.input}
+            style={chatStyles.input}
             value={inputText}
             onChangeText={setInputText}
             placeholder="Type a message..."
@@ -140,148 +144,14 @@ export default function RideChat() {
             maxLength={500}
           />
           <Pressable
-            style={[styles.sendButton, !inputText.trim() && styles.sendButtonDisabled]}
+            style={[chatStyles.sendButton, !inputText.trim() && chatStyles.sendButtonDisabled]}
             onPress={() => void handleSend()}
             disabled={!inputText.trim()}
           >
-            <Text style={styles.sendButtonText}>Send</Text>
+            <Text style={chatStyles.sendButtonText}>Send</Text>
           </Pressable>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "white",
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  backButton: {
-    color: colors.primary,
-    fontWeight: "600",
-    fontSize: 16,
-  },
-  headerTitleContainer: {
-    flex: 1,
-    alignItems: "center",
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: colors.text,
-  },
-  headerSubtitle: {
-    fontSize: 12,
-    color: colors.textLight,
-    marginTop: 2,
-  },
-  listContent: {
-    padding: spacing.md,
-  },
-  messageContainer: {
-    marginBottom: spacing.md,
-    maxWidth: "80%",
-  },
-  myMessage: {
-    alignSelf: "flex-end",
-  },
-  otherMessage: {
-    alignSelf: "flex-start",
-  },
-  senderName: {
-    fontSize: 12,
-    color: colors.textLight,
-    fontWeight: "600",
-    marginLeft: 4,
-  },
-  driverBadge: {
-    fontSize: 11,
-    color: colors.primary,
-    fontWeight: "700",
-  },
-  bubble: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.lg,
-  },
-  myBubble: {
-    backgroundColor: colors.primary,
-    borderBottomRightRadius: 4,
-  },
-  otherBubble: {
-    backgroundColor: "white",
-    borderBottomLeftRadius: 4,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  messageText: {
-    fontSize: 15,
-    lineHeight: 20,
-  },
-  myMessageText: {
-    color: "white",
-  },
-  otherMessageText: {
-    color: colors.text,
-  },
-  timeText: {
-    fontSize: 10,
-    marginTop: 4,
-    alignSelf: "flex-end",
-  },
-  myTimeText: {
-    color: "rgba(255,255,255,0.7)",
-  },
-  otherTimeText: {
-    color: colors.textLight,
-  },
-  inputContainer: {
-    flexDirection: "row",
-    padding: spacing.md,
-    backgroundColor: "white",
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    alignItems: "flex-end",
-  },
-  input: {
-    flex: 1,
-    minHeight: 40,
-    maxHeight: 100,
-    backgroundColor: colors.background,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    paddingTop: 10,
-    paddingBottom: 10,
-    marginRight: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    fontSize: 15,
-  },
-  sendButton: {
-    backgroundColor: colors.primary,
-    borderRadius: radius.md,
-    height: 40,
-    paddingHorizontal: spacing.md,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  sendButtonDisabled: {
-    backgroundColor: colors.primaryLight,
-  },
-  sendButtonText: {
-    color: "white",
-    fontWeight: "600",
-    fontSize: 15,
-  },
-});

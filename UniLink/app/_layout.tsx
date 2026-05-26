@@ -11,7 +11,6 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { colors } from '../styles/theme';
 
 export default function RootLayout() {
 
@@ -46,10 +45,13 @@ export default function RootLayout() {
     <Stack.Screen name="ride/[id]" />
 
     <Stack.Screen name="review/[id]" />
-    
-    <Stack.Screen name="reviewComment/[id]" />
 
     <Stack.Screen name="reportUser/[id]" />
+
+    <Stack.Screen
+      name="mapView"
+      options={{ headerShown: false }}
+    />
 
    </Stack>
 

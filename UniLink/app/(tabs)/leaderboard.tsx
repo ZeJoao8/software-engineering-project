@@ -1,62 +1,40 @@
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, View, Pressable, ScrollView } from "react-native";
+import { Text, View, Pressable, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-
-import { getRides } from "../../data/rides";
-import { getUsers, getCurrentUser } from "../../data/user";
-import { colors, radius, spacing } from "../../styles/theme";
+import { useAuth } from "../../hooks/useAuth";
+import { useRides } from "../../hooks/useRides";
+import { spacing } from "../../styles/theme";
 import { layout } from "../../styles/layout";
 import { components } from "../../styles/components";
-import { calculateUserCO2Saved } from "../../utils/sustainability";
+import { buildLeaderboard, type UserRankEntry } from "../../domain/rules/leaderboard";
 
-interface UserRankEntry {
-  id: string;
-  name: string;
-  co2: number;
-}
 export default function Leaderboard() {
   const router = useRouter();
-  const currentUser = getCurrentUser();
+  const { user: currentUser, getUsers } = useAuth();
+  const rides = useRides();
   const [ranking, setRanking] = useState<UserRankEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    function loadLeaderboard() {
-      const rides = getRides();
-      const users = getUsers();
-
-      const result = users
-        .map(u => ({
-          id: u.uid,
-          name: u.name,
-          co2: calculateUserCO2Saved(rides, u.uid)
-        }))
-        .filter(u => u.co2 > 0)
-        .sort((a, b) => b.co2 - a.co2);
-
-      setRanking(result);
-      setLoading(false);
-    }
-
-    loadLeaderboard();
-  }, [currentUser]);
+    setRanking(buildLeaderboard(getUsers(), rides));
+    setLoading(false);
+  }, [rides, currentUser]);
 
 
   if (loading) {
     return (
       <View style={[layout.screen, { justifyContent: "center", alignItems: "center" }]}>
-        <Text style={styles.emptyText}>Calculating impact...</Text>
+        <Text style={layout.emptyText}>Calculating impact...</Text>
       </View>
     );
   }
 
   if (ranking.length === 0) {
     return (
-      <ScrollView style={layout.scrollScreen} contentContainerStyle={styles.scrollContent}>
+      <ScrollView style={layout.scrollScreen} contentContainerStyle={components.leaderboardScrollContent}>
         <Text style={layout.title}>Sustainability Leaderboard</Text>
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No sustainability data yet</Text>
+        <View style={layout.emptyContainer}>
+          <Text style={layout.emptyText}>No sustainability data yet</Text>
         </View>
       </ScrollView>
     );
@@ -65,10 +43,9 @@ export default function Leaderboard() {
   const top10 = ranking.slice(0, 10);
   const userRankIndex = ranking.findIndex(u => u.id === currentUser?.uid);
   const isUserInTop10 = userRankIndex !== -1 && userRankIndex < 10;
-  
-  // If user has 0 CO2, they aren't in the ranking. We create a placeholder entry.
-  const userRankEntry = userRankIndex !== -1 
-    ? ranking[userRankIndex] 
+
+  const userRankEntry = userRankIndex !== -1
+    ? ranking[userRankIndex]
     : currentUser ? { id: currentUser.uid, name: currentUser.name, co2: 0 } : null;
 
   const renderRankItem = (u: UserRankEntry, index: number) => {
@@ -80,7 +57,7 @@ export default function Leaderboard() {
         key={u.id}
         style={[
           components.card,
-          isCurrentUser && styles.currentUserCard,
+          isCurrentUser && components.leaderboardCurrentUser,
           { marginBottom: spacing.sm }
         ]}
         onPress={() => {
@@ -88,22 +65,22 @@ export default function Leaderboard() {
           else router.push(`/user/${u.id}`);
         }}
       >
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Text style={[styles.rank, isTop3 && styles.topRank]}>
+        <View style={components.row}>
+          <Text style={[components.rankNumber, isTop3 && components.rankNumberTop]}>
             {index === -1 ? "-" : `#${index + 1}`}
           </Text>
 
           <View style={{ flex: 1 }}>
-            <Text style={styles.name}>
+            <Text style={components.rankName}>
               {u.name} {isCurrentUser && "(You)"}
             </Text>
-            <Text style={styles.co2}>
+            <Text style={components.rankCO2}>
               {u.co2.toFixed(2)} kg CO₂ saved
             </Text>
           </View>
 
           {isTop3 && (
-            <Text style={styles.trophy}>
+            <Text style={components.rankTrophy}>
               {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}
             </Text>
           )}
@@ -113,15 +90,19 @@ export default function Leaderboard() {
   };
 
   return (
-    <ScrollView style={layout.scrollScreen} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={layout.scrollScreen}
+      contentContainerStyle={components.leaderboardScrollContent}
+      showsVerticalScrollIndicator={false}
+    >
       <Text style={layout.title}>Sustainability Leaderboard</Text>
 
       {top10.map((u, i) => renderRankItem(u, i))}
 
       {!isUserInTop10 && userRankEntry && (
         <>
-          <View style={styles.divider}>
-            <Text style={styles.dividerText}>...</Text>
+          <View style={components.rankDivider}>
+            <Text style={components.rankDividerText}>...</Text>
           </View>
           {renderRankItem(userRankEntry, userRankIndex)}
         </>
@@ -129,59 +110,3 @@ export default function Leaderboard() {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  scrollContent: {
-    padding: spacing.lg,
-    paddingBottom: spacing.xl
-  },
-  currentUserCard: {
-    borderColor: colors.primary,
-    borderWidth: 2,
-    backgroundColor: "white"
-  },
-  rank: {
-    fontSize: 18,
-    fontWeight: "700",
-    width: 45,
-    color: colors.textLight
-  },
-  topRank: {
-    color: colors.primary,
-    fontSize: 20,
-  },
-  name: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: colors.text
-  },
-  co2: {
-    fontSize: 13,
-    color: colors.textLight,
-    marginTop: 2
-  },
-  trophy: {
-    fontSize: 24
-  },
-  divider: {
-    alignItems: "center",
-    marginVertical: spacing.md
-  },
-  dividerText: {
-    color: colors.textLight,
-    fontSize: 20,
-    fontWeight: "600"
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "transparent",
-    marginTop: spacing.xl
-  },
-  emptyText: {
-    color: colors.textLight,
-    fontSize: 16,
-    fontWeight: "500"
-  }
-});

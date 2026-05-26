@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844">
+  <defs>
+    <style>text { font-family: -apple-system, 'Helvetica Neue', sans-serif; }</style>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.08"/></filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="390" height="844" fill="#f8fafc"/>
+
+  <!-- Green header -->
+  <rect width="390" height="110" fill="#10b981"/>
+  <text x="32" y="20" fill="white" font-size="13" font-weight="600">9:41</text>
+  <path d="M24 66 L14 56 L24 46" stroke="white" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="205" y="63" text-anchor="middle" fill="white" font-size="19" font-weight="700">Código de Segurança</text>
+
+  <!-- Instruction card -->
+  <rect x="16" y="126" width="358" height="72" fill="white" rx="12" filter="url(#shadow)"/>
+  <text x="195" y="150" text-anchor="middle" fill="#0f172a" font-size="15" font-weight="600">🔒  Mostra este código ao condutor</text>
+  <text x="195" y="172" text-anchor="middle" fill="#64748b" font-size="13">Confirma que entraste no carro correto</text>
+
+  <!-- Code display card -->
+  <rect x="32" y="218" width="326" height="200" fill="white" rx="16" filter="url(#shadow)"/>
+  <!-- Lock icon circle -->
+  <circle cx="195" cy="256" r="26" fill="#ecfdf5"/>
+  <text x="195" y="265" text-anchor="middle" font-size="24">🔐</text>
+  <!-- Big code -->
+  <text x="195" y="356" text-anchor="middle" fill="#0f172a" font-size="64" font-weight="800" font-family="'Courier New', monospace" letter-spacing="12">A7F3</text>
+  <!-- Countdown -->
+  <text x="195" y="396" text-anchor="middle" fill="#94a3b8" font-size="13">⏱  Válido por 4:52</text>
+
+  <!-- Progress bar for timer -->
+  <rect x="60" y="408" width="270" height="6" fill="#f1f5f9" rx="3"/>
+  <rect x="60" y="408" width="200" height="6" fill="#10b981" rx="3"/>
+
+  <!-- Ride info card -->
+  <rect x="16" y="442" width="358" height="120" fill="white" rx="12" filter="url(#shadow)"/>
+  <text x="32" y="466" fill="#94a3b8" font-size="12" font-weight="600">DETALHES DA BOLEIA</text>
+  <!-- Conductor row -->
+  <circle cx="46" cy="492" r="16" fill="#e2e8f0"/>
+  <text x="46" y="498" text-anchor="middle" fill="#64748b" font-size="12">JS</text>
+  <text x="70" y="488" fill="#0f172a" font-size="14" font-weight="600">João Santos</text>
+  <text x="70" y="506" fill="#64748b" font-size="13">⭐ 4.6 · Renault Clio · 45-AB-23</text>
+  <!-- Route row -->
+  <text x="32" y="534" fill="#64748b" font-size="13">📍  Lisboa → FEUP   ·   📅  18/03 08:30</text>
+
+  <!-- Show to driver hint -->
+  <rect x="16" y="578" width="358" height="78" fill="#fefce8" rx="12"/>
+  <text x="195" y="602" text-anchor="middle" fill="#854d0e" font-size="14" font-weight="600">⚠️  Atenção</text>
+  <text x="195" y="622" text-anchor="middle" fill="#92400e" font-size="13">Partilha este código APENAS com o condutor</text>
+  <text x="195" y="640" text-anchor="middle" fill="#92400e" font-size="13">presencialmente, antes de iniciares a viagem.</text>
+
+  <!-- Refresh button -->
+  <rect x="16" y="672" width="358" height="48" fill="white" rx="12" stroke="#e2e8f0" stroke-width="1.5"/>
+  <text x="195" y="701" text-anchor="middle" fill="#047857" font-size="15" font-weight="600">↻  Gerar novo código</text>
+
+  <!-- 4-tab green nav bar (Boleias active) -->
+  <rect x="0" y="764" width="390" height="80" fill="#10b981"/>
+  <path d="M40 793 L40 800 L58 800 L58 793 L49 782 Z" fill="none" stroke="#ecfdf5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="44" y="793" width="10" height="7" fill="none" stroke="#ecfdf5" stroke-width="2" rx="1"/>
+  <text x="49" y="822" text-anchor="middle" fill="#ecfdf5" font-size="11" font-weight="700">Boleias</text>
+  <rect x="137" y="784" width="18" height="17" fill="none" stroke="#064e3b" stroke-width="1.8" rx="3"/>
+  <line x1="141" y1="789" x2="151" y2="789" stroke="#064e3b" stroke-width="1.4" stroke-linecap="round"/>
+  <line x1="141" y1="793" x2="151" y2="793" stroke="#064e3b" stroke-width="1.4" stroke-linecap="round"/>
+  <line x1="141" y1="797" x2="151" y2="797" stroke="#064e3b" stroke-width="1.4" stroke-linecap="round"/>
+  <text x="146" y="822" text-anchor="middle" fill="#064e3b" font-size="11">Minhas</text>
+  <path d="M237 783 L237 795 Q237 802 244 802 Q251 802 251 795 L251 783 Z" fill="none" stroke="#064e3b" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M237 787 Q233 787 233 791 Q233 795 237 795" fill="none" stroke="#064e3b" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M251 787 Q255 787 255 791 Q255 795 251 795" fill="none" stroke="#064e3b" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="244" y1="802" x2="244" y2="805" stroke="#064e3b" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="240" y1="805" x2="248" y2="805" stroke="#064e3b" stroke-width="1.8" stroke-linecap="round"/>
+  <text x="244" y="822" text-anchor="middle" fill="#064e3b" font-size="11">Ranking</text>
+  <circle cx="341" cy="789" r="6" fill="none" stroke="#064e3b" stroke-width="1.8"/>
+  <path d="M328 806 Q328 799 341 799 Q354 799 354 806" fill="none" stroke="#064e3b" stroke-width="1.8" stroke-linecap="round"/>
+  <text x="341" y="822" text-anchor="middle" fill="#064e3b" font-size="11">Perfil</text>
+</svg>
