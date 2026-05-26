@@ -22,6 +22,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 import { canCreateRide } from "../domain/rules/rideCreateRules";
+import { DEFAULT_DRIVER_PREFERENCES } from "../domain/entities/DriverPreferences";
 import { useAuth } from "../hooks/useAuth";
 import { useCars } from "../hooks/useCars";
 import { generateId } from "../infra/firebase";
@@ -116,7 +117,7 @@ export default function CreateRide() {
     const check = canCreateRide({ origin, destination, originCoords, destinationCoords, seats, car, departure });
     if (!check.ok) { Alert.alert("Error", check.error); return; }
 
-    const prefLines = getDriverPreferenceLines(activeUser.driverPreferences);
+    const prefLines = getDriverPreferenceLines({ ...DEFAULT_DRIVER_PREFERENCES, ...activeUser.driverPreferences });
     const prefSummary = prefLines.length > 0 ? prefLines.join("\n") : "No preferences set.";
 
     try {
