@@ -18,7 +18,7 @@ import { layout } from "../styles/layout";
 import { forms } from "../styles/forms";
 import { components } from "../styles/components";
 import { Button } from "../components/Button";
-import { spacing, colors } from "../styles/theme";
+import { colors } from "../styles/theme";
 import {
   areRequiredFieldsFilled,
   doPasswordsMatch,
