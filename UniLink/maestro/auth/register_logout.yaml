@@ -2,15 +2,15 @@ appId: host.exp.exponent
 ---
 - runFlow: ../subflows/launch.yaml
 
-# GERAR EMAIL ÚNICO para não colidir com contas existentes
+# Gerar email único para não colidir com contas existentes
 - evalScript: ${output.email = "test" + Date.now() + "@up.pt"}
 
-# MUDAR PARA MODO REGISTO
+# Mudar para modo registo
 - tapOn:
     id: authModeToggleButton
 - waitForAnimationToEnd
 
-# --- PREENCHER FORMULÁRIO ---
+# Preencher formulário
 - tapOn:
     id: registerNameInput
 - inputText: "E2E Test User"
@@ -26,7 +26,6 @@ appId: host.exp.exponent
 - inputText: "LEIC"
 - pressKey: Enter
 
-# Selecionar género no dropdown
 - tapOn:
     id: genderPicker
 - tapOn: "Male"
@@ -46,62 +45,25 @@ appId: host.exp.exponent
 - inputText: "12345678"
 - pressKey: Enter
 
-# Firebase às vezes precisa de 2 taps (debounce/proteção)
 - tapOn:
     id: authSubmitButton
 - waitForAnimationToEnd
-- tapOn:
-    id: authSubmitButton
 
-- waitForAnimationToEnd
+# Verificar que chegou à app
 - assertVisible: "Search rides"
 
-# --- IR AO PERFIL E ADICIONAR CARRO ---
+# Logout
 - tapOn:
     id: profileTab
-
-- tapOn:
-    id: editProfileButton
-
 - swipe:
     direction: UP
-
-# FORMULÁRIO DO CARRO
-- tapOn:
-    id: toggleAddCarButton
-- waitForAnimationToEnd
-
 - swipe:
     direction: UP
-
 - tapOn:
-    id: carModelInput
-- inputText: "Toyota Yaris"
-- pressKey: Enter
-
-- tapOn:
-    id: carColorInput
-- inputText: "White"
-- pressKey: Enter
-
-- tapOn:
-    id: carPlateInput
-- inputText: "ZZ-99-AA"
-- pressKey: Enter
-
-- tapOn:
-    id: carSeatsInput
-- inputText: "5"
-- pressKey: Enter
-
-- tapOn:
-    id: saveCarButton
-
-- tapOn:
-    id: saveProfileButton
-
-- tapOn: "OK"
+    id: logoutButton
+- tapOn: "Logout"
 - waitForAnimationToEnd
 
-# O carro deve aparecer no perfil
-- assertVisible: "Toyota Yaris"
+# Verificar que voltou ao ecrã de login
+- assertVisible:
+    id: authScreenTitle

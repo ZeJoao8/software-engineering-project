@@ -1,17 +1,16 @@
+# Subflow reutilizável para login.
+# Parâmetros: EMAIL, PASSWORD (passados via env no runFlow pai)
 appId: host.exp.exponent
 ---
-# Subflow reutilizável para fazer login com a conta de teste.
-# Assume que o ecrã de Login está visível quando este flow é chamado.
-
 - tapOn:
     id: loginEmailInput
-- inputText: "maria@feup.pt"
+- inputText: ${EMAIL}
 - pressKey: Enter
 
 - tapOn:
     id: loginPasswordInput
-- eraseText: 10
-- inputText: "123456"
+- eraseText: 20
+- inputText: ${PASSWORD}
 - pressKey: Enter
 
 - tapOn:

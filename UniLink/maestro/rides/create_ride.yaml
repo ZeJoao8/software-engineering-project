@@ -1,0 +1,54 @@
+appId: host.exp.exponent
+# Pré-condição: maria@feup.pt tem pelo menos um carro registado
+---
+- runFlow: ../subflows/launch.yaml
+- runFlow:
+    file: ../subflows/login.yaml
+    env:
+      EMAIL: "maria@feup.pt"
+      PASSWORD: "123456"
+
+- tapOn:
+    id: createRideHeaderButton
+
+# --- ORIGEM ---
+- runFlow:
+    file: ../subflows/select_address.yaml
+    env:
+      FIELD_TEST_ID: "createRideOriginInput"
+      SEARCH_TEXT: "FEUP, Porto"
+
+# --- DESTINO ---
+- runFlow:
+    file: ../subflows/select_address.yaml
+    env:
+      FIELD_TEST_ID: "createRideDestinationInput"
+      SEARCH_TEXT: "Boavista, Porto"
+
+# Verificar que as coordenadas foram definidas
+- assertVisible: "✓ Location defined"
+
+- swipe:
+    direction: UP
+
+# --- LUGARES ---
+- tapOn:
+    id: createRideSeatsInput
+- inputText: "2"
+- pressKey: Enter
+
+# --- CRIAR ---
+- tapOn:
+    id: createRideButton
+- waitForAnimationToEnd
+
+# Confirmar dialog de preferências
+- tapOn: "Confirm"
+- waitForAnimationToEnd
+
+# Verificar sucesso e redirecionamento para My Rides
+- assertVisible: "Ride created"
+- tapOn: "OK"
+- waitForAnimationToEnd
+
+- assertVisible: "My Rides"

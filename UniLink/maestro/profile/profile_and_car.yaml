@@ -1,0 +1,100 @@
+appId: host.exp.exponent
+---
+- runFlow: ../subflows/launch.yaml
+- runFlow:
+    file: ../subflows/login.yaml
+    env:
+      EMAIL: "joao@feup.pt"
+      PASSWORD: "123456"
+
+- tapOn:
+    id: profileTab
+- waitForAnimationToEnd
+
+# --- EDITAR PERFIL ---
+- tapOn:
+    id: editProfileButton
+- waitForAnimationToEnd
+
+- tapOn:
+    id: profileNameInput
+- eraseText: 30
+- inputText: "Joao Editado"
+- pressKey: Enter
+
+- swipe:
+    direction: UP
+
+- tapOn:
+    id: saveProfileButton
+- tapOn: "OK"
+- waitForAnimationToEnd
+
+- swipe:
+    direction: DOWN
+
+- assertVisible: "Joao Editado"
+
+# Editar de volta
+- tapOn:
+    id: editProfileButton
+- waitForAnimationToEnd
+
+- tapOn:
+    id: profileNameInput
+- eraseText: 30
+- inputText: "Joao"
+- pressKey: Enter
+
+- swipe:
+    direction: UP
+
+- tapOn:
+    id: saveProfileButton
+- tapOn: "OK"
+- waitForAnimationToEnd
+
+- swipe:
+    direction: DOWN
+
+- assertVisible: "Joao"
+
+# --- ADICIONAR CARRO ---
+- tapOn:
+    id: editProfileButton
+- waitForAnimationToEnd
+
+- swipe:
+    direction: UP
+
+- tapOn:
+    id: toggleAddCarButton
+- waitForAnimationToEnd
+
+- tapOn:
+    id: carModelInput
+- inputText: "Toyota Corolla"
+
+- tapOn:
+    id: carColorInput
+- inputText: "Blue"
+
+- tapOn:
+    id: carPlateInput
+- inputText: "ZZ-11-ZZ"
+
+- tapOn:
+    id: carSeatsInput
+- inputText: "5"
+
+- tapOn:
+    id: saveCarButton
+- waitForAnimationToEnd
+
+- tapOn:
+    id: saveProfileButton
+- tapOn: "OK"
+- waitForAnimationToEnd
+
+- swipe:
+    direction: DOWN

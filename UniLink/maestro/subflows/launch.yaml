@@ -1,12 +1,12 @@
 appId: host.exp.exponent
 env:
-    EXPO_URL: "exp://10.0.2.2:8081" # IP genérico para o Emulador Android (aponta para o localhost do PC)
+    EXPO_URL: "exp://10.0.2.2:8081"
 ---
 - launchApp
 - openLink: ${EXPO_URL}
 - waitForAnimationToEnd
 
-# Se estiver logado noutra conta, faz logout para limpar o estado
+# Se já estiver logado, faz logout para começar limpo
 - runFlow:
     when:
       visible:
@@ -14,6 +14,10 @@ env:
     commands:
       - tapOn:
           id: profileTab
+      - swipe:
+          direction: UP
+      - swipe:
+          direction: UP
       - swipe:
           direction: UP
       - tapOn:

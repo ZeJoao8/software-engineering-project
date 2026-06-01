@@ -5,6 +5,7 @@ import {
   Tabs,
   useRouter
 } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 import { getPendingReceivedRequests, subscribeToFriendshipsChanges } from "../../store/friends";
 import { getRideNotificationsCount, subscribeToNotificationsChanges } from "../../store/notifications";
@@ -90,7 +91,10 @@ export default function TabsLayout() {
           title: "Rides",
           headerTitle: "Rides",
           tabBarButtonTestID: "ridesTab",
-          headerRight: () => <CreateRideHeaderButton />
+          headerRight: () => <CreateRideHeaderButton />,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? "search" : "search-outline"} size={24} color={color} />
+          ),
         }}
       />
 
@@ -101,6 +105,9 @@ export default function TabsLayout() {
           headerTitle: "My Rides",
           tabBarButtonTestID: "myRidesTab",
           tabBarBadge: rideNotifCount > 0 ? rideNotifCount : undefined,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? "car" : "car-outline"} size={24} color={color} />
+          ),
         }}
       />
 
@@ -108,7 +115,10 @@ export default function TabsLayout() {
         name="leaderboard"
         options={{
           title: "Leaderboard",
-          tabBarButtonTestID: "leaderboardTab"
+          tabBarButtonTestID: "leaderboardTab",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? "trophy" : "trophy-outline"} size={24} color={color} />
+          ),
         }}
       />
 
@@ -118,6 +128,9 @@ export default function TabsLayout() {
           title: "Profile",
           tabBarButtonTestID: "profileTab",
           tabBarBadge: pendingCount > 0 ? pendingCount : undefined,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? "person" : "person-outline"} size={24} color={color} />
+          ),
         }}
       />
 

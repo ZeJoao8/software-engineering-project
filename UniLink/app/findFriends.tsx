@@ -49,6 +49,7 @@ export default function FindFriends() {
         onChangeText={setQuery}
         style={forms.input}
         autoFocus
+        testID="findFriendsSearchInput"
       />
 
       <ScrollView

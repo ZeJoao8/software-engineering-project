@@ -325,27 +325,6 @@ export default function Login() {
           />
 
 
-          {!registerMode && (
-
-            <Text style={[layout.textLightSm, { marginTop: spacing.md, textAlign: "center" }]}>
-
-              test accounts:
-
-              {"\n"}
-
-              joao@feup.pt / 123456
-
-              {"\n"}
-
-              maria@feup.pt / 123456
-
-              {"\n"}
-
-              ana@feup.pt / 123456
-
-            </Text>
-
-          )}
 
         </View>
 

@@ -443,6 +443,7 @@ export default function Profile() {
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: spacing.sm }}>
               <Text style={layout.subtitle}>Friends</Text>
               <Pressable
+                testID="findFriendsButton"
                 onPress={() => router.push("/findFriends")}
                 style={({ pressed }) => ({
                   backgroundColor: colors.primary,
