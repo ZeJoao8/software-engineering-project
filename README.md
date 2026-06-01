@@ -921,3 +921,12 @@ Next improvements:
 - Improve mockups and screen prints for the final release
 
 ### Final Release
+
+Final Questionary:
+
+A questionnaire was conducted among university students to evaluate the features implemented in UniLink and gather feedback for future improvements.
+The results confirmed a strong interest in the platform, with safety, ride management, and communication features being identified as the most valuable. The feedback obtained helped validate the project's design decisions and better align the application with students needs.
+<img width="1188" height="486" alt="image" src="https://github.com/user-attachments/assets/3a0bd1df-9e88-4c28-a1ba-2dfe36f076fd" />
+<img width="1189" height="535" alt="image" src="https://github.com/user-attachments/assets/9408a7c6-448c-4b49-8990-34de9c8b1c7c" />
+
+
